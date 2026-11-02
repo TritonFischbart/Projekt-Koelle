@@ -248,7 +248,10 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Unter den Abstimmungen auf der Startseite: spontane Aktionen („Ich koche – wer isst mit?“,
   Film, Bouldern, Kneipe, Sport, Spieleabend oder eigener Text) mit „Jetzt“ oder Uhrzeit
   heute/morgen und optionaler Notiz. Andere tippen „Bin dabei 👍“ / „Diesmal nicht“
-  (nochmal tippen = zurücknehmen). Beim Essen werden „Portionen“ gezählt (auch erkannt an
+  (nochmal tippen = zurücknehmen). **Symbol passt sich beim Tippen an** (`guessInviteEmoji` in
+  `invites.js`, Stichwort am Wortanfang, z. B. Pizza 🍕, Kino 🎬, Kölsch 🍻; sonst 🙋) – trägt man
+  selbst eins ein, bleibt es (Wunsch von Lukas: freie Wahl erhalten); Feld leeren = wieder automatisch.
+  Beim Essen werden „Portionen“ gezählt (auch erkannt an
   Wörtern wie koch/essen/grill/back). Ersteller kann „Absagen“ (mit Rückgängig).
 - Verschwindet von selbst: mit Uhrzeit 4 Std. danach, „Jetzt“ nach 6 Std. (spätestens
   3 Uhr nachts) – Regeln in `js/invites.js`. Roter Punkt an „Start“, solange man auf eine
