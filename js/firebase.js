@@ -122,6 +122,12 @@ export function createFirebaseBackend(config) {
       return getToken(getMessaging(app), { vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
     },
 
+    // Aktuelle "Adresse" ohne Nachfrage (Erlaubnis ist schon da). Google tauscht sie ab und zu aus.
+    async currentPushToken() {
+      const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+      return getToken(getMessaging(app), { vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
+    },
+
     async disablePush() {
       await deleteToken(getMessaging(app)).catch(() => {});
     },

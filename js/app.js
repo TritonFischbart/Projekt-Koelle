@@ -2,24 +2,24 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=32';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=32';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=33';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=33';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=32';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=32';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=32';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=32';
-import { compressImage } from './images.js?v=32';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=32';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=32';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=32';
-import { toPlain, expensesCsv } from './export.js?v=32';
-import { firebaseConfig } from './firebase-config.js?v=32';
+} from './chores.js?v=33';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=33';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=33';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=33';
+import { compressImage } from './images.js?v=33';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=33';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=33';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=33';
+import { toPlain, expensesCsv } from './export.js?v=33';
+import { firebaseConfig } from './firebase-config.js?v=33';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=32) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=33) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -153,9 +153,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=32')).createDemoBackend();
+      backend = (await import('./demo.js?v=33')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=32')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=33')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -234,6 +234,7 @@ function route() {
       showScreen('app');
       renderHeader();
       switchTab(state.tab);
+      refreshPushToken();
     }
     renderAll();
     return;
@@ -1542,6 +1543,28 @@ async function pushOn() {
   } finally {
     state.pushBusy = false;
     renderSettings();
+  }
+}
+
+// Bei jedem Start: Ist die "Adresse" dieses Handys für Nachrichten noch aktuell?
+// Google tauscht sie gelegentlich aus – dann käme sonst nichts mehr an.
+async function refreshPushToken() {
+  const stored = storedPushToken();
+  if (backend.isDemo || !stored || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    const token = await backend.currentPushToken();
+    if (!token) return;
+    await backend.set('pushTokens', token, {
+      person: state.me,
+      device: navigator.userAgent.slice(0, 120),
+      createdAt: backend.now(),
+    });
+    if (token !== stored) {
+      await backend.remove('pushTokens', stored).catch(() => {});
+      storePushToken(token);
+    }
+  } catch (err) {
+    console.error('Push-Adresse konnte nicht erneuert werden', err);
   }
 }
 
