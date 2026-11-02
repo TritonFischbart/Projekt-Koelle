@@ -145,9 +145,9 @@ Am besten am Computer oder iPad im Browser. Bei Fragen: Screenshot an Claude sch
 Damit GitHub den Versand-Dienst bei Firebase automatisch einrichten darf.
 1. Öffne **https://console.cloud.google.com/iam-admin/serviceaccounts?project=projekt-koelle**
 2. **„+ Dienstkonto erstellen“ / „+ Create service account“** → Name: `github-deploy` → **Erstellen und fortfahren**.
-3. Rollen: **„Bearbeiter“ / „Editor“**, **„Project IAM Admin“** und **„Cloud Functions Admin“**
-   („Cloud Functions-Administrator“) auswählen → **Weiter** → **Fertig**.
-   (Alle drei sind nötig, sonst bricht die Einrichtung ab. Später ergänzen geht unter
+3. Rollen: **„Bearbeiter“ / „Editor“**, **„Project IAM Admin“**, **„Cloud Functions Admin“**
+   („Cloud Functions-Administrator“) und **„Cloud Run Admin“** („Cloud Run-Administrator“) auswählen → **Weiter** → **Fertig**.
+   (Alle vier sind nötig, sonst bricht die Einrichtung ab. Später ergänzen geht unter
    https://console.cloud.google.com/iam-admin/iam?project=projekt-koelle → Stift ✏️.)
 4. Das neue Konto anklicken → Reiter **„Schlüssel“ / „Keys“** →
    **„Schlüssel hinzufügen“ → „Neuen Schlüssel erstellen“** → **JSON** → **Erstellen**.
