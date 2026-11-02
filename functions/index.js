@@ -28,9 +28,15 @@ async function send(messages, { ignoreSettings = false } = {}) {
   const [tokens, settingsList] = await Promise.all([docs('pushTokens'), docs('pushSettings')]);
   const settings = Object.fromEntries(settingsList.map((s) => [s.id, s]));
   for (const msg of messages) {
-    if (!ignoreSettings && !wants(settings, msg.person, msg.type)) continue;
+    if (!ignoreSettings && !wants(settings, msg.person, msg.type)) {
+      console.log(`PUSH ${msg.type} an ${msg.person}: in den Einstellungen ausgeschaltet`);
+      continue;
+    }
     const mine = tokens.filter((t) => t.person === msg.person).map((t) => t.id);
-    if (!mine.length) continue;
+    if (!mine.length) {
+      console.log(`PUSH ${msg.type} an ${msg.person}: kein Gerät eingeschaltet`);
+      continue;
+    }
     const result = await getMessaging().sendEachForMulticast({
       tokens: mine,
       notification: { title: msg.title, body: msg.body },
@@ -39,6 +45,8 @@ async function send(messages, { ignoreSettings = false } = {}) {
         fcmOptions: { link: APP_URL },
       },
     });
+    const codes = [...new Set(result.responses.map((r) => r.error?.code).filter(Boolean))];
+    console.log(`PUSH ${msg.type} an ${msg.person}: ${mine.length} Gerät(e), ${result.successCount} angekommen, ${result.failureCount} Fehler${codes.length ? ` (${codes.join(', ')})` : ''}`);
     // Ungültige Handys (App gelöscht, Nachrichten ausgeschaltet) aufräumen
     await Promise.all(result.responses.map((r, i) => {
       const code = r.error?.code ?? '';

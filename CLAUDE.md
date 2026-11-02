@@ -273,6 +273,12 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Bereitstellung: GitHub Action bei Änderungen an `functions/**` oder den geteilten
   `js/`-Dateien, oder per Hand („Run workflow“). Lukas wollte, dass man das Verhalten nach dem
   Ausprobieren anpasst („wie das Handling wird“) – Rückmeldungen einplanen.
+- **Adresse erneuern:** Bei jedem App-Start holt die App die aktuelle Push-Adresse (`refreshPushToken`,
+  `currentPushToken` in beiden Backends) und speichert sie neu – Google tauscht sie ab und zu aus.
+- **Fehlersuche:** GitHub-Action „Push-Nachrichten prüfen“ (`.github/workflows/push-check.yml`, nur per
+  Hand) zeigt Geräte pro Person, Einstellungen, liegengebliebene Tests und das Protokoll der letzten
+  3 Tage. Der Dienst schreibt pro Nachricht eine Zeile „PUSH typ an person: … angekommen, … Fehler“.
+  Repo ist öffentlich → nichts Geheimes ausgeben (lange Kennungen werden unkenntlich gemacht).
 - VAPID-Schlüssel (öffentlich) steht in `js/firebase-config.js` → `vapidKey` (eingetragen 1. Nov. 2026).
 - ⚠️ Das Google-Cloud-Rechnungskonto lief am 1. Nov. 2026 als **kostenlose Testphase (90 Tage)**.
   Wird es bis Ende Januar 2027 nicht auf ein vollständiges Konto umgestellt („Upgrade“ in der
