@@ -81,7 +81,8 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `js/export.js` | Datensicherung (JSON) und Ausgaben-Tabelle (CSV für Excel) |
 | `js/absences.js` | Urlaubs-Modus: wer wann weg ist |
 | `js/images.js` | Bilder fürs Schwarze Brett auf dem Handy verkleinern |
-| `js/invites.js` | „Wer hat Bock?“: Vorlagen, wann eine Aktion abläuft, Zeitangabe |
+| `js/invites.js` | „Wer hat Bock?“: Vorlagen, wann eine Aktion abläuft, Zeitangabe, Symbol raten |
+| `js/koelsch.js` | Geheimnis: Kölsche Weisheit des Tages (Tipp auf „Projekt Kölle“) |
 | `js/firebase.js` | Firebase-Anbindung (Backend), inkl. Push ein/aus |
 | `firebase-messaging-sw.js` | Service Worker: zeigt Push-Nachrichten, wenn die App zu ist (Firebase-Werte doppelt eingetragen) |
 | `functions/index.js` | Versand-Dienst: Auslöser (neue Aktion/Abstimmung/Ausgabe, Test) + stündlicher Lauf |
@@ -165,6 +166,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   holt auch Termine und neue Version). Nur in der Home-Bildschirm-App – im Browser hat das
   Handy das schon selbst. Ohne Netz kein Neuladen (sonst leere Seite), nur Hinweis.
   Läuft über dieselben Touch-Funktionen wie das Wischen (`swipe.pull`).
+- **Geheimnis (Idee von Lukas):** Tipp auf „Projekt Kölle“ oben links öffnet die **Kölsche Weisheit des
+  Tages** (jeden Tag eine andere, für alle gleich): die 11 Artikel des Kölschen Grundgesetzes + weitere
+  Sprüche/Liedzeilen, jeweils mit Übersetzung (`js/koelsch.js`, Liste `WEISHEITEN` – einfach ergänzbar).
 - **⚙️ Einstellungen** (Knopf oben rechts, auch Tipp auf den eigenen Kreis): Benachrichtigungen,
   Kalender verbinden, Datensicherung, Konto/Abmelden, Versionsnummer. Gehört nicht zur
   Wisch-Reihenfolge. (Lukas wollte Technisches gesammelt statt unter „Infos“.)
