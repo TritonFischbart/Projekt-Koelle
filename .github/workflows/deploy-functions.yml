@@ -62,6 +62,22 @@ jobs:
           trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
           deploy() { npx --yes firebase-tools@14 deploy --only functions --project projekt-koelle --force --non-interactive; }
-          # Google meldet beim stündlichen Job manchmal einen kurzen Berechtigungs-Fehler,
-          # der beim zweiten Versuch weg ist -> einmal nach 60 Sekunden wiederholen.
-          deploy || { echo "Erster Versuch fehlgeschlagen – neuer Versuch in 60 Sekunden"; sleep 60; deploy; }
+          # Bei einem kurzen Google-Fehler einmal wiederholen. Wichtig: beim zweiten Versuch ALLES
+          # neu bereitstellen – sonst gilt eine halb fertige Funktion als "unverändert" und wird
+          # übersprungen (so fehlte der Zeitplan für den stündlichen Job, obwohl alles grün war).
+          deploy || { echo "Erster Versuch fehlgeschlagen – neuer Versuch in 60 Sekunden"; sleep 60; FUNCTIONS_DEPLOY_UNCHANGED=true deploy; }
+
+      - name: Gibt es den Zeitplan für den stündlichen Job?
+        if: steps.check.outputs.ready == 'true'
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$SA" > "$RUNNER_TEMP/sa.json"
+          trap 'rm -f "$RUNNER_TEMP/sa.json"' EXIT
+          gcloud auth activate-service-account --key-file="$RUNNER_TEMP/sa.json" --quiet
+          if gcloud scheduler jobs list --project projekt-koelle --location europe-west3 --format='value(name)' 2>/dev/null | grep -qi pushhourly; then
+            echo "Zeitplan vorhanden ✓"
+          else
+            echo "::error::Der Zeitplan für pushHourly fehlt – Erinnerungen (Putzplan, Termine, Einkauf) werden nicht verschickt."
+            exit 1
+          fi

@@ -324,7 +324,10 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 
 - ~~**Push-Nachrichten** (#12)~~ – erledigt am 1. Nov. 2026: bereitgestellt, Test-Nachricht auf
   Lukas' Handy kam an. Rückmeldungen zum Verhalten (Uhrzeiten, Menge) noch einplanen. Das Dienstkonto `github-deploy` braucht die Rollen
-  Editor, Project IAM Admin und Cloud Functions Admin; die Cloud Billing API muss an sein.
+  Editor, Project IAM Admin, Cloud Functions Admin und **Cloud Run Admin** (sonst scheitert „set invoker“
+  beim stündlichen Job und der Zeitplan wird nie angelegt – war am 2. Nov. 2026 der Grund, warum keine
+  Erinnerungen kamen); die Cloud Billing API muss an sein. Die Bereitstellung prüft am Ende, ob der
+  Zeitplan existiert. Beim zweiten Versuch `FUNCTIONS_DEPLOY_UNCHANGED=true`, sonst wird übersprungen.
   Beim allerersten Bereitstellen kam „Eventarc Service Agent“ – das löst sich nach ein paar Minuten von selbst.
 - **Kassenbon-Fotos** bei Ausgaben – bräuchte Firebase Storage (ebenfalls „Blaze“).
 - **WG-Radio** (#24): Radio in der App, gespeist über einen Anbieter. Möglichkeiten:
