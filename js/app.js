@@ -2,24 +2,24 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=33';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=33';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=34';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=34';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=33';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=33';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=33';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=33';
-import { compressImage } from './images.js?v=33';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=33';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=33';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=33';
-import { toPlain, expensesCsv } from './export.js?v=33';
-import { firebaseConfig } from './firebase-config.js?v=33';
+} from './chores.js?v=34';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=34';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=34';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=34';
+import { compressImage } from './images.js?v=34';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=34';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=34';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=34';
+import { toPlain, expensesCsv } from './export.js?v=34';
+import { firebaseConfig } from './firebase-config.js?v=34';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=33) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=34) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -153,9 +153,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=33')).createDemoBackend();
+      backend = (await import('./demo.js?v=34')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=33')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=34')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1746,10 +1746,20 @@ const openPolls = () => state.polls.filter((p) => !p.closed);
 const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const shortDate = (iso) => formatDate(iso);
 
+// Begrüßung auf Kölsch – je nach Tageszeit, am 11.11. und an Karneval mit „Alaaf“
+function koelscheBegruessung(now) {
+  const md = (now.getMonth() + 1) * 100 + now.getDate();
+  if (md === 1111) return 'Kölle Alaaf';
+  const hour = now.getHours();
+  if (hour < 5 || hour >= 23) return 'Jode Naach';
+  if (hour < 11) return 'Morje';
+  if (hour < 18) return 'Tach';
+  return 'N’Ovend';
+}
+
 function renderStart() {
   const now = new Date();
-  const hour = now.getHours();
-  const hello = hour < 11 ? 'Guten Morgen' : hour < 18 ? 'Hallo' : 'Guten Abend';
+  const hello = koelscheBegruessung(now);
   const balance = computeBalances(PERSON_IDS, activeExpenses(), activePayments())[state.me];
   const myChores = weekChores(thisMonday()).filter((c) => c.assignee === state.me);
   const openShop = state.shopping.filter((i) => !i.doneBy);
