@@ -105,7 +105,11 @@ button { cursor: pointer; }
   background: var(--brand);
   color: #fff;
 }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; background: none; border: 0; padding: 0; color: inherit; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.koelsch { display: grid; gap: 10px; text-align: center; padding: 6px 4px 10px; }
+.koelsch-text { margin: 0; font-size: 1.6rem; font-weight: 800; color: var(--brand); line-height: 1.25; }
+.koelsch-de { margin: 0; font-size: 1rem; }
+.koelsch-source { margin: 0; color: var(--muted); font-size: 0.85rem; }
 .brand img { width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85); }
 .me-button .avatar { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85); }
 .me-button { background: none; border: 0; padding: 0; border-radius: 50%; }

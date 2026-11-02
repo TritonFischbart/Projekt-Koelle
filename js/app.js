@@ -2,24 +2,25 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=34';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=34';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=35';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=35';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=34';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=34';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=34';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=34';
-import { compressImage } from './images.js?v=34';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=34';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=34';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=34';
-import { toPlain, expensesCsv } from './export.js?v=34';
-import { firebaseConfig } from './firebase-config.js?v=34';
+} from './chores.js?v=35';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=35';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=35';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=35';
+import { compressImage } from './images.js?v=35';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=35';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=35';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=35';
+import { toPlain, expensesCsv } from './export.js?v=35';
+import { firebaseConfig } from './firebase-config.js?v=35';
+import { weisheitDesTages } from './koelsch.js?v=35';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=34) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=35) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -153,9 +154,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=34')).createDemoBackend();
+      backend = (await import('./demo.js?v=35')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=34')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=35')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1276,6 +1277,15 @@ function eventWhen(e) {
 // Links in der Beschreibung antippbar machen (Text ist schon mit esc() geschützt).
 function linkify(escaped) {
   return escaped.replace(/https?:\/\/[^\s<]+[^\s<.,;:!?)]/g, (url) => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`);
+}
+
+function openKoelsch() {
+  const w = weisheitDesTages();
+  $('#koelsch-body').innerHTML = `
+    <p class="koelsch-text">„${esc(w.koelsch)}“</p>
+    <p class="koelsch-de">${esc(w.deutsch)}</p>
+    <p class="koelsch-source">${esc(w.quelle)}</p>`;
+  $('#koelsch-dialog').showModal();
 }
 
 function openEvent(id) {
@@ -2488,6 +2498,7 @@ function onClick(event) {
     case 'calendar-settings': openCalendarForm(); break;
     case 'calendar-reload': loadEvents(); break;
     case 'event-open': openEvent(el.dataset.id); break;
+    case 'koelsch': openKoelsch(); break;
     case 'calendar-remove': removeCalendar(); break;
     case 'quick-edit': state.quickEdit = !state.quickEdit; renderEinkauf(); break;
     case 'delete-expense': deleteExpense(); break;
