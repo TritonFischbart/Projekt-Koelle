@@ -171,7 +171,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Untere Leiste: **Start · Ausgaben · Einkauf · Putzplan · Infos**. Der **Kalender**
   hat keinen eigenen Knopf mehr – er hängt an der Startseite („Ganzer Kalender ›“,
   „‹ Zur Übersicht“), damit die Leiste auf dem Handy nicht zu voll wird.
-- **Start (Übersicht)**: Begrüßung, nächste Termine, Kontostand, Einkaufsliste, eigene
+- **Start (Übersicht)**: Begrüßung auf Kölsch (Wunsch von Lukas: „Morje“ bis 11 Uhr, „Tach“ bis 18,
+  „N’Ovend“ bis 23, sonst „Jode Naach“, am 11.11. „Kölle Alaaf“ – `koelscheBegruessung`), nächste Termine, Kontostand, Einkaufsliste, eigene
   Putzaufgabe (mit „Erledigt“), „Wer hat Bock?“, Abstimmungen, „Wer ist weg?“ (Bock vor
   Abstimmungen – Wunsch von Lukas, Nov. 2026).
 - **Rückgängig**: Gelöschte Ausgaben, Daueraufträge, Überweisungen, Einkäufe, Notizen,
