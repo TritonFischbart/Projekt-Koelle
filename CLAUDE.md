@@ -172,7 +172,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   hat keinen eigenen Knopf mehr – er hängt an der Startseite („Ganzer Kalender ›“,
   „‹ Zur Übersicht“), damit die Leiste auf dem Handy nicht zu voll wird.
 - **Start (Übersicht)**: Begrüßung, nächste Termine, Kontostand, Einkaufsliste, eigene
-  Putzaufgabe (mit „Erledigt“), Abstimmungen, „Wer hat Bock?“, „Wer ist weg?“.
+  Putzaufgabe (mit „Erledigt“), „Wer hat Bock?“, Abstimmungen, „Wer ist weg?“ (Bock vor
+  Abstimmungen – Wunsch von Lukas, Nov. 2026).
 - **Rückgängig**: Gelöschte Ausgaben, Daueraufträge, Überweisungen, Einkäufe, Notizen,
   Abstimmungen und Abwesenheiten lassen sich 6 Sekunden lang über die Meldung zurückholen.
 - **Offline-Hinweis** oben, wenn das Handy kein Netz hat (Firestore speichert später).
@@ -245,7 +246,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - **Keine Frist / kein automatisches Ende** – ausdrücklich nicht gewünscht.
 
 ### 🙋 Wer hat Bock? (Idee von Lukas/Jana)
-- Unter den Abstimmungen auf der Startseite: spontane Aktionen („Ich koche – wer isst mit?“,
+- Auf der Startseite über den Abstimmungen: spontane Aktionen („Ich koche – wer isst mit?“,
   Film, Bouldern, Kneipe, Sport, Spieleabend oder eigener Text) mit „Jetzt“ oder Uhrzeit
   heute/morgen und optionaler Notiz. Andere tippen „Bin dabei 👍“ / „Diesmal nicht“
   (nochmal tippen = zurücknehmen). **Symbol passt sich beim Tippen an** (`guessInviteEmoji` in
