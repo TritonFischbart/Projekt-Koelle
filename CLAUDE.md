@@ -327,7 +327,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Editor, Project IAM Admin, Cloud Functions Admin und **Cloud Run Admin** (sonst scheitert „set invoker“
   beim stündlichen Job und der Zeitplan wird nie angelegt – war am 2. Nov. 2026 der Grund, warum keine
   Erinnerungen kamen); die Cloud Billing API muss an sein. Die Bereitstellung prüft am Ende, ob der
-  Zeitplan existiert. Beim zweiten Versuch `FUNCTIONS_DEPLOY_UNCHANGED=true`, sonst wird übersprungen.
+  Zeitplan existiert. Jede Bereitstellung schreibt `functions/deploy-stamp.txt` (nicht eingecheckt), damit
+  firebase-tools nichts als „unverändert“ überspringt (`FUNCTIONS_DEPLOY_UNCHANGED` hat nicht gewirkt).
   Beim allerersten Bereitstellen kam „Eventarc Service Agent“ – das löst sich nach ein paar Minuten von selbst.
 - **Kassenbon-Fotos** bei Ausgaben – bräuchte Firebase Storage (ebenfalls „Blaze“).
 - **WG-Radio** (#24): Radio in der App, gespeist über einen Anbieter. Möglichkeiten:
