@@ -32,15 +32,33 @@ jobs:
       - name: Protokoll des Versand-Dienstes (letzte 3 Tage)
         run: |
           gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS" --quiet
+          echo "=== Funktionen ==="
+          gcloud functions list --project projekt-koelle --format="table(name.basename(), state, environment, updateTime)" 2>&1 || true
+          echo
+          echo "=== Auslöser (Eventarc) ==="
+          gcloud eventarc triggers list --project projekt-koelle --location europe-west3 \
+            --format="table(name.basename(), eventFilters, conditions)" 2>&1 || true
+          echo
           echo "=== Zeitplan (stündlicher Job) ==="
           gcloud scheduler jobs list --project projekt-koelle --location europe-west3 \
-            --format="table(name.basename(), schedule, state, lastAttemptTime, status.code)" || true
+            --format="table(name.basename(), schedule, state, lastAttemptTime, status.code)" 2>&1 || true
+          echo
+          echo "=== Aufrufe der Funktionen (letzte 3 Tage, je Funktion) ==="
+          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name:"push"' \
+            --project projekt-koelle --freshness=3d --limit=1000 --format='value(resource.labels.service_name)' 2>&1 \
+            | sort | uniq -c || true
           echo
           echo "=== Protokoll ==="
           gcloud logging read \
             'resource.type="cloud_run_revision" AND resource.labels.service_name:"push" AND (severity>=WARNING OR textPayload:"PUSH" OR textPayload:"Error")' \
             --project projekt-koelle --freshness=3d --limit=200 --order=asc \
             --format='value(timestamp.date("%d.%m. %H:%M", tz="Europe/Berlin"), resource.labels.service_name, severity, textPayload)' \
+            2>&1 | sed -E 's/[A-Za-z0-9_:-]{60,}/[…]/g' || true
+          echo
+          echo "=== Letzte Meldungen pushtest (alle Arten) ==="
+          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="pushtest"' \
+            --project projekt-koelle --freshness=3d --limit=30 \
+            --format='value(timestamp.date("%d.%m. %H:%M", tz="Europe/Berlin"), severity, textPayload, httpRequest.status)' 2>&1 \
             | sed -E 's/[A-Za-z0-9_:-]{60,}/[…]/g' || true
 
       - name: Zugang entfernen
