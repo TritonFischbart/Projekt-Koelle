@@ -63,12 +63,13 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
           # Immer alles bereitstellen (auch "unveränderte" Funktionen) – so wird ein fehlender
           # Zeitplan oder eine fehlende Berechtigung bei jedem Lauf wieder repariert.
-          export FUNCTIONS_DEPLOY_UNCHANGED=true
+          # Dafür bekommt jede Bereitstellung eine eigene Kennung, dann gilt nichts als "unverändert".
+          echo "$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$(date +%s)" > functions/deploy-stamp.txt
           deploy() { npx --yes firebase-tools@14 deploy --only functions --project projekt-koelle --force --non-interactive; }
           # Bei einem kurzen Google-Fehler einmal wiederholen. Wichtig: beim zweiten Versuch ALLES
           # neu bereitstellen – sonst gilt eine halb fertige Funktion als "unverändert" und wird
           # übersprungen (so fehlte der Zeitplan für den stündlichen Job, obwohl alles grün war).
-          deploy || { echo "Erster Versuch fehlgeschlagen – neuer Versuch in 60 Sekunden"; sleep 60; deploy; }
+          deploy || { echo "Erster Versuch fehlgeschlagen – neuer Versuch in 60 Sekunden"; sleep 60; date +%s >> functions/deploy-stamp.txt; deploy; }
 
       - name: Gibt es den Zeitplan für den stündlichen Job?
         if: steps.check.outputs.ready == 'true'
