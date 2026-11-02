@@ -2,24 +2,24 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=30';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=30';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=31';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=31';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=30';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=30';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=30';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=30';
-import { compressImage } from './images.js?v=30';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen } from './invites.js?v=30';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=30';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=30';
-import { toPlain, expensesCsv } from './export.js?v=30';
-import { firebaseConfig } from './firebase-config.js?v=30';
+} from './chores.js?v=31';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=31';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=31';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=31';
+import { compressImage } from './images.js?v=31';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=31';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=31';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=31';
+import { toPlain, expensesCsv } from './export.js?v=31';
+import { firebaseConfig } from './firebase-config.js?v=31';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=30) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=31) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -153,9 +153,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=30')).createDemoBackend();
+      backend = (await import('./demo.js?v=31')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=30')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=31')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1900,6 +1900,7 @@ function openInviteForm() {
   $('#i-time').hidden = true;
   $('#i-error').textContent = '';
   state.inviteKind = 'other';
+  state.inviteEmojiChosen = false;
   $('#invite-dialog').showModal();
 }
 
@@ -1908,6 +1909,7 @@ function useInviteTemplate(index) {
   $('#i-emoji').value = t.emoji;
   $('#i-title').value = t.title;
   state.inviteKind = t.kind;
+  state.inviteEmojiChosen = false;
 }
 
 function onSubmitInvite(event) {
@@ -2520,7 +2522,13 @@ $('#invite-form').addEventListener('change', (event) => {
   if (event.target.name === 'iWhen') $('#i-time').hidden = event.target.value === 'now';
 });
 // Eigener Text statt Vorlage -> normale Aktion (außer der Text klingt nach Kochen)
-$('#i-title').addEventListener('input', () => { state.inviteKind = 'other'; });
+// Das Symbol passt sich beim Tippen an – außer man hat selbst eins eingetragen.
+$('#i-title').addEventListener('input', () => {
+  state.inviteKind = 'other';
+  if (!state.inviteEmojiChosen) $('#i-emoji').value = guessInviteEmoji($('#i-title').value) ?? '🙋';
+});
+// Feld geleert -> wieder automatisch
+$('#i-emoji').addEventListener('input', () => { state.inviteEmojiChosen = $('#i-emoji').value.trim() !== ''; });
 // Abgelaufene Aktionen verschwinden auch ohne neue Daten
 setInterval(() => { if (state.me) renderStart(); }, 60000);
 $('#search-input').addEventListener('input', renderSearch);
