@@ -2,26 +2,26 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=36';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=36';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=37';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=37';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=36';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=36';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=36';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=36';
-import { compressImage } from './images.js?v=36';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=36';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=36';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=36';
-import { toPlain, expensesCsv } from './export.js?v=36';
-import { firebaseConfig } from './firebase-config.js?v=36';
-import { weisheitDesTages } from './koelsch.js?v=36';
-import { noteTextHtml, continueList } from './notetext.js?v=36';
+} from './chores.js?v=37';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=37';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=37';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=37';
+import { compressImage } from './images.js?v=37';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=37';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=37';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=37';
+import { toPlain, expensesCsv } from './export.js?v=37';
+import { firebaseConfig } from './firebase-config.js?v=37';
+import { weisheitDesTages } from './koelsch.js?v=37';
+import { noteTextHtml, continueList } from './notetext.js?v=37';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=36) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=37) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -155,9 +155,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=36')).createDemoBackend();
+      backend = (await import('./demo.js?v=37')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=36')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=37')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1417,8 +1417,28 @@ const NOTE_TEMPLATES = [
 let noteDrag = null; // Notiz, die gerade verschoben wird (siehe unten)
 
 // Angeheftete zuerst, dann in der selbst gewählten Reihenfolge (neue Notizen ans Ende)
-const sortedNotes = () => [...state.notes].sort((a, b) => (Boolean(b.pinned) - Boolean(a.pinned))
-  || ((a.order ?? 1e9) - (b.order ?? 1e9)) || (toMillis(a.createdAt) - toMillis(b.createdAt)));
+// Sortierung wählt jeder für sich (wird auf dem Handy gemerkt): eigene Reihenfolge oder nach Datum.
+// Angeheftete stehen immer oben. Datum = letzte Änderung.
+const NOTE_SORTS = [
+  { id: 'custom', label: 'Eigene Reihenfolge' },
+  { id: 'newest', label: 'Neueste zuerst' },
+  { id: 'oldest', label: 'Älteste zuerst' },
+];
+const NOTE_SORT_KEY = 'koelle.noteSort';
+function noteSort() {
+  try { return localStorage.getItem(NOTE_SORT_KEY) || 'custom'; } catch { return 'custom'; }
+}
+function setNoteSort(mode) {
+  try { localStorage.setItem(NOTE_SORT_KEY, mode); } catch { /* privater Modus */ }
+}
+const noteDate = (n) => toMillis(n.updatedAt ?? n.createdAt);
+const sortedNotes = () => {
+  const mode = noteSort();
+  return [...state.notes].sort((a, b) => (Boolean(b.pinned) - Boolean(a.pinned))
+    || (mode === 'newest' ? noteDate(b) - noteDate(a)
+      : mode === 'oldest' ? noteDate(a) - noteDate(b)
+        : ((a.order ?? 1e9) - (b.order ?? 1e9)) || (toMillis(a.createdAt) - toMillis(b.createdAt))));
+};
 
 function renderInfos() {
   if (noteDrag?.active) { noteDrag.dirty = true; return; } // nicht mitten im Verschieben neu zeichnen
@@ -1448,6 +1468,8 @@ function renderInfos() {
     <section class="card">
       <div class="card-head"><h2>📌 Schwarzes Brett</h2><button class="link-btn" data-action="note-new">＋ Notiz</button></div>
       <p class="hint left">Alles, was man in der WG immer wieder sucht.${notes.length > 1 ? ' Lange auf eine Notiz drücken, um sie zu verschieben.' : ''}</p>
+      ${notes.length > 1 ? `<div class="chips note-sort no-swipe"><span class="note-sort-label">Sortieren:</span>${NOTE_SORTS.map((o) => `
+        <button class="chip-btn${noteSort() === o.id ? ' active' : ''}" data-action="note-sort" data-mode="${o.id}">${o.label}</button>`).join('')}</div>` : ''}
       ${templates.length ? `<div class="quick-chips">${templates.map((t, i) => `
         <button class="quick-chip" data-action="note-template" data-index="${NOTE_TEMPLATES.indexOf(t)}">＋ ${esc(t.title)}</button>`).join('')}</div>` : ''}
     </section>
@@ -1543,7 +1565,11 @@ function noteTouchEnd() {
       backend.update('notes', n.id, changes).catch(showError);
     }
   });
-  if (Boolean(moved.pinned) !== Boolean(drag.pinned)) toast(drag.pinned ? 'Angeheftet 📌' : 'Gelöst');
+  if (noteSort() !== 'custom') {
+    setNoteSort('custom');
+    renderInfos();
+    toast('Sortierung: eigene Reihenfolge');
+  } else if (Boolean(moved.pinned) !== Boolean(drag.pinned)) toast(drag.pinned ? 'Angeheftet 📌' : 'Gelöst');
 }
 
 function cancelNoteDrag() {
@@ -2581,6 +2607,7 @@ function onClick(event) {
       break;
     }
     case 'note-new': openNoteForm(); break;
+    case 'note-sort': setNoteSort(el.dataset.mode); renderInfos(); break;
     case 'note-template': openNoteForm(null, NOTE_TEMPLATES[Number(el.dataset.index)]); break;
     case 'note-edit': openNoteForm(state.notes.find((n) => n.id === el.dataset.id)); break;
     case 'note-delete': deleteNote(); break;
