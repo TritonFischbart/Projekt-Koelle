@@ -85,14 +85,21 @@ export const pushHourly = onSchedule({ schedule: '0 * * * *', timeZone: 'Europe/
     }
     if (job === 'calendar') {
       const cfg = (await db.collection('settings').doc('kalender').get()).data();
-      if (!cfg?.calendarId || !cfg?.apiKey) continue;
+      if (!cfg?.calendarId || !cfg?.apiKey) {
+        console.log('PUSH calendar: kein Kalender verbunden');
+        continue;
+      }
       const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const to = new Date(from.getFullYear(), from.getMonth(), from.getDate() + 1);
       // Der API-Schlüssel ist auf die Website beschränkt -> als Website ausweisen
       const res = await fetch(eventsUrl(cfg.calendarId, cfg.apiKey, from, to), { headers: { Referer: APP_URL } });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.log(`PUSH calendar: Google antwortet mit Fehler ${res.status}`);
+        continue;
+      }
       const items = ((await res.json()).items ?? []).filter((i) => i.status !== 'cancelled').map(normalizeEvent);
       const today = groupByDay(items, now).find((g) => g.day.toDateString() === now.toDateString());
+      console.log(`PUSH calendar: ${today?.events.length ?? 0} Termin(e) heute`);
       await send(calendarMessages(today?.events ?? []));
     }
     if (job === 'shopping') {
