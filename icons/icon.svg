@@ -5,7 +5,8 @@
     <clipPath id="inner"><path d="M160 220 H352 V328 C352 388 310 418 256 446 C202 418 160 388 160 328 Z"/></clipPath>
   </defs>
   <rect width="512" height="512" rx="112" fill="#ed1c24"/>
-  <g clip-path="url(#bg)" fill="#ffffff" opacity="0.2"><path d="M256 300 L256.0 -200.0 L385.4 -183.0 Z M256 300 L506.0 -133.0 L609.6 -53.6 Z M256 300 L689.0 50.0 L739.0 170.6 Z M256 300 L756.0 300.0 L739.0 429.4 Z M256 300 L689.0 550.0 L609.6 653.6 Z M256 300 L506.0 733.0 L385.4 783.0 Z M256 300 L256.0 800.0 L126.6 783.0 Z M256 300 L6.0 733.0 L-97.6 653.6 Z M256 300 L-177.0 550.0 L-227.0 429.4 Z M256 300 L-244.0 300.0 L-227.0 170.6 Z M256 300 L-177.0 50.0 L-97.6 -53.6 Z M256 300 L6.0 -133.0 L126.6 -183.0 Z"/></g>
+  <g clip-path="url(#bg)" fill="#ffffff"><path d="M256 300 L256.0 -200.0 L385.4 -183.0 Z M256 300 L506.0 -133.0 L609.6 -53.6 Z M256 300 L689.0 50.0 L739.0 170.6 Z M256 300 L756.0 300.0 L739.0 429.4 Z M256 300 L689.0 550.0 L609.6 653.6 Z M256 300 L506.0 733.0 L385.4 783.0 Z M256 300 L256.0 800.0 L126.6 783.0 Z M256 300 L6.0 733.0 L-97.6 653.6 Z M256 300 L-177.0 550.0 L-227.0 429.4 Z M256 300 L-244.0 300.0 L-227.0 170.6 Z M256 300 L-177.0 50.0 L-97.6 -53.6 Z M256 300 L6.0 -133.0 L126.6 -183.0 Z"/></g>
+  <rect width="512" height="512" rx="112" fill="none" stroke="#ed1c24" stroke-width="36" clip-path="url(#bg)"/>
   <g transform="translate(0 -24) translate(256 282) scale(1.1) translate(-256 -282)">
   <!-- Krone mit drei Türmen -->
   <g fill="#ffffff" stroke="#7d0a11" stroke-width="6" stroke-linejoin="round">

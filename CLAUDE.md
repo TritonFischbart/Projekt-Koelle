@@ -143,7 +143,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 ### Allgemein
 - Name **„Projekt Kölle“**, Logo (seit 4. Nov. 2026, Wunsch von Lukas nach einem Foto des Mosaiks in
   Ehrenfeld): **Ehrenfelder Wappen** – Schild mit Dreiturm-Krone und Zahnrad, oben rot, unten weiß,
-  vor rot-weißem Strahlenkranz (`icons/icon.svg`; PNGs daraus gerendert, `apple-touch-icon.png` ohne
+  vor rot-weißem Strahlenkranz (weiße Streifen, roter Rahmen – wie das Mosaik; `icons/icon.svg`; PNGs daraus gerendert, `apple-touch-icon.png` ohne
   runde Ecken, weil iOS selbst rundet). Vorher: Kölner Dom.
 - Design konsequent in den **Kölner Stadtfarben Rot und Weiß** (`--brand: #ed1c24`, kräftiges Rot wie beim 1. FC Köln,
   rote Kopfzeile, weißer Hintergrund, rotes Logo). Anfangs war es grün – Lukas wollte
