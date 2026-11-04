@@ -1,41 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Projekt Kölle: Ehrenfelder Wappen in Kölner Rot-Weiß -->
+  <defs>
+    <clipPath id="bg"><rect width="512" height="512" rx="112"/></clipPath>
+    <clipPath id="inner"><path d="M160 220 H352 V328 C352 388 310 418 256 446 C202 418 160 388 160 328 Z"/></clipPath>
+  </defs>
   <rect width="512" height="512" rx="112" fill="#ed1c24"/>
-  <!-- Kölner Dom: Westfassade mit zwei Türmen -->
-  <g fill="#ffffff">
-    <!-- linker Turm -->
-    <rect x="156" y="250" width="70" height="190"/>
-    <rect x="164" y="198" width="54" height="56"/>
-    <path d="M170 200 L191 74 L212 200 Z"/>
-    <path d="M156 252 L161 226 L166 252 Z M216 252 L221 226 L226 252 Z"/>
-    <path d="M164 200 L169 180 L174 200 Z M208 200 L213 180 L218 200 Z"/>
-    <circle cx="191" cy="70" r="6"/>
-    <!-- rechter Turm -->
-    <rect x="286" y="250" width="70" height="190"/>
-    <rect x="294" y="198" width="54" height="56"/>
-    <path d="M300 200 L321 74 L342 200 Z"/>
-    <path d="M286 252 L291 226 L296 252 Z M346 252 L351 226 L356 252 Z"/>
-    <path d="M294 200 L299 180 L304 200 Z M338 200 L343 180 L348 200 Z"/>
-    <circle cx="321" cy="70" r="6"/>
-    <!-- Mittelteil mit Giebel -->
-    <path d="M226 440 V300 L256 252 L286 300 V440 Z"/>
-    <!-- Boden -->
-    <rect x="136" y="436" width="240" height="14" rx="5"/>
+  <g clip-path="url(#bg)" fill="#ffffff" opacity="0.2"><path d="M256 300 L256.0 -200.0 L385.4 -183.0 Z M256 300 L506.0 -133.0 L609.6 -53.6 Z M256 300 L689.0 50.0 L739.0 170.6 Z M256 300 L756.0 300.0 L739.0 429.4 Z M256 300 L689.0 550.0 L609.6 653.6 Z M256 300 L506.0 733.0 L385.4 783.0 Z M256 300 L256.0 800.0 L126.6 783.0 Z M256 300 L6.0 733.0 L-97.6 653.6 Z M256 300 L-177.0 550.0 L-227.0 429.4 Z M256 300 L-244.0 300.0 L-227.0 170.6 Z M256 300 L-177.0 50.0 L-97.6 -53.6 Z M256 300 L6.0 -133.0 L126.6 -183.0 Z"/></g>
+  <g transform="translate(0 -24) translate(256 282) scale(1.1) translate(-256 -282)">
+  <!-- Krone mit drei Türmen -->
+  <g fill="#ffffff" stroke="#7d0a11" stroke-width="6" stroke-linejoin="round">
+    <path d="M150 210 V150 H168 V132 H184 V150 H196 V132 H212 V150 H222 V210 Z"/>
+    <path d="M290 210 V150 H300 V132 H316 V150 H328 V132 H344 V150 H362 V210 Z"/>
+    <path d="M214 210 V124 H226 V102 H242 V124 H270 V102 H286 V124 H298 V210 Z"/>
+    <rect x="146" y="176" width="220" height="40" rx="4"/>
   </g>
-  <g fill="#ed1c24">
-    <!-- durchbrochene Turmhelme -->
-    <rect x="178" y="168" width="26" height="4"/>
-    <rect x="183" y="138" width="16" height="4"/>
-    <rect x="187" y="108" width="8" height="4"/>
-    <rect x="308" y="168" width="26" height="4"/>
-    <rect x="313" y="138" width="16" height="4"/>
-    <rect x="317" y="108" width="8" height="4"/>
-    <!-- Spitzbogenfenster -->
-    <path d="M181 380 V305 Q181 290 191 282 Q201 290 201 305 V380 Z"/>
-    <path d="M311 380 V305 Q311 290 321 282 Q331 290 331 305 V380 Z"/>
-    <path d="M184 240 V220 Q184 212 191 207 Q198 212 198 220 V240 Z"/>
-    <path d="M314 240 V220 Q314 212 321 207 Q328 212 328 220 V240 Z"/>
-    <path d="M246 360 V328 Q246 314 256 306 Q266 314 266 328 V360 Z"/>
-    <!-- Portal -->
-    <path d="M243 436 V398 Q243 380 256 371 Q269 380 269 398 V436 Z"/>
+  <g fill="#b5121b">
+    <path d="M176 210 V198 Q176 186 186 186 Q196 186 196 198 V210 Z"/>
+    <path d="M316 210 V198 Q316 186 326 186 Q336 186 336 198 V210 Z"/>
+    <path d="M240 210 V194 Q240 180 256 180 Q272 180 272 194 V210 Z"/>
+    <circle cx="256" cy="148" r="11"/>
+  </g>
+  <!-- Schild: oben rot, unten weiß -->
+  <path d="M146 206 H366 V328 C366 398 318 432 256 462 C194 432 146 398 146 328 Z" fill="#ffffff" stroke="#7d0a11" stroke-width="6" stroke-linejoin="round"/>
+  <g clip-path="url(#inner)">
+    <rect x="140" y="210" width="232" height="120" fill="#b5121b"/>
+    <rect x="140" y="330" width="232" height="140" fill="#ffffff"/>
+  </g>
+  <path d="M160 220 H352 V328 C352 388 310 418 256 446 C202 418 160 388 160 328 Z" fill="none" stroke="#7d0a11" stroke-width="5"/>
+  <!-- Zahnrad (Industrie-Viertel Ehrenfeld) -->
+  <path d="M309.4 322.3 L321.7 323.4 L321.7 336.6 L309.4 337.7 L308.2 344.0 L306.2 350.0 L316.2 357.1 L309.5 368.6 L298.4 363.4 L294.2 368.2 L289.4 372.4 L294.6 383.5 L283.1 390.2 L276.0 380.2 L270.0 382.2 L263.7 383.4 L262.6 395.7 L249.4 395.7 L248.3 383.4 L242.0 382.2 L236.0 380.2 L228.9 390.2 L217.4 383.5 L222.6 372.4 L217.8 368.2 L213.6 363.4 L202.5 368.6 L195.8 357.1 L205.8 350.0 L203.8 344.0 L202.6 337.7 L190.3 336.6 L190.3 323.4 L202.6 322.3 L203.8 316.0 L205.8 310.0 L195.8 302.9 L202.5 291.4 L213.6 296.6 L217.8 291.8 L222.6 287.6 L217.4 276.5 L228.9 269.8 L236.0 279.8 L242.0 277.8 L248.3 276.6 L249.4 264.3 L262.6 264.3 L263.7 276.6 L270.0 277.8 L276.0 279.8 L283.1 269.8 L294.6 276.5 L289.4 287.6 L294.2 291.8 L298.4 296.6 L309.5 291.4 L316.2 302.9 L306.2 310.0 L308.2 316.0 Z" fill="#7d0a11"/>
+  <circle cx="256" cy="330" r="42" fill="#ffffff"/>
+  <g fill="#7d0a11"><rect x="252" y="286" width="8" height="88" rx="3" transform="rotate(0 256 330)"/><rect x="252" y="286" width="8" height="88" rx="3" transform="rotate(45 256 330)"/><rect x="252" y="286" width="8" height="88" rx="3" transform="rotate(90 256 330)"/><rect x="252" y="286" width="8" height="88" rx="3" transform="rotate(135 256 330)"/></g>
+  <circle cx="256" cy="330" r="15" fill="#ed1c24" stroke="#7d0a11" stroke-width="5"/>
   </g>
 </svg>
