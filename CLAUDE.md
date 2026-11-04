@@ -297,6 +297,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - **Verschieben** (Wunsch von Lukas): lange auf eine Notiz drücken (0,45 s), dann ziehen. Nach oben zu den
   angehefteten = anheften, darunter = lösen (rote Linie „📌 Angeheftet“ zeigt es an). Reihenfolge im Feld
   `order` (neue Notizen ans Ende). Am Rand scrollt die Seite mit. Nur Touch (Handy/iPad).
+- **Sortieren** (Wunsch von Lukas): Umschalter „Eigene Reihenfolge / Neueste zuerst / Älteste zuerst“
+  (Datum = letzte Änderung), merkt sich jedes Handy selbst (`localStorage` `koelle.noteSort`).
+  Angeheftete bleiben immer oben. Verschieben im Datumsmodus schaltet auf „Eigene Reihenfolge“ um.
 - **Aufzählungen** im Notiztext: Zeilen mit „- “, „• “, „* “, „– “ werden zu Punkten, „1. “/„1) “ zu
   Nummern (`js/notetext.js`). Beim Tippen setzt Enter den nächsten Punkt/die nächste Nummer, Enter
   in einer leeren Listenzeile beendet die Liste. Gespeichert wird weiter reiner Text.
