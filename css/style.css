@@ -554,7 +554,16 @@ a.btn.full { width: 100%; }
 
 /* ---------- Infos: Schwarzes Brett ---------- */
 .card .hint.left { text-align: left; margin: 0 0 10px; }
-.note-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1rem; }
+.note-text { overflow-wrap: anywhere; font-size: 1rem; }
+.note-text p { margin: 0; white-space: pre-wrap; }
+.note-text > * + * { margin-top: 8px; }
+.note-text ul, .note-text ol { margin: 0; padding-left: 1.4em; }
+.note-text li + li { margin-top: 3px; }
+.note-text li::marker { color: var(--brand); font-weight: 700; }
+.note { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.note.dragging { position: relative; z-index: 9; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28); opacity: 0.96; transition: box-shadow 0.15s; }
+.note-drop { height: 4px; margin: 2px 8px; border-radius: 4px; background: var(--muted); }
+.note-drop.pin { background: var(--brand); height: auto; padding: 2px 10px; color: #fff; font-size: 0.78rem; font-weight: 700; text-align: center; }
 .note-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; color: var(--muted); font-size: 0.82rem; }
 .field textarea, .field select {
   width: 100%; padding: 10px 14px;

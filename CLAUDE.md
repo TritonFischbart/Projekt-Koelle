@@ -82,6 +82,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `js/absences.js` | Urlaubs-Modus: wer wann weg ist |
 | `js/images.js` | Bilder fürs Schwarze Brett auf dem Handy verkleinern |
 | `js/invites.js` | „Wer hat Bock?“: Vorlagen, wann eine Aktion abläuft, Zeitangabe, Symbol raten |
+| `js/notetext.js` | Schwarzes Brett: Aufzählungen erkennen/anzeigen, Liste beim Tippen fortsetzen |
 | `js/koelsch.js` | Geheimnis: Kölsche Weisheit des Tages (Tipp auf „Projekt Kölle“) |
 | `js/firebase.js` | Firebase-Anbindung (Backend), inkl. Push ein/aus |
 | `firebase-messaging-sw.js` | Service Worker: zeigt Push-Nachrichten, wenn die App zu ist (Firebase-Werte doppelt eingetragen) |
@@ -122,7 +123,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `shopping` | Einkaufsliste: `name, category, addedBy, doneBy, doneAt` |
 | `favorites/{name}` | Wie oft etwas gekauft wurde + gemerkte Kategorie (Schnellauswahl) |
 | `recurring` | Daueraufträge: `description, amountCents, paidBy, splitAmong, category, dayOfMonth (1–28), lastBooked ("2026-11")` |
-| `notes` | Schwarzes Brett: `title, text, createdBy, updatedBy` (ID wird in der App erzeugt) |
+| `notes` | Schwarzes Brett: `title, text, pinned, order, createdBy, updatedBy` (ID wird in der App erzeugt) |
 | `noteImages` | Bilder zu Notizen: `noteId, data` (JPEG als Data-URL, max. ~0,9 MB), `width, height` |
 | `settings/backup` | Wann zuletzt gesichert wurde (`at`, `by`) |
 | `settings/einkauf` | Eigene Reihenfolge der Einkaufs-Kategorien (`order[]`) |
@@ -293,6 +294,12 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - **Schwarzes Brett**: Notizen mit Vorlagen (WLAN, Vermieter, Zählerstände, Schlüssel,
   Notfall). „Text kopieren“ z. B. fürs WLAN-Passwort.
 - **Anheften** („Anheften“/„Lösen“, Feld `pinned`): angeheftete Notizen stehen oben, rot markiert.
+- **Verschieben** (Wunsch von Lukas): lange auf eine Notiz drücken (0,45 s), dann ziehen. Nach oben zu den
+  angehefteten = anheften, darunter = lösen (rote Linie „📌 Angeheftet“ zeigt es an). Reihenfolge im Feld
+  `order` (neue Notizen ans Ende). Am Rand scrollt die Seite mit. Nur Touch (Handy/iPad).
+- **Aufzählungen** im Notiztext: Zeilen mit „- “, „• “, „* “, „– “ werden zu Punkten, „1. “/„1) “ zu
+  Nummern (`js/notetext.js`). Beim Tippen setzt Enter den nächsten Punkt/die nächste Nummer, Enter
+  in einer leeren Listenzeile beendet die Liste. Gespeichert wird weiter reiner Text.
 - **Bilder** an Notizen (z. B. Grundriss aus dem Exposé): werden auf dem Handy auf
   max. 1600 px / < 0,9 MB verkleinert und **in Firestore** gespeichert (kostenlos, kein
   Firebase Storage/„Blaze“ nötig). Vorschaubilder, Tippen = groß, nochmal = Zoom.

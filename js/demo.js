@@ -1,7 +1,7 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=35';
+import { weekKey } from './chores.js?v=36';
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -79,6 +79,7 @@ export function createDemoBackend() {
       { id: 'n1', title: '📶 WLAN', text: 'Netzwerk: Koelle-WG\nPasswort: DomBlick2026!', createdBy: 'lukas', createdAt: created(20), updatedBy: 'lukas', updatedAt: created(20) },
       { id: 'n3', title: '📐 Grundriss', text: 'Aus dem Exposé, 3 Zimmer, 78 m²', createdBy: 'lukas', createdAt: created(25), updatedBy: 'lukas', updatedAt: created(10) },
       { id: 'n2', title: '🏠 Vermieter & Hausverwaltung', text: 'Herr Beispiel\nTelefon: 0221 123456', createdBy: 'jana', createdAt: created(15), updatedBy: 'jana', updatedAt: created(4) },
+      { id: 'n4', title: '🧳 Vor dem Urlaub', text: 'Bitte dran denken:\n- Pflanzen gießen\n- Fenster zu\n- Kühlschrank leer machen\n\nReihenfolge Müll:\n1. Bio\n2. Gelber Sack\n3. Restmüll', createdBy: 'jana', createdAt: created(5), updatedBy: 'jana', updatedAt: created(5) },
     ],
     pushSettings: [],
     pushTokens: [],
