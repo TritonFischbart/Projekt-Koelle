@@ -2,25 +2,26 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=35';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=35';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=36';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=36';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=35';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=35';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=35';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=35';
-import { compressImage } from './images.js?v=35';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=35';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=35';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=35';
-import { toPlain, expensesCsv } from './export.js?v=35';
-import { firebaseConfig } from './firebase-config.js?v=35';
-import { weisheitDesTages } from './koelsch.js?v=35';
+} from './chores.js?v=36';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=36';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=36';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=36';
+import { compressImage } from './images.js?v=36';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=36';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=36';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=36';
+import { toPlain, expensesCsv } from './export.js?v=36';
+import { firebaseConfig } from './firebase-config.js?v=36';
+import { weisheitDesTages } from './koelsch.js?v=36';
+import { noteTextHtml, continueList } from './notetext.js?v=36';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=35) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=36) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -154,9 +155,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=35')).createDemoBackend();
+      backend = (await import('./demo.js?v=36')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=35')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=36')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1413,14 +1414,20 @@ const NOTE_TEMPLATES = [
   { title: '🚨 Notfall & Handwerker', text: 'Hausmeister: \nSchlüsseldienst: ' },
 ];
 
+let noteDrag = null; // Notiz, die gerade verschoben wird (siehe unten)
+
+// Angeheftete zuerst, dann in der selbst gewählten Reihenfolge (neue Notizen ans Ende)
+const sortedNotes = () => [...state.notes].sort((a, b) => (Boolean(b.pinned) - Boolean(a.pinned))
+  || ((a.order ?? 1e9) - (b.order ?? 1e9)) || (toMillis(a.createdAt) - toMillis(b.createdAt)));
+
 function renderInfos() {
-  // Angeheftete Notizen zuerst
-  const notes = [...state.notes].sort((a, b) => (Boolean(b.pinned) - Boolean(a.pinned)) || (toMillis(a.createdAt) - toMillis(b.createdAt)));
+  if (noteDrag?.active) { noteDrag.dirty = true; return; } // nicht mitten im Verschieben neu zeichnen
+  const notes = sortedNotes();
   const existing = new Set(notes.map((n) => n.title));
   const templates = NOTE_TEMPLATES.filter((t) => !existing.has(t.title));
 
   const noteCards = notes.map((n) => `
-    <article class="card note${n.pinned ? ' pinned' : ''}">
+    <article class="card note${n.pinned ? ' pinned' : ''}" data-id="${esc(n.id)}">
       <div class="card-head">
         <h2>${n.pinned ? '<span class="pin-mark" aria-label="Angeheftet">📌</span> ' : ''}${esc(n.title)}</h2>
         <span class="note-actions">
@@ -1428,7 +1435,7 @@ function renderInfos() {
           <button class="link-btn" data-action="note-edit" data-id="${esc(n.id)}">Bearbeiten</button>
         </span>
       </div>
-      ${n.text ? `<p class="note-text">${esc(n.text)}</p>` : ''}
+      ${n.text ? `<div class="note-text">${noteTextHtml(n.text, esc)}</div>` : ''}
       ${imagesOf(n.id).length ? `<div class="note-thumbs">${imagesOf(n.id).map((img) => `
         <button class="note-thumb" data-action="image-open" data-id="${esc(img.id)}"><img src="${img.data}" alt="Bild"></button>`).join('')}</div>` : ''}
       <div class="note-foot">
@@ -1440,11 +1447,114 @@ function renderInfos() {
   $('#tab-infos').innerHTML = `
     <section class="card">
       <div class="card-head"><h2>📌 Schwarzes Brett</h2><button class="link-btn" data-action="note-new">＋ Notiz</button></div>
-      <p class="hint left">Alles, was man in der WG immer wieder sucht.</p>
+      <p class="hint left">Alles, was man in der WG immer wieder sucht.${notes.length > 1 ? ' Lange auf eine Notiz drücken, um sie zu verschieben.' : ''}</p>
       ${templates.length ? `<div class="quick-chips">${templates.map((t, i) => `
         <button class="quick-chip" data-action="note-template" data-index="${NOTE_TEMPLATES.indexOf(t)}">＋ ${esc(t.title)}</button>`).join('')}</div>` : ''}
     </section>
     ${noteCards}`;
+}
+
+// ---------- Notizen verschieben (lange drücken, dann ziehen) ----------
+// Nach oben zu den angehefteten ziehen = anheften, nach unten = lösen.
+
+function noteTouchStart(event) {
+  cancelNoteDrag();
+  const card = event.target.closest('#tab-infos .note');
+  if (!card || event.touches.length !== 1 || event.target.closest('button, a')) return;
+  const t = event.touches[0];
+  noteDrag = { card, id: card.dataset.id, x: t.clientX, y: t.clientY, active: false };
+  noteDrag.timer = setTimeout(startNoteDrag, 450);
+}
+
+function startNoteDrag() {
+  if (!noteDrag || document.querySelector('dialog[open]')) return;
+  noteDrag.active = true;
+  noteDrag.startPageY = noteDrag.y + window.scrollY;
+  swipe = null; // kein Wischen/Aktualisieren gleichzeitig
+  noteDrag.card.classList.add('dragging');
+  navigator.vibrate?.(15);
+  updateNoteDrop(noteDrag.y);
+  // Am oberen/unteren Rand läuft die Seite weiter, auch wenn der Finger stillhält
+  const drag = noteDrag;
+  const tick = () => {
+    if (noteDrag !== drag) return;
+    // Nur so weit, bis die Notiz ganz oben bzw. ganz unten landen würde
+    const speed = drag.y < 110 && drag.index > 0 ? -10
+      : drag.y > window.innerHeight - 140 && drag.index < drag.count ? 10 : 0;
+    if (speed) {
+      window.scrollBy(0, speed);
+      positionDraggedNote();
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function positionDraggedNote() {
+  noteDrag.card.style.transform = `translateY(${noteDrag.y + window.scrollY - noteDrag.startPageY}px)`;
+  updateNoteDrop(noteDrag.y);
+}
+
+function noteTouchMove(event) {
+  if (!noteDrag) return;
+  const t = event.touches[0];
+  if (!noteDrag.active) {
+    if (Math.hypot(t.clientX - noteDrag.x, t.clientY - noteDrag.y) > 10) cancelNoteDrag();
+    return;
+  }
+  event.preventDefault(); // Seite nicht scrollen, solange man zieht
+  noteDrag.y = t.clientY;
+  positionDraggedNote();
+}
+
+// Wo würde die Notiz landen? Zeigt eine Linie an der Stelle.
+function updateNoteDrop(y) {
+  const others = [...document.querySelectorAll('#tab-infos .note')].filter((c) => c !== noteDrag.card);
+  let index = others.findIndex((c) => { const r = c.getBoundingClientRect(); return y < r.top + r.height / 2; });
+  if (index < 0) index = others.length;
+  const pinnedCount = others.filter((c) => c.classList.contains('pinned')).length;
+  const wasPinned = noteDrag.card.classList.contains('pinned');
+  noteDrag.index = index;
+  noteDrag.count = others.length;
+  noteDrag.pinned = index < pinnedCount ? true : index > pinnedCount ? false : wasPinned;
+  let marker = document.querySelector('.note-drop');
+  if (!marker) { marker = document.createElement('div'); marker.className = 'note-drop'; }
+  marker.classList.toggle('pin', noteDrag.pinned);
+  marker.textContent = noteDrag.pinned ? '📌 Angeheftet' : '';
+  if (index < others.length) others[index].before(marker); else (others.at(-1) ?? noteDrag.card).after(marker);
+}
+
+function noteTouchEnd() {
+  if (!noteDrag) return;
+  const drag = noteDrag;
+  cancelNoteDrag();
+  if (!drag.active) return;
+  const order = sortedNotes().filter((n) => n.id !== drag.id);
+  const moved = state.notes.find((n) => n.id === drag.id);
+  if (!moved) return;
+  order.splice(drag.index, 0, { ...moved, pinned: drag.pinned });
+  order.forEach((n, i) => {
+    const original = state.notes.find((x) => x.id === n.id);
+    const changes = {};
+    if (original.order !== i) changes.order = i;
+    if (Boolean(original.pinned) !== Boolean(n.pinned)) changes.pinned = n.pinned;
+    if (Object.keys(changes).length) {
+      Object.assign(original, changes); // sofort richtig anzeigen
+      backend.update('notes', n.id, changes).catch(showError);
+    }
+  });
+  if (Boolean(moved.pinned) !== Boolean(drag.pinned)) toast(drag.pinned ? 'Angeheftet 📌' : 'Gelöst');
+}
+
+function cancelNoteDrag() {
+  if (!noteDrag) return;
+  clearTimeout(noteDrag.timer);
+  const wasActive = noteDrag.active;
+  noteDrag.card.classList.remove('dragging');
+  noteDrag.card.style.transform = '';
+  document.querySelector('.note-drop')?.remove();
+  noteDrag = null;
+  if (wasActive) renderInfos();
 }
 
 // ---------- Einstellungen ----------
@@ -2524,6 +2634,20 @@ document.addEventListener('change', (event) => {
   if (event.target.dataset.pushType) setPushType(event.target.dataset.pushType, event.target.checked);
 });
 document.addEventListener('touchstart', onTouchStart, { passive: true });
+document.addEventListener('touchstart', noteTouchStart, { passive: true });
+document.addEventListener('touchmove', noteTouchMove, { passive: false });
+document.addEventListener('touchend', noteTouchEnd, { passive: true });
+document.addEventListener('touchcancel', noteTouchEnd, { passive: true });
+// Notiztext: Enter in einer Aufzählung setzt den nächsten Punkt
+$('#n-text').addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+  const box = event.target;
+  if (box.selectionStart !== box.selectionEnd) return;
+  const change = continueList(box.value, box.selectionStart);
+  if (!change) return;
+  event.preventDefault();
+  box.setRangeText(change.insert, change.from, change.to, 'end');
+});
 document.addEventListener('touchmove', onTouchMove, { passive: true });
 document.addEventListener('touchend', onTouchEnd, { passive: true });
 document.addEventListener('touchcancel', onTouchEnd, { passive: true });
