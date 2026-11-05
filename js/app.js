@@ -2,26 +2,26 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=38';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=38';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=39';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=39';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=38';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=38';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=38';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=38';
-import { compressImage } from './images.js?v=38';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=38';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=38';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=38';
-import { toPlain, expensesCsv } from './export.js?v=38';
-import { firebaseConfig } from './firebase-config.js?v=38';
-import { weisheitDesTages } from './koelsch.js?v=38';
-import { noteTextHtml, continueList } from './notetext.js?v=38';
+} from './chores.js?v=39';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=39';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=39';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=39';
+import { compressImage } from './images.js?v=39';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=39';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=39';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=39';
+import { toPlain, expensesCsv } from './export.js?v=39';
+import { firebaseConfig } from './firebase-config.js?v=39';
+import { weisheitDesTages } from './koelsch.js?v=39';
+import { noteTextHtml, continueList } from './notetext.js?v=39';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=38) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=39) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -155,9 +155,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=38')).createDemoBackend();
+      backend = (await import('./demo.js?v=39')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=38')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=39')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -2202,7 +2202,7 @@ function votePoll(id, index) {
 }
 
 function closePoll(id) {
-  backend.update('polls', id, { closed: true, closedAt: backend.now() }).catch(showError);
+  backend.update('polls', id, { closed: true, closedAt: backend.now(), closedBy: state.me }).catch(showError);
 }
 
 function deletePoll(id) {
