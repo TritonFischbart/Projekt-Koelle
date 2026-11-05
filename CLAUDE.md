@@ -272,9 +272,14 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   wählt **pro Person** (gilt für alle Geräte), welche Arten sie will. Liste der Arten:
   `PUSH_TYPES` in `js/config.js` (von App und Dienst gemeinsam genutzt). Standard: alles an
   außer Einkaufsliste. Nie Nachrichten über eigene Einträge.
-- Arten: 🙋 neue „Wer hat Bock?“-Aktion · 🗳️ neue Abstimmung · 💶 neue Ausgabe, die mich
-  betrifft (mit Anteil; Daueraufträge still) · 🧹 Putzplan (Mo 9 Uhr: deine Aufgabe; So 18 Uhr:
-  falls noch offen) · 📅 Termine heute (8 Uhr) · 🛒 Einkaufsliste (19 Uhr).
+- Arten: 🙋 neue „Wer hat Bock?“-Aktion + an den Ersteller, wer zu-/absagt · 🗳️ neue Abstimmung +
+  Ergebnis beim Beenden (`closedBy`) · 💶 neue **oder geänderte** Ausgabe, die mich betrifft (mit Anteil
+  „jetzt … (vorher …)“; Daueraufträge still; Abrechnen zählt nicht) · 📌 Schwarzes Brett: neue oder
+  geänderte Notiz (nur Titel/Text, Verschieben/Anheften nicht) · 🌴 neue Abwesenheit · 🧹 Putzplan
+  (Mo 9 Uhr: deine Aufgabe; So 18 Uhr: falls noch offen) · 📅 Termine heute (8 Uhr) · 🛒 Einkaufsliste (19 Uhr).
+  Änderungen kamen am 5. Nov. 2026 dazu (Wunsch von Lukas: „wenn jemand etwas ändert“). Gelöschtes
+  wird nicht gemeldet (wegen „Rückgängig“). Funktionen: `pushExpenseChange`, `pushNote`,
+  `pushInviteAnswer`, `pushPollClosed`, `pushAbsence`.
 - Zeitgesteuertes läuft über **einen** stündlichen Job (`pushHourly`, im Gratis-Kontingent).
   Region `europe-west3`, Zeitzone Europe/Berlin.
 - iPhone/iPad: nur in der Home-Bildschirm-App (iOS 16.4+). Ist die App offen, erscheint die

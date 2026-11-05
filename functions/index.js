@@ -7,11 +7,12 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { setGlobalOptions } from 'firebase-functions/v2';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onDocumentCreated, onDocumentUpdated, onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { eventsUrl, normalizeEvent, groupByDay } from './shared/calendar.js';
 import {
   wants, inviteMessages, pollMessages, expenseMessages, choreWeekStartMessages,
+  expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages,
   choreReminderMessages, calendarMessages, shoppingMessages, dueJobs,
 } from './logic.js';
 
@@ -60,6 +61,14 @@ async function send(messages, { ignoreSettings = false } = {}) {
 export const pushInvite = onDocumentCreated('invites/{id}', (e) => send(inviteMessages(e.data.data())));
 export const pushPoll = onDocumentCreated('polls/{id}', (e) => send(pollMessages(e.data.data())));
 export const pushExpense = onDocumentCreated('expenses/{id}', (e) => send(expenseMessages(e.data.data())));
+
+// Änderungen: bearbeitete Ausgaben, Notizen, Antworten, Abstimmungs-Ergebnis, Abwesenheiten
+const beforeAfter = (e) => [e.data.before.exists ? e.data.before.data() : null, e.data.after.exists ? e.data.after.data() : null];
+export const pushExpenseChange = onDocumentUpdated('expenses/{id}', (e) => send(expenseChangeMessages(...beforeAfter(e))));
+export const pushNote = onDocumentWritten('notes/{id}', (e) => send(noteMessages(...beforeAfter(e))));
+export const pushInviteAnswer = onDocumentUpdated('invites/{id}', (e) => send(inviteAnswerMessages(...beforeAfter(e))));
+export const pushPollClosed = onDocumentUpdated('polls/{id}', (e) => send(pollClosedMessages(...beforeAfter(e))));
+export const pushAbsence = onDocumentCreated('absences/{id}', (e) => send(absenceMessages(e.data.data())));
 
 // "Test-Nachricht senden" aus der App
 export const pushTest = onDocumentCreated('pushTests/{id}', async (e) => {

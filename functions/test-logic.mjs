@@ -1,7 +1,7 @@
 // Nur zum Testen (wird nicht bereitgestellt): node functions/test-logic.mjs
 process.env.TZ = 'Europe/Berlin';
 import assert from 'node:assert';
-import { wants, inviteMessages, pollMessages, expenseMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
+import { wants, inviteMessages, pollMessages, expenseMessages, expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
 import { mondayOf, weekKey } from './shared/chores.js';
 
 // Einstellungen: Standard + eigene Wahl
@@ -23,6 +23,30 @@ const ex = expenseMessages({ createdBy: 'julian', paidBy: 'julian', description:
 assert.deepEqual(ex.map(m => [m.person, m.body.replace(/\u00a0/g, ' ')]), [['jana', '30,00 € – dein Anteil 6,00 €'], ['lukas', '30,00 € – dein Anteil 12,00 €']]);
 assert.equal(expenseMessages({ createdBy: 'lukas', paidBy: 'lukas', description: 'X', amountCents: 1000, splitAmong: ['lukas'] }).length, 0);
 assert.equal(expenseMessages({ createdBy: 'auto', paidBy: 'lukas', description: 'Internet', amountCents: 3999, splitAmong: ['jana', 'julian', 'lukas'] }).length, 0);
+
+// Änderungen an Ausgaben
+const e0 = { createdBy: 'julian', paidBy: 'julian', description: 'Pizza', amountCents: 3000, splitAmong: ['jana', 'julian', 'lukas'], settlementId: null };
+const e1 = { ...e0, amountCents: 3600, updatedBy: 'julian' };
+const ch = expenseChangeMessages(e0, e1).map(m => [m.person, m.body.replace(/\u00a0/g, ' ')]);
+assert.deepEqual(ch, [['jana', '36,00 € – dein Anteil jetzt 12,00 € (vorher 10,00 €)'], ['lukas', '36,00 € – dein Anteil jetzt 12,00 € (vorher 10,00 €)']]);
+assert.equal(expenseChangeMessages(e0, { ...e0, settlementId: 's1' }).length, 0); // Abrechnung
+assert.equal(expenseChangeMessages(e0, { ...e0, updatedBy: 'julian' }).length, 0); // nichts Wichtiges geändert
+const out = expenseChangeMessages(e0, { ...e0, splitAmong: ['julian', 'lukas'], updatedBy: 'lukas' });
+assert.deepEqual(out.map(m => m.person), ['jana', 'julian']); // Jul zahlt jetzt mehr
+assert.ok(out[0].body.startsWith('Du bist nicht mehr dabei'));
+// Notizen
+assert.equal(noteMessages(null, { title: 'WLAN', text: 'Netz: X\nPW: Y', createdBy: 'jana' })[0].body, 'Jana: Netz: X · PW: Y');
+assert.equal(noteMessages({ title: 'WLAN', text: 'a' }, { title: 'WLAN', text: 'a', order: 2, updatedBy: 'jana' }).length, 0);
+assert.deepEqual(noteMessages({ title: 'WLAN', text: 'a' }, { title: 'WLAN', text: 'b', updatedBy: 'lukas' }).map(m => m.person), ['jana', 'julian']);
+// Antworten bei Wer hat Bock?
+const ia = inviteAnswerMessages({ createdBy: 'jana', title: 'Kochen', emoji: '🍳', responses: {} }, { createdBy: 'jana', title: 'Kochen', emoji: '🍳', responses: { lukas: 'yes', julian: null } });
+assert.deepEqual(ia.map(m => [m.person, m.title]), [['jana', '🍳 Lukas ist dabei 👍']]);
+// Abstimmung beendet
+const pc = pollClosedMessages({ closed: false }, { closed: true, closedBy: 'lukas', createdBy: 'jana', question: 'Pizza?', options: ['Ja', 'Nein'], votes: { jana: 0, lukas: 0, julian: 1 } });
+assert.deepEqual(pc.map(m => [m.person, m.body]), [['jana', 'Gewonnen: Ja · Ja 2, Nein 1'], ['julian', 'Gewonnen: Ja · Ja 2, Nein 1']]);
+// Abwesenheit
+const ab = absenceMessages({ person: 'jana', from: '2026-11-10', to: '2026-11-14', note: 'Hamburg', createdBy: 'jana' });
+assert.deepEqual(ab.map(m => [m.person, m.title, m.body]), [['julian', '🌴 Jana ist vom 10.11. bis 14.11. weg', 'Hamburg'], ['lukas', '🌴 Jana ist vom 10.11. bis 14.11. weg', 'Hamburg']]);
 
 // Putzplan: Montag 2.11.2026
 const monday = new Date(2026, 10, 2, 9);

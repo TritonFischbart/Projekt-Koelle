@@ -62,6 +62,82 @@ export function expenseMessages(expense) {
     }));
 }
 
+// ---------- Änderungen ----------
+
+const MONEY_FIELDS = ['amountCents', 'description', 'paidBy', 'splitAmong', 'shares'];
+const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+// Ausgabe bearbeitet: alle, die vorher oder nachher einen Anteil haben (außer wer geändert hat).
+// "Alles ausgeglichen" (settlementId) ist keine Änderung.
+export function expenseChangeMessages(before, after) {
+  if (!before || !after || before.settlementId !== after.settlementId) return [];
+  if (MONEY_FIELDS.every((f) => same(before[f], after[f]))) return [];
+  const editor = after.updatedBy ?? after.createdBy;
+  const old = expenseShares(before, PERSON_IDS);
+  const now = expenseShares(after, PERSON_IDS);
+  return PERSON_IDS
+    .filter((p) => p !== editor && ((old[p] ?? 0) > 0 || (now[p] ?? 0) > 0))
+    .map((person) => {
+      const a = now[person] ?? 0;
+      const b = old[person] ?? 0;
+      const body = a > 0
+        ? `${formatEuro(after.amountCents)} – dein Anteil ${a !== b ? 'jetzt ' : ''}${formatEuro(a)}${b > 0 && a !== b ? ` (vorher ${formatEuro(b)})` : ''}`
+        : `Du bist nicht mehr dabei (vorher ${formatEuro(b)})`;
+      return { person, type: 'expenses', title: `💶 ${personName(editor)} hat „${after.description}“ geändert`, body };
+    });
+}
+
+// Schwarzes Brett: neue Notiz oder Titel/Text geändert (Verschieben/Anheften zählt nicht)
+export function noteMessages(before, after) {
+  if (!after) return [];
+  if (before && before.title === after.title && before.text === after.text) return [];
+  const editor = after.updatedBy ?? after.createdBy;
+  const text = String(after.text ?? '').replace(/\s*\n+\s*/g, ' · ').trim();
+  const body = `${personName(editor)}${text ? `: ${text.length > 110 ? `${text.slice(0, 107)}…` : text}` : ''}`;
+  return others(editor).map((person) => ({
+    person, type: 'notes', title: `📌 ${before ? 'Notiz geändert' : 'Neue Notiz'}: ${after.title}`, body,
+  }));
+}
+
+// Wer hat Bock?: Der Ersteller erfährt, wer dabei ist oder absagt.
+export function inviteAnswerMessages(before, after) {
+  if (!before || !after) return [];
+  const old = before.responses ?? {};
+  const now = after.responses ?? {};
+  return PERSON_IDS
+    .filter((p) => p !== after.createdBy && now[p] && now[p] !== old[p])
+    .map((p) => ({
+      person: after.createdBy,
+      type: 'invites',
+      title: now[p] === 'yes' ? `${after.emoji || '🙋'} ${personName(p)} ist dabei 👍` : `${personName(p)} hat diesmal keine Zeit`,
+      body: after.title,
+    }));
+}
+
+// Abstimmung beendet: Ergebnis an alle außer der Person, die beendet hat
+export function pollClosedMessages(before, after) {
+  if (!before || !after || before.closed || !after.closed) return [];
+  const options = after.options ?? [];
+  const counts = options.map((_, i) => Object.values(after.votes ?? {}).filter((v) => v === i).length);
+  const max = Math.max(0, ...counts);
+  const winners = options.filter((_, i) => counts[i] === max && max > 0);
+  const body = max === 0 ? 'Niemand hat abgestimmt.'
+    : `${winners.length > 1 ? 'Gleichstand' : 'Gewonnen'}: ${winners.join(' / ')} · ${options.map((o, i) => `${o} ${counts[i]}`).join(', ')}`;
+  return others(after.closedBy ?? after.createdBy).map((person) => ({
+    person, type: 'polls', title: `🗳️ Ergebnis: ${after.question}`, body,
+  }));
+}
+
+// Abwesenheit eingetragen
+const shortDate = (iso) => { const [, m, d] = String(iso).split('-'); return `${Number(d)}.${Number(m)}.`; };
+export function absenceMessages(abs) {
+  if (!abs?.person) return [];
+  const span = abs.from === abs.to ? `am ${shortDate(abs.from)}` : `vom ${shortDate(abs.from)} bis ${shortDate(abs.to)}`;
+  return PERSON_IDS.filter((p) => p !== abs.person && p !== abs.createdBy).map((person) => ({
+    person, type: 'absences', title: `🌴 ${personName(abs.person)} ist ${span} weg`, body: abs.note || 'Eingetragen unter „Wer ist weg?“',
+  }));
+}
+
 // ---------- Putzplan ----------
 
 // Wie in der App (weekChores): fällige Bereiche, Abwesenheiten, Tausch und Erledigt.
