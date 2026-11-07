@@ -758,3 +758,8 @@ main { overflow-x: clip; }
 .switch:checked { background: var(--brand); }
 .switch:checked::after { transform: translateX(20px); }
 .logout-btn { margin-top: 12px; }
+
+/* Antippbare Zeile (z. B. Abwesenheit bearbeiten) */
+.row-edit { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 0; border: 0; background: none; text-align: left; color: inherit; font: inherit; }
+.row-edit .row-name { flex: 1; min-width: 0; }
+.row-arrow { flex: none; color: var(--muted); font-size: 0.95rem; }

@@ -8,11 +8,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Kölle">
   <title>Projekt Kölle</title>
-  <link rel="icon" href="icons/icon.svg?v=39" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=39">
-  <link rel="manifest" href="manifest.webmanifest?v=39">
-  <link rel="stylesheet" href="css/style.css?v=39">
-  <script type="module" src="js/app.js?v=39"></script>
+  <link rel="icon" href="icons/icon.svg?v=40" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=40">
+  <link rel="manifest" href="manifest.webmanifest?v=40">
+  <link rel="stylesheet" href="css/style.css?v=40">
+  <script type="module" src="js/app.js?v=40"></script>
 </head>
 <body>
   <!-- Ladebildschirm -->
@@ -23,7 +23,7 @@
   <!-- Firebase ist noch nicht eingerichtet -->
   <div id="screen-setup" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=39" alt="" class="logo">
+      <img src="icons/icon.svg?v=40" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p id="setup-text">Fast geschafft! Die Verbindung zur gemeinsamen Datenbank (Firebase) ist noch nicht eingerichtet. Wie das geht, steht in der Datei <strong>ANLEITUNG.md</strong>.</p>
       <a class="btn primary" href="?demo">Demo ansehen</a>
@@ -33,7 +33,7 @@
   <!-- Anmelden -->
   <div id="screen-login" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=39" alt="" class="logo">
+      <img src="icons/icon.svg?v=40" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p>Die WG-Seite von Jana, Jul und Lukas.</p>
       <button class="btn primary" data-action="login">Mit Google anmelden</button>
@@ -66,7 +66,7 @@
       <span class="pull-text visually-hidden">Zum Aktualisieren ziehen</span>
     </div>
     <header class="topbar">
-      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=39" alt=""> Projekt Kölle</button>
+      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=40" alt=""> Projekt Kölle</button>
       <span class="topbar-actions">
         <button class="icon-btn settings-btn" data-action="tab" data-tab="settings" aria-label="Einstellungen">⚙️</button>
         <button class="me-button" id="me-button" data-action="tab" data-tab="settings"></button>
@@ -319,7 +319,7 @@
   <dialog id="absence-dialog" class="sheet">
     <form id="absence-form" class="sheet-form" novalidate>
       <div class="sheet-head">
-        <h2>Ich bin nicht da</h2>
+        <h2 id="a-title">Ich bin nicht da</h2>
         <button type="button" class="icon-btn" data-action="close-form" aria-label="Schließen">✕</button>
       </div>
       <fieldset class="field">
@@ -336,7 +336,10 @@
       </label>
       <p class="hint">Wer in einer Woche mindestens 4 Tage weg ist, bekommt in dieser Woche keine Putzaufgabe.</p>
       <p class="error" id="a-error"></p>
-      <div class="form-actions"><button type="submit" class="btn primary">Speichern</button></div>
+      <div class="form-actions">
+        <button type="button" class="btn danger" id="a-delete" data-action="absence-delete-form" hidden>Löschen</button>
+        <button type="submit" class="btn primary">Speichern</button>
+      </div>
     </form>
   </dialog>
 

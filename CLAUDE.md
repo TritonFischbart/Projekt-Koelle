@@ -127,7 +127,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `noteImages` | Bilder zu Notizen: `noteId, data` (JPEG als Data-URL, max. ~0,9 MB), `width, height` |
 | `settings/backup` | Wann zuletzt gesichert wurde (`at`, `by`) |
 | `settings/einkauf` | Eigene Reihenfolge der Einkaufs-Kategorien (`order[]`) |
-| `absences` | Abwesenheiten: `person, from, to ("2026-11-10"), note` |
+| `absences` | Abwesenheiten: `person, from, to ("2026-11-10"), note, createdBy, updatedBy` |
 | `invites` | „Wer hat Bock?“: `emoji, title, note, at (ISO oder null = jetzt), kind (food/other), responses {person: yes/no}` |
 | `pushTokens/{token}` | Ein Gerät, das Nachrichten bekommt: `person, device` (ungültige räumt der Dienst auf) |
 | `pushSettings/{person}` | Welche Nachrichtenarten eine Person will: `types {invites, polls, expenses, chores, calendar, shopping}` |
@@ -245,6 +245,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   wöchentlichen Bereichen ist das genau die alte Rotation (alte Daten passen).
 - „Erledigt ✓“, „Ich übernehme“ (spontan tauschen), „Zurückgeben“.
 - Erinnerungen vorerst nur als Hinweis in der App (roter Punkt, Startseite).
+- **„Wer ist weg?“** (Startseite): Eintrag antippen = bearbeiten (Person, Von/Bis, Notiz, Löschen-Knopf;
+  Wunsch von Lukas, Nov. 2026), ✕ = löschen mit Rückgängig. Änderungen lösen eine Push-Nachricht aus.
 - **Urlaubs-Modus**: Wer in einer Woche mindestens 4 Tage weg ist, bekommt keine
   Putzaufgabe; seine Bereiche gehen an die Anwesenden („statt Jana – nicht da“).
 
@@ -279,7 +281,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   (Mo 9 Uhr: deine Aufgabe; So 18 Uhr: falls noch offen) · 📅 Termine heute (8 Uhr) · 🛒 Einkaufsliste (19 Uhr).
   Änderungen kamen am 5. Nov. 2026 dazu (Wunsch von Lukas: „wenn jemand etwas ändert“). Gelöschtes
   wird nicht gemeldet (wegen „Rückgängig“). Funktionen: `pushExpenseChange`, `pushNote`,
-  `pushInviteAnswer`, `pushPollClosed`, `pushAbsence`.
+  `pushInviteAnswer`, `pushPollClosed`, `pushAbsence`, `pushAbsenceChange`.
 - Zeitgesteuertes läuft über **einen** stündlichen Job (`pushHourly`, im Gratis-Kontingent).
   Region `europe-west3`, Zeitzone Europe/Berlin.
 - iPhone/iPad: nur in der Home-Bildschirm-App (iOS 16.4+). Ist die App offen, erscheint die
@@ -332,6 +334,30 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   „In Google Kalender öffnen“.
 - **Widgets** für den Home-Bildschirm gehen mit einer Web-App nicht (bräuchte eine echte
   iPhone-/Android-App). Lukas gefragt am 1. Nov. 2026 – Alternative: Widget der Google-Kalender-App.
+
+## 🤖 Wartungs-Operator (seit 7. Nov. 2026, Wunsch von Lukas)
+
+Lukas möchte, dass die App regelmäßig von selbst geprüft und verbessert wird. Er hat erlaubt,
+**Verbesserungen ohne Rückfrage** zu machen, will aber **immer informiert** werden.
+Eine geplante Aufgabe startet dafür **jede Woche** eine neue Claude-Sitzung (Operator), die so arbeitet:
+
+1. **Prüfen** (gern mit Unter-Agenten als Helfer, z. B. ein „Tester“ und ein „Bedienbarkeits-Prüfer“):
+   - Demo-Modus mit Playwright auf iPhone- und iPad-Größe, hell und dunkel: jeden Bereich öffnen,
+     jedes Formular ausprobieren, auf Fehler in der Konsole und zu breite Seiten achten.
+   - Bedienbarkeit: Lässt sich alles, was man einträgt, auch **bearbeiten und löschen**? Sind Knöpfe groß
+     genug (mind. ~40 px)? Sind Texte einfach und auf Deutsch? Passt alles ins Rot-Weiß-Design?
+   - `node functions/test-logic.mjs` (vorher `js`-Dateien nach `functions/shared/` kopieren).
+   - GitHub-Action „Push-Nachrichten prüfen“ starten und das Protokoll lesen (Fehler? Zeitplan da?).
+2. **Verbessern – ohne Rückfrage erlaubt:** Fehler beheben; Layout, Grafik, Bedienbarkeit,
+   Nutzerfreundlichkeit, Barrierefreiheit; fehlende Bearbeiten-/Löschen-Möglichkeiten; kleine
+   Textverbesserungen. Höchstens ~3 Änderungen pro Runde, jede im Demo-Modus getestet,
+   Versionsnummer erhöhen, Pull Request erstellen und selbst mergen, CLAUDE.md nachführen.
+3. **Nicht ohne Lukas:** neue große Funktionen, Funktionen entfernen, alte Daten unbrauchbar machen,
+   alles unter „Ausdrücklich nicht gewünscht“, Firebase-/Google-Einstellungen, Sicherheitsregeln,
+   Kosten, Geheimnisse, mehr/andere Push-Nachrichten. Solche Ideen nur **vorschlagen**.
+4. **Berichten:** Im GitHub-Issue „🤖 Wartungsberichte“ einen Kommentar auf Deutsch, einfach erklärt:
+   was geprüft wurde, was geändert wurde (mit PR-Links), was gefunden aber nicht geändert wurde
+   (Vorschläge für Lukas). Auch wenn nichts zu tun war („Alles in Ordnung“).
 
 ## Merkliste / To-do für später (noch nicht gebaut)
 
