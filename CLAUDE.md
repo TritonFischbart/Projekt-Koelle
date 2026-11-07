@@ -339,7 +339,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 
 Lukas möchte, dass die App regelmäßig von selbst geprüft und verbessert wird. Er hat erlaubt,
 **Verbesserungen ohne Rückfrage** zu machen, will aber **immer informiert** werden.
-Eine geplante Aufgabe startet dafür **jede Woche** eine neue Claude-Sitzung (Operator), die so arbeitet:
+Eine geplante Aufgabe („Projekt Kölle – wöchentlicher Wartungs-Operator“, **samstags 10:23 Uhr**,
+Push-Mitteilung an Lukas am Ende; Berichte im Issue #55) startet dafür jede Woche eine neue
+Claude-Sitzung (Operator), die so arbeitet:
 
 1. **Prüfen** (gern mit Unter-Agenten als Helfer, z. B. ein „Tester“ und ein „Bedienbarkeits-Prüfer“):
    - Demo-Modus mit Playwright auf iPhone- und iPad-Größe, hell und dunkel: jeden Bereich öffnen,
