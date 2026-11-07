@@ -69,6 +69,10 @@ export const pushNote = onDocumentWritten('notes/{id}', (e) => send(noteMessages
 export const pushInviteAnswer = onDocumentUpdated('invites/{id}', (e) => send(inviteAnswerMessages(...beforeAfter(e))));
 export const pushPollClosed = onDocumentUpdated('polls/{id}', (e) => send(pollClosedMessages(...beforeAfter(e))));
 export const pushAbsence = onDocumentCreated('absences/{id}', (e) => send(absenceMessages(e.data.data())));
+export const pushAbsenceChange = onDocumentUpdated('absences/{id}', (e) => {
+  const [before, after] = beforeAfter(e);
+  return send(absenceMessages(after, before));
+});
 
 // "Test-Nachricht senden" aus der App
 export const pushTest = onDocumentCreated('pushTests/{id}', async (e) => {

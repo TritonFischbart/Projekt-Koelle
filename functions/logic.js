@@ -130,11 +130,16 @@ export function pollClosedMessages(before, after) {
 
 // Abwesenheit eingetragen
 const shortDate = (iso) => { const [, m, d] = String(iso).split('-'); return `${Number(d)}.${Number(m)}.`; };
-export function absenceMessages(abs) {
+export function absenceMessages(abs, changedFrom = null) {
   if (!abs?.person) return [];
+  if (changedFrom && ['person', 'from', 'to', 'note'].every((f) => changedFrom[f] === abs[f])) return [];
   const span = abs.from === abs.to ? `am ${shortDate(abs.from)}` : `vom ${shortDate(abs.from)} bis ${shortDate(abs.to)}`;
-  return PERSON_IDS.filter((p) => p !== abs.person && p !== abs.createdBy).map((person) => ({
-    person, type: 'absences', title: `🌴 ${personName(abs.person)} ist ${span} weg`, body: abs.note || 'Eingetragen unter „Wer ist weg?“',
+  const editor = changedFrom ? (abs.updatedBy ?? abs.createdBy) : abs.createdBy;
+  return PERSON_IDS.filter((p) => p !== abs.person && p !== editor).map((person) => ({
+    person,
+    type: 'absences',
+    title: `🌴 ${changedFrom ? 'Geändert: ' : ''}${personName(abs.person)} ist ${span} weg`,
+    body: abs.note || (changedFrom ? 'Geändert unter „Wer ist weg?“' : 'Eingetragen unter „Wer ist weg?“'),
   }));
 }
 

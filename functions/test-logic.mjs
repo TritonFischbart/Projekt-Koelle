@@ -48,6 +48,10 @@ assert.deepEqual(pc.map(m => [m.person, m.body]), [['jana', 'Gewonnen: Ja · Ja 
 const ab = absenceMessages({ person: 'jana', from: '2026-11-10', to: '2026-11-14', note: 'Hamburg', createdBy: 'jana' });
 assert.deepEqual(ab.map(m => [m.person, m.title, m.body]), [['julian', '🌴 Jana ist vom 10.11. bis 14.11. weg', 'Hamburg'], ['lukas', '🌴 Jana ist vom 10.11. bis 14.11. weg', 'Hamburg']]);
 
+const abc = absenceMessages({ person: 'jana', from: '2026-11-11', to: '2026-11-14', note: '', updatedBy: 'jana', createdBy: 'jana' }, { person: 'jana', from: '2026-11-10', to: '2026-11-14', note: '' });
+assert.deepEqual(abc.map(m => [m.person, m.title]), [['julian', '🌴 Geändert: Jana ist vom 11.11. bis 14.11. weg'], ['lukas', '🌴 Geändert: Jana ist vom 11.11. bis 14.11. weg']]);
+assert.equal(absenceMessages({ person: 'jana', from: 'a', to: 'b', note: '' }, { person: 'jana', from: 'a', to: 'b', note: '' }).length, 0);
+
 // Putzplan: Montag 2.11.2026
 const monday = new Date(2026, 10, 2, 9);
 const start = choreWeekStartMessages({}, monday);

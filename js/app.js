@@ -2,26 +2,26 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=39';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=39';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=40';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=40';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=39';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=39';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=39';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=39';
-import { compressImage } from './images.js?v=39';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=39';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=39';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=39';
-import { toPlain, expensesCsv } from './export.js?v=39';
-import { firebaseConfig } from './firebase-config.js?v=39';
-import { weisheitDesTages } from './koelsch.js?v=39';
-import { noteTextHtml, continueList } from './notetext.js?v=39';
+} from './chores.js?v=40';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=40';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=40';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=40';
+import { compressImage } from './images.js?v=40';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=40';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=40';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=40';
+import { toPlain, expensesCsv } from './export.js?v=40';
+import { firebaseConfig } from './firebase-config.js?v=40';
+import { weisheitDesTages } from './koelsch.js?v=40';
+import { noteTextHtml, continueList } from './notetext.js?v=40';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=39) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=40) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -155,9 +155,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=39')).createDemoBackend();
+      backend = (await import('./demo.js?v=40')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=39')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=40')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1986,10 +1986,13 @@ function absencesCard() {
   const list = upcomingAbsences(state.absences);
   const items = list.map((a) => `
     <li class="row">
-      ${avatar(a.person, true)}
-      <span class="row-name">${esc(personName(a.person))}
-        <small>${a.from === a.to ? shortDate(a.from) : `${shortDate(a.from)} – ${shortDate(a.to)}`}${a.note ? ` · ${esc(a.note)}` : ''}${isAwayOn(state.absences, a.person) && a.from <= isoDay(new Date()) ? ' · gerade weg' : ''}</small>
-      </span>
+      <button type="button" class="row-edit" data-action="absence-edit" data-id="${esc(a.id)}" aria-label="Abwesenheit bearbeiten">
+        ${avatar(a.person, true)}
+        <span class="row-name">${esc(personName(a.person))}
+          <small>${a.from === a.to ? shortDate(a.from) : `${shortDate(a.from)} – ${shortDate(a.to)}`}${a.note ? ` · ${esc(a.note)}` : ''}${isAwayOn(state.absences, a.person) && a.from <= isoDay(new Date()) ? ' · gerade weg' : ''}</small>
+        </span>
+        <span class="row-arrow" aria-hidden="true">✎</span>
+      </button>
       <button class="icon-btn small" data-action="absence-delete" data-id="${esc(a.id)}" aria-label="Abwesenheit löschen">✕</button>
     </li>`).join('');
   return `
@@ -1999,12 +2002,17 @@ function absencesCard() {
     </section>`;
 }
 
-function openAbsenceForm() {
-  $('#a-person').innerHTML = PEOPLE.map((p) => chip('absPerson', 'radio', p.id, p.name, p.id === state.me)).join('');
-  $('#a-from').value = todayISO();
-  $('#a-to').value = todayISO();
-  $('#a-note').value = '';
+// Neu eintragen oder (mit absence) bearbeiten – Antippen eines Eintrags in „Wer ist weg?“
+function openAbsenceForm(absence = null) {
+  state.editingAbsence = absence?.id ?? null;
+  const person = absence?.person ?? state.me;
+  $('#a-title').textContent = absence ? 'Abwesenheit bearbeiten' : 'Ich bin nicht da';
+  $('#a-person').innerHTML = PEOPLE.map((p) => chip('absPerson', 'radio', p.id, p.name, p.id === person)).join('');
+  $('#a-from').value = absence?.from ?? todayISO();
+  $('#a-to').value = absence?.to ?? todayISO();
+  $('#a-note').value = absence?.note ?? '';
   $('#a-error').textContent = '';
+  $('#a-delete').hidden = !absence;
   $('#absence-dialog').showModal();
 }
 
@@ -2017,9 +2025,13 @@ function onSubmitAbsence(event) {
     $('#a-error').textContent = 'Bitte ein gültiges Von- und Bis-Datum wählen.';
     return;
   }
-  backend.add('absences', { person, from, to, note: $('#a-note').value.trim(), createdBy: state.me, createdAt: backend.now() }).catch(showError);
+  const note = $('#a-note').value.trim();
+  const id = state.editingAbsence;
+  (id
+    ? backend.update('absences', id, { person, from, to, note, updatedBy: state.me, updatedAt: backend.now() })
+    : backend.add('absences', { person, from, to, note, createdBy: state.me, createdAt: backend.now() })).catch(showError);
   $('#absence-dialog').close();
-  toast('Eingetragen ✓ Der Putzplan passt sich an.');
+  toast(id ? 'Geändert ✓ Der Putzplan passt sich an.' : 'Eingetragen ✓ Der Putzplan passt sich an.');
 }
 
 function deleteAbsence(id) {
@@ -2581,6 +2593,8 @@ function onClick(event) {
     case 'chore-done-start': choreDoneThisWeek(el.dataset.id); break;
     case 'absence-new': openAbsenceForm(); break;
     case 'absence-delete': deleteAbsence(el.dataset.id); break;
+    case 'absence-edit': openAbsenceForm(state.absences.find((a) => a.id === el.dataset.id)); break;
+    case 'absence-delete-form': $('#absence-dialog').close(); deleteAbsence(state.editingAbsence); break;
     case 'poll-new': openPollForm(); break;
     case 'invite-new': openInviteForm(); break;
     case 'invite-template': useInviteTemplate(Number(el.dataset.index)); break;
