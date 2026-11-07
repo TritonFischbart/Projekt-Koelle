@@ -83,6 +83,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `js/images.js` | Bilder fürs Schwarze Brett auf dem Handy verkleinern |
 | `js/invites.js` | „Wer hat Bock?“: Vorlagen, wann eine Aktion abläuft, Zeitangabe, Symbol raten |
 | `js/notetext.js` | Schwarzes Brett: Aufzählungen erkennen/anzeigen, Liste beim Tippen fortsetzen |
+| `js/tipps.js`, `data/wochentipps.json` | Wochentipps „Diese Woche in Ehrenfeld“ (Startseite) |
 | `js/koelsch.js` | Geheimnis: Kölsche Weisheit des Tages (Tipp auf „Projekt Kölle“) |
 | `js/firebase.js` | Firebase-Anbindung (Backend), inkl. Push ein/aus |
 | `firebase-messaging-sw.js` | Service Worker: zeigt Push-Nachrichten, wenn die App zu ist (Firebase-Werte doppelt eingetragen) |
@@ -181,7 +182,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   „‹ Zur Übersicht“), damit die Leiste auf dem Handy nicht zu voll wird.
 - **Start (Übersicht)**: Begrüßung auf Kölsch (Wunsch von Lukas: „Morje“ bis 11 Uhr, „Tach“ bis 18,
   „N’Ovend“ bis 23, sonst „Jode Naach“, am 11.11. „Kölle Alaaf“ – `koelscheBegruessung`), nächste Termine, Kontostand, Einkaufsliste, eigene
-  Putzaufgabe (mit „Erledigt“), „Wer hat Bock?“, Abstimmungen, „Wer ist weg?“ (Bock vor
+  Putzaufgabe (mit „Erledigt“), „Wer hat Bock?“, Abstimmungen, „Wer ist weg?“, Wochentipps (Bock vor
   Abstimmungen – Wunsch von Lukas, Nov. 2026).
 - **Rückgängig**: Gelöschte Ausgaben, Daueraufträge, Überweisungen, Einkäufe, Notizen,
   Abstimmungen und Abwesenheiten lassen sich 6 Sekunden lang über die Meldung zurückholen.
@@ -334,6 +335,18 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   „In Google Kalender öffnen“.
 - **Widgets** für den Home-Bildschirm gehen mit einer Web-App nicht (bräuchte eine echte
   iPhone-/Android-App). Lukas gefragt am 1. Nov. 2026 – Alternative: Widget der Google-Kalender-App.
+
+## 🎪 Wochentipps „Diese Woche in Ehrenfeld“ (seit 7. Nov. 2026, Wunsch von Lukas)
+
+- Karte ganz unten auf der Startseite: Events, Konzerte, Partys, Märkte, Flohmärkte in Ehrenfeld
+  (Umgebung ok, z. B. Neuehrenfeld/Bickendorf). Je Tipp: Emoji, Titel, Tag + Uhrzeit, Ort, kurzer Text,
+  Link (Antippen öffnet die Quelle). Vergangene Tipps verschwinden von selbst; 4 sichtbar, „Alle … anzeigen“.
+- Daten in **`data/wochentipps.json`** (`updated, from, to, tips[{emoji, title, date, dateTo?, time,
+  place, text, url}]`), geladen von `js/tipps.js` (ohne Cache). Leer/fehlend = Karte unsichtbar.
+- Eine **geplante Aufgabe** („Projekt Kölle – Wochentipps Ehrenfeld“, **montags 7:41 Uhr**) recherchiert
+  jede Woche neu (Montag–Sonntag + nächstes Wochenende), ersetzt die Datei, PR + selbst mergen.
+  Regeln: **nur echte Termine mit Quelle** (Veranstalter-, Stadt- oder Ticketseite), nichts erfinden,
+  unsichere Angaben weglassen statt raten, 5–10 Tipps, bunte Mischung, keine Werbung für Zweifelhaftes.
 
 ## 🤖 Wartungs-Operator (seit 7. Nov. 2026, Wunsch von Lukas)
 
