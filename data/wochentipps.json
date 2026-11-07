@@ -3,13 +3,113 @@
   "from": "2026-11-07",
   "to": "2026-11-15",
   "tips": [
-    { "emoji": "🎸", "title": "The Howlers live", "date": "2026-11-07", "time": "19:30 Uhr", "place": "Club Bahnhof Ehrenfeld", "text": "Konzert, Tickets ab ca. 27 €", "url": "https://bz-ticket.de/location/359084669-club-bahnhof-ehrenfeld-koeln" },
-    { "emoji": "🧸", "title": "Kinder- und Familienflohmarkt", "date": "2026-11-08", "time": "11–14 Uhr", "place": "Tante Astrid e.V., Vogelsanger Str. 282", "text": "Flohmarkt rund um Kindersachen", "url": "https://www.koeln.de/eventreihe/flohmarkt-in-ehrenfeld-tante-astrid/" },
-    { "emoji": "🎭", "title": "„2:22 – Eine Geistergeschichte“", "date": "2026-11-10", "time": "19:30 Uhr", "place": "Theater&Ehrenfeld, Platenstraße 32", "text": "Theaterstück", "url": "https://www.koeln.de/events/2026-11-10/" },
-    { "emoji": "🎉", "title": "11.11. in den GARAGEN", "date": "2026-11-11", "time": "ab 11:11 Uhr", "place": "GARAGEN, Oskar-Jäger-Str. 179", "text": "Sessionsauftakt, Eintritt frei, ohne Vorverkauf", "url": "https://verliebtinkoeln.com/11-11-2026-koeln-partys-ohne-vorverkauf-tageskasse/" },
-    { "emoji": "🎉", "title": "11.11. im CBE & Yuca", "date": "2026-11-11", "time": "Einlass 10:30 Uhr", "place": "Club Bahnhof Ehrenfeld", "text": "Karnevalsparty, Vorverkauf 9 €", "url": "https://www.clubbahnhofehrenfeld.de/events/12063/11-11-2026-11.11.-im-cbe-and-yuca-4582533-2" },
-    { "emoji": "🎉", "title": "11.11. bei Herbrand's", "date": "2026-11-11", "time": "ab 11:11 Uhr", "place": "Herbrand's", "text": "Drei Partyflächen, ab 16 Uhr live Band", "url": "https://www.koeln.de/karneval/11-11-koeln-karneval/partys-11-11/" },
-    { "emoji": "🥕", "title": "Wochenmarkt Neptunplatz", "date": "2026-11-13", "time": "7–14 Uhr", "place": "Neptunplatz", "text": "Jeden Freitag: Obst, Gemüse, Käse & mehr", "url": "https://www.koeln.de/leben/ll/die-koelner-wochenmaerkte-im-ueberblick/das-sind-die-wochenmaerkte-in-ehrenfeld/" },
-    { "emoji": "👗", "title": "Mädelsflohmarkt", "date": "2026-11-14", "time": "11–16 Uhr", "place": "Pattenhalle, Christianstraße 82", "text": "Kleidung & Accessoires, Eintritt 5 €, nur Kartenzahlung", "url": "https://maedelsflohmarkt.de/standort/koeln-ehrenfeld/" }
+    {
+      "emoji": "🎸",
+      "title": "The Howlers live",
+      "date": "2026-11-07",
+      "time": "19:30 Uhr",
+      "place": "Club Bahnhof Ehrenfeld",
+      "text": "Konzert, Tickets ab ca. 27 €",
+      "url": "https://bz-ticket.de/location/359084669-club-bahnhof-ehrenfeld-koeln",
+      "tags": [
+        "konzert",
+        "band",
+        "live"
+      ]
+    },
+    {
+      "emoji": "🧸",
+      "title": "Kinder- und Familienflohmarkt",
+      "date": "2026-11-08",
+      "time": "11–14 Uhr",
+      "place": "Tante Astrid e.V., Vogelsanger Str. 282",
+      "text": "Flohmarkt rund um Kindersachen",
+      "url": "https://www.koeln.de/eventreihe/flohmarkt-in-ehrenfeld-tante-astrid/",
+      "tags": [
+        "flohmarkt",
+        "kinder",
+        "familie"
+      ]
+    },
+    {
+      "emoji": "🎭",
+      "title": "„2:22 – Eine Geistergeschichte“",
+      "date": "2026-11-10",
+      "time": "19:30 Uhr",
+      "place": "Theater&Ehrenfeld, Platenstraße 32",
+      "text": "Theaterstück",
+      "url": "https://www.koeln.de/events/2026-11-10/",
+      "tags": [
+        "theater"
+      ]
+    },
+    {
+      "emoji": "🎉",
+      "title": "11.11. in den GARAGEN",
+      "date": "2026-11-11",
+      "time": "ab 11:11 Uhr",
+      "place": "GARAGEN, Oskar-Jäger-Str. 179",
+      "text": "Sessionsauftakt, Eintritt frei, ohne Vorverkauf",
+      "url": "https://verliebtinkoeln.com/11-11-2026-koeln-partys-ohne-vorverkauf-tageskasse/",
+      "tags": [
+        "party",
+        "karneval",
+        "kostenlos"
+      ]
+    },
+    {
+      "emoji": "🎉",
+      "title": "11.11. im CBE & Yuca",
+      "date": "2026-11-11",
+      "time": "Einlass 10:30 Uhr",
+      "place": "Club Bahnhof Ehrenfeld",
+      "text": "Karnevalsparty, Vorverkauf 9 €",
+      "url": "https://www.clubbahnhofehrenfeld.de/events/12063/11-11-2026-11.11.-im-cbe-and-yuca-4582533-2",
+      "tags": [
+        "party",
+        "karneval"
+      ]
+    },
+    {
+      "emoji": "🎉",
+      "title": "11.11. bei Herbrand's",
+      "date": "2026-11-11",
+      "time": "ab 11:11 Uhr",
+      "place": "Herbrand's",
+      "text": "Drei Partyflächen, ab 16 Uhr live Band",
+      "url": "https://www.koeln.de/karneval/11-11-koeln-karneval/partys-11-11/",
+      "tags": [
+        "party",
+        "karneval",
+        "konzert",
+        "band"
+      ]
+    },
+    {
+      "emoji": "🥕",
+      "title": "Wochenmarkt Neptunplatz",
+      "date": "2026-11-13",
+      "time": "7–14 Uhr",
+      "place": "Neptunplatz",
+      "text": "Jeden Freitag: Obst, Gemüse, Käse & mehr",
+      "url": "https://www.koeln.de/leben/ll/die-koelner-wochenmaerkte-im-ueberblick/das-sind-die-wochenmaerkte-in-ehrenfeld/",
+      "tags": [
+        "markt",
+        "wochenmarkt"
+      ]
+    },
+    {
+      "emoji": "👗",
+      "title": "Mädelsflohmarkt",
+      "date": "2026-11-14",
+      "time": "11–16 Uhr",
+      "place": "Pattenhalle, Christianstraße 82",
+      "text": "Kleidung & Accessoires, Eintritt 5 €, nur Kartenzahlung",
+      "url": "https://maedelsflohmarkt.de/standort/koeln-ehrenfeld/",
+      "tags": [
+        "flohmarkt",
+        "second hand"
+      ]
+    }
   ]
 }

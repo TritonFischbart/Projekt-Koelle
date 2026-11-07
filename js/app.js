@@ -2,27 +2,27 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=41';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=41';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=42';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=42';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=41';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=41';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=41';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=41';
-import { compressImage } from './images.js?v=41';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=41';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=41';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=41';
-import { toPlain, expensesCsv } from './export.js?v=41';
-import { firebaseConfig } from './firebase-config.js?v=41';
-import { weisheitDesTages } from './koelsch.js?v=41';
-import { noteTextHtml, continueList } from './notetext.js?v=41';
-import { loadTips, upcomingTips, tipDay } from './tipps.js?v=41';
+} from './chores.js?v=42';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=42';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=42';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=42';
+import { compressImage } from './images.js?v=42';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=42';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=42';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=42';
+import { toPlain, expensesCsv } from './export.js?v=42';
+import { firebaseConfig } from './firebase-config.js?v=42';
+import { weisheitDesTages } from './koelsch.js?v=42';
+import { noteTextHtml, continueList } from './notetext.js?v=42';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=42';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=41) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=42) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -156,9 +156,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=41')).createDemoBackend();
+      backend = (await import('./demo.js?v=42')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=41')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=42')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1905,6 +1905,16 @@ function koelscheBegruessung(now) {
 }
 
 function renderStart() {
+  const searching = document.activeElement?.id === 'tips-search' ? document.activeElement.selectionStart : null;
+  renderStartContent();
+  if (searching !== null) {
+    const box = $('#tips-search');
+    box?.focus();
+    box?.setSelectionRange(searching, searching);
+  }
+}
+
+function renderStartContent() {
   const now = new Date();
   const hello = koelscheBegruessung(now);
   const balance = computeBalances(PERSON_IDS, activeExpenses(), activePayments())[state.me];
@@ -1956,24 +1966,44 @@ function tipsCard() {
   const today = isoDay(new Date());
   const tips = upcomingTips(state.tips, today);
   if (!tips.length) return '';
-  const shown = state.tipsAll ? tips : tips.slice(0, 4);
+  const q = state.tipsQuery ?? '';
   return `
     <section class="card">
       <div class="card-head"><h2>🎪 Diese Woche in Ehrenfeld</h2></div>
-      <ul class="tips">${shown.map((t) => `
-        <li><a class="tip" href="${esc(t.url ?? '#')}" target="_blank" rel="noopener">
-          <span class="tip-emoji" aria-hidden="true">${esc(t.emoji ?? '📍')}</span>
-          <span class="tip-main">
-            <span class="tip-title">${esc(t.title)}</span>
-            <span class="tip-sub">${esc(tipDay(t, today))}${t.time ? ` · ${esc(t.time)}` : ''}</span>
-            ${t.place ? `<span class="tip-text">📍 ${esc(t.place)}</span>` : ''}
-            ${t.text ? `<span class="tip-text">${esc(t.text)}</span>` : ''}
-          </span>
-          <span class="tip-arrow" aria-hidden="true">›</span>
-        </a></li>`).join('')}</ul>
-      ${tips.length > 4 ? `<button class="link-btn tips-more" data-action="tips-toggle">${state.tipsAll ? 'Weniger anzeigen' : `Alle ${tips.length} Tipps anzeigen`}</button>` : ''}
+      <input type="search" id="tips-search" class="tips-search" placeholder="🔍 Suchen: Flohmarkt, Band, Party …" value="${esc(q)}" autocomplete="off" enterkeyhint="search">
+      <div class="chips tips-filters no-swipe">${TIP_FILTERS.map((f) => `
+        <button class="chip-btn${q.toLowerCase() === f.q ? ' active' : ''}" data-action="tips-filter" data-q="${f.q}">${f.label}</button>`).join('')}</div>
+      <div id="tips-list">${tipsListHtml(tips, today)}</div>
       <p class="hint left tips-hint">Jeden Montag neu zusammengesucht – Angaben ohne Gewähr, im Zweifel beim Veranstalter nachsehen.</p>
     </section>`;
+}
+
+// Nur die Liste neu zeichnen (beim Tippen bleibt das Suchfeld so erhalten)
+function tipsListHtml(all, today) {
+  const q = (state.tipsQuery ?? '').trim();
+  const found = searchTips(all, q);
+  if (!found.length) return `<p class="empty">Nichts gefunden für „${esc(q)}“. Probier ein anderes Wort.</p>`;
+  const shown = q || state.tipsAll ? found : found.slice(0, 4);
+  return `
+    ${q ? `<p class="hint left tips-count">${found.length} ${found.length === 1 ? 'Treffer' : 'Treffer'}</p>` : ''}
+    <ul class="tips">${shown.map((t) => `
+      <li><a class="tip" href="${esc(t.url ?? '#')}" target="_blank" rel="noopener">
+        <span class="tip-emoji" aria-hidden="true">${esc(t.emoji ?? '📍')}</span>
+        <span class="tip-main">
+          <span class="tip-title">${esc(t.title)}</span>
+          <span class="tip-sub">${esc(tipDay(t, today))}${t.time ? ` · ${esc(t.time)}` : ''}</span>
+          ${t.place ? `<span class="tip-text">📍 ${esc(t.place)}</span>` : ''}
+          ${t.text ? `<span class="tip-text">${esc(t.text)}</span>` : ''}
+        </span>
+        <span class="tip-arrow" aria-hidden="true">›</span>
+      </a></li>`).join('')}</ul>
+    ${!q && found.length > 4 ? `<button class="link-btn tips-more" data-action="tips-toggle">${state.tipsAll ? 'Weniger anzeigen' : `Alle ${found.length} Tipps anzeigen`}</button>` : ''}`;
+}
+
+function updateTipsList() {
+  const box = $('#tips-list');
+  if (box) box.innerHTML = tipsListHtml(upcomingTips(state.tips, isoDay(new Date())), isoDay(new Date()));
+  document.querySelectorAll('[data-action=tips-filter]').forEach((b) => b.classList.toggle('active', (state.tipsQuery ?? '').toLowerCase() === b.dataset.q));
 }
 
 function startCalendarCard() {
@@ -2634,6 +2664,11 @@ function onClick(event) {
     case 'chore-done-start': choreDoneThisWeek(el.dataset.id); break;
     case 'absence-new': openAbsenceForm(); break;
     case 'tips-toggle': state.tipsAll = !state.tipsAll; renderStart(); break;
+    case 'tips-filter':
+      state.tipsQuery = (state.tipsQuery ?? '').toLowerCase() === el.dataset.q ? '' : el.dataset.q;
+      $('#tips-search').value = state.tipsQuery;
+      updateTipsList();
+      break;
     case 'absence-delete': deleteAbsence(el.dataset.id); break;
     case 'absence-edit': openAbsenceForm(state.absences.find((a) => a.id === el.dataset.id)); break;
     case 'absence-delete-form': $('#absence-dialog').close(); deleteAbsence(state.editingAbsence); break;
@@ -2783,6 +2818,12 @@ $('#i-emoji').addEventListener('input', () => { state.inviteEmojiChosen = $('#i-
 // Abgelaufene Aktionen verschwinden auch ohne neue Daten
 setInterval(() => { if (state.me) renderStart(); }, 60000);
 $('#search-input').addEventListener('input', renderSearch);
+// Wochentipps durchsuchen (Feld liegt auf der Startseite, darum über document)
+document.addEventListener('input', (event) => {
+  if (event.target.id !== 'tips-search') return;
+  state.tipsQuery = event.target.value;
+  updateTipsList();
+});
 $('#restore-file').addEventListener('change', (event) => {
   const file = event.target.files[0];
   event.target.value = '';

@@ -341,12 +341,19 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Karte ganz unten auf der Startseite: Events, Konzerte, Partys, Märkte, Flohmärkte in Ehrenfeld
   (Umgebung ok, z. B. Neuehrenfeld/Bickendorf). Je Tipp: Emoji, Titel, Tag + Uhrzeit, Ort, kurzer Text,
   Link (Antippen öffnet die Quelle). Vergangene Tipps verschwinden von selbst; 4 sichtbar, „Alle … anzeigen“.
+- **Suche** (Wunsch von Lukas): Suchfeld + Schnell-Knöpfe (Flohmarkt, Konzert, Party, Theater, Markt,
+  Familie, Kostenlos). Durchsucht Titel, Text, Ort, Uhrzeit und `tags`; verwandte Wörter zählen mit
+  („Band“ findet Konzerte, „Trödel“ Flohmärkte – Liste `SYNONYMS` in `js/tipps.js`). Beim Tippen wird nur
+  die Liste neu gezeichnet; beim Neuzeichnen der Startseite bleiben Fokus und Text im Suchfeld erhalten.
 - Daten in **`data/wochentipps.json`** (`updated, from, to, tips[{emoji, title, date, dateTo?, time,
-  place, text, url}]`), geladen von `js/tipps.js` (ohne Cache). Leer/fehlend = Karte unsichtbar.
+  place, text, url, tags[]}]`), geladen von `js/tipps.js` (ohne Cache). Leer/fehlend = Karte unsichtbar.
+  `tags` (klein geschrieben) z. B. flohmarkt, konzert, band, party, karneval, theater, markt, kinder,
+  kostenlos, ausstellung, fest.
 - Eine **geplante Aufgabe** („Projekt Kölle – Wochentipps Ehrenfeld“, **montags 7:41 Uhr**) recherchiert
   jede Woche neu (Montag–Sonntag + nächstes Wochenende), ersetzt die Datei, PR + selbst mergen.
   Regeln: **nur echte Termine mit Quelle** (Veranstalter-, Stadt- oder Ticketseite), nichts erfinden,
-  unsichere Angaben weglassen statt raten, 5–10 Tipps, bunte Mischung, keine Werbung für Zweifelhaftes.
+  unsichere Angaben weglassen statt raten, 10–20 Tipps (wegen der Suche gern mehr), jeder mit `tags`,
+  bunte Mischung, keine Werbung für Zweifelhaftes.
 
 ## 🤖 Wartungs-Operator (seit 7. Nov. 2026, Wunsch von Lukas)
 
