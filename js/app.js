@@ -2,27 +2,28 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=43';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=43';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=44';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=44';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=43';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=43';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=43';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=43';
-import { compressImage } from './images.js?v=43';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=43';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=43';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=43';
-import { toPlain, expensesCsv } from './export.js?v=43';
-import { firebaseConfig } from './firebase-config.js?v=43';
-import { weisheitDesTages } from './koelsch.js?v=43';
-import { noteTextHtml, continueList } from './notetext.js?v=43';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=43';
+} from './chores.js?v=44';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=44';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=44';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=44';
+import { compressImage } from './images.js?v=44';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=44';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=44';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=44';
+import { toPlain, expensesCsv } from './export.js?v=44';
+import { firebaseConfig } from './firebase-config.js?v=44';
+import { weisheitDesTages } from './koelsch.js?v=44';
+import { noteTextHtml, continueList } from './notetext.js?v=44';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=44';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=44';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=43) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=44) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -156,9 +157,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=43')).createDemoBackend();
+      backend = (await import('./demo.js?v=44')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=43')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=44')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1889,7 +1890,9 @@ async function exportCsv() {
 
 // ---------- Start: Übersicht ----------
 
-const openPolls = () => state.polls.filter((p) => !p.closed);
+// Abstimmungen mit Datum zählen nach dem Tag nicht mehr (verschwinden von selbst)
+const currentPolls = () => state.polls.filter((p) => !pollExpired(p, isoDay(new Date())));
+const openPolls = () => currentPolls().filter((p) => !p.closed);
 const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const shortDate = (iso) => formatDate(iso);
 
@@ -2224,7 +2227,7 @@ function deleteInvite(id) {
 
 function pollsCard() {
   const weekAgo = Date.now() - 7 * 86400000;
-  const polls = state.polls
+  const polls = currentPolls()
     .filter((p) => !p.closed || toMillis(p.closedAt) > weekAgo)
     .sort((a, b) => (a.closed - b.closed) || (toMillis(b.createdAt) - toMillis(a.createdAt)));
   const cards = polls.map((p) => {
@@ -2234,7 +2237,7 @@ function pollsCard() {
     const voted = PERSON_IDS.filter((id) => votes[id] != null).length;
     return `
       <div class="poll${p.closed ? ' closed' : ''}">
-        <p class="poll-question">${esc(p.question)}</p>
+        <p class="poll-question">${esc(p.question)}${p.until ? ` <span class="poll-date">📅 ${pollDay(p.until)}</span>` : ''}</p>
         <div class="poll-options">${p.options.map((opt, i) => `
           <button class="poll-option${votes[state.me] === i ? ' mine' : ''}${p.closed && max > 0 && counts[i].length === max ? ' winner' : ''}"
             ${p.closed ? 'disabled' : `data-action="poll-vote" data-id="${esc(p.id)}" data-index="${i}"`}>
@@ -2263,6 +2266,8 @@ function pollOptionInput(value = '') {
 
 function openPollForm() {
   $('#p-question').value = '';
+  $('#p-date').value = '';
+  state.pollDateChosen = false;
   $('#p-options').innerHTML = pollOptionInput() + pollOptionInput();
   $('#p-error').textContent = '';
   $('#poll-dialog').showModal();
@@ -2278,7 +2283,8 @@ function onSubmitPoll(event) {
     $('#p-error').textContent = problem;
     return;
   }
-  backend.add('polls', { question, options, votes: {}, closed: false, createdBy: state.me, createdAt: backend.now() }).catch(showError);
+  const until = $('#p-date').value || null;
+  backend.add('polls', { question, options, until, votes: {}, closed: false, createdBy: state.me, createdAt: backend.now() }).catch(showError);
   $('#poll-dialog').close();
   toast('Abstimmung gestartet ✓');
 }
@@ -2816,6 +2822,11 @@ $('#invite-form').addEventListener('change', (event) => {
 });
 // Eigener Text statt Vorlage -> normale Aktion (außer der Text klingt nach Kochen)
 // Das Symbol passt sich beim Tippen an – außer man hat selbst eins eingetragen.
+// Abstimmung: Datum aus der Frage erkennen, solange man es nicht selbst gewählt hat
+$('#p-question').addEventListener('input', () => {
+  if (!state.pollDateChosen) $('#p-date').value = guessDateFromText($('#p-question').value) ?? '';
+});
+$('#p-date').addEventListener('input', () => { state.pollDateChosen = $('#p-date').value !== ''; });
 $('#i-title').addEventListener('input', () => {
   state.inviteKind = 'other';
   if (!state.inviteEmojiChosen) $('#i-emoji').value = guessInviteEmoji($('#i-title').value) ?? '🙋';

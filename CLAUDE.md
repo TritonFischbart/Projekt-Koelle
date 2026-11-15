@@ -133,7 +133,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `pushTokens/{token}` | Ein Gerät, das Nachrichten bekommt: `person, device` (ungültige räumt der Dienst auf) |
 | `pushSettings/{person}` | Welche Nachrichtenarten eine Person will: `types {invites, polls, expenses, chores, calendar, shopping}` |
 | `pushTests` | „Test-Nachricht senden“ – der Dienst schickt sie und löscht den Eintrag |
-| `polls` | Abstimmungen: `question, options[], votes {person: index}, closed, closedAt` (Stimme per `votes.{person}` speichern) |
+| `polls` | Abstimmungen: `question, options[], until?, votes {person: index}, closed, closedAt, closedBy` (Stimme per `votes.{person}` speichern) |
 
 Ausgaben aus Daueraufträgen haben die feste ID `rec_{auftrag}_{monat}` und das Feld
 `recurringId` – so wird auch bei zwei gleichzeitig geöffneten Handys nichts doppelt gebucht.
@@ -255,7 +255,11 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Auf der Startseite: Frage + 2–6 Antworten (oder „Ja / Nein“). Antippen = abstimmen,
   nochmal tippen = Stimme zurücknehmen. „Beenden“ zeigt das Ergebnis (bleibt 7 Tage sichtbar).
   Roter Punkt an „Start“, solange man selbst noch nicht abgestimmt hat.
-- **Keine Frist / kein automatisches Ende** – ausdrücklich nicht gewünscht.
+- **Keine Frist / kein automatisches Ende** fürs Abstimmen – ausdrücklich nicht gewünscht.
+- **Aber (Wunsch von Lukas, 15. Nov. 2026):** optional „Wann ist das?“ (Feld `until`, z. B. „Pizza am Freitag?“).
+  Wird aus der Frage erkannt (heute/morgen/übermorgen/Wochentag/Wochenende/„20.11.“, `js/polls.js`), lässt sich
+  ändern oder leeren. **Nach diesem Tag verschwindet die Abstimmung** (auch aus rotem Punkt), damit Platz für
+  Neues ist. Ohne Datum bleibt alles wie bisher. In der Liste steht ein kleines „📅 Fr, 20.11.“.
 
 ### 🙋 Wer hat Bock? (Idee von Lukas/Jana)
 - Auf der Startseite über den Abstimmungen: spontane Aktionen („Ich koche – wer isst mit?“,
