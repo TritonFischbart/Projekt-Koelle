@@ -1,101 +1,23 @@
 {
-  "updated": "2026-11-07",
-  "from": "2026-11-07",
-  "to": "2026-11-15",
+  "updated": "2026-11-14",
+  "from": "2026-11-14",
+  "to": "2026-11-28",
   "tips": [
     {
-      "emoji": "🎸",
-      "title": "The Howlers live",
-      "date": "2026-11-07",
-      "time": "19:30 Uhr",
-      "place": "Club Bahnhof Ehrenfeld",
-      "text": "Konzert, Tickets ab ca. 27 €",
-      "url": "https://bz-ticket.de/location/359084669-club-bahnhof-ehrenfeld-koeln",
+      "emoji": "🎄",
+      "title": "Ehrenfelder Weihnachtsmarkt",
+      "date": "2026-11-14",
+      "dateTo": "2026-12-23",
+      "time": "Mo–Fr ab 17 Uhr, Sa/So ab 14 Uhr",
+      "place": "Bumann & Sohn, Bartholomäus-Schink-Str. 2",
+      "text": "Kleiner Weihnachtsmarkt im Hof, Eintritt frei",
+      "url": "https://www.koeln.de/?p=189729",
       "tags": [
-        "konzert",
-        "band",
-        "live"
-      ]
-    },
-    {
-      "emoji": "🧸",
-      "title": "Kinder- und Familienflohmarkt",
-      "date": "2026-11-08",
-      "time": "11–14 Uhr",
-      "place": "Tante Astrid e.V., Vogelsanger Str. 282",
-      "text": "Flohmarkt rund um Kindersachen",
-      "url": "https://www.koeln.de/eventreihe/flohmarkt-in-ehrenfeld-tante-astrid/",
-      "tags": [
-        "flohmarkt",
-        "kinder",
-        "familie"
-      ]
-    },
-    {
-      "emoji": "🎭",
-      "title": "„2:22 – Eine Geistergeschichte“",
-      "date": "2026-11-10",
-      "time": "19:30 Uhr",
-      "place": "Theater&Ehrenfeld, Platenstraße 32",
-      "text": "Theaterstück",
-      "url": "https://www.koeln.de/events/2026-11-10/",
-      "tags": [
-        "theater"
-      ]
-    },
-    {
-      "emoji": "🎉",
-      "title": "11.11. in den GARAGEN",
-      "date": "2026-11-11",
-      "time": "ab 11:11 Uhr",
-      "place": "GARAGEN, Oskar-Jäger-Str. 179",
-      "text": "Sessionsauftakt, Eintritt frei, ohne Vorverkauf",
-      "url": "https://verliebtinkoeln.com/11-11-2026-koeln-partys-ohne-vorverkauf-tageskasse/",
-      "tags": [
-        "party",
-        "karneval",
-        "kostenlos"
-      ]
-    },
-    {
-      "emoji": "🎉",
-      "title": "11.11. im CBE & Yuca",
-      "date": "2026-11-11",
-      "time": "Einlass 10:30 Uhr",
-      "place": "Club Bahnhof Ehrenfeld",
-      "text": "Karnevalsparty, Vorverkauf 9 €",
-      "url": "https://www.clubbahnhofehrenfeld.de/events/12063/11-11-2026-11.11.-im-cbe-and-yuca-4582533-2",
-      "tags": [
-        "party",
-        "karneval"
-      ]
-    },
-    {
-      "emoji": "🎉",
-      "title": "11.11. bei Herbrand's",
-      "date": "2026-11-11",
-      "time": "ab 11:11 Uhr",
-      "place": "Herbrand's",
-      "text": "Drei Partyflächen, ab 16 Uhr live Band",
-      "url": "https://www.koeln.de/karneval/11-11-koeln-karneval/partys-11-11/",
-      "tags": [
-        "party",
-        "karneval",
-        "konzert",
-        "band"
-      ]
-    },
-    {
-      "emoji": "🥕",
-      "title": "Wochenmarkt Neptunplatz",
-      "date": "2026-11-13",
-      "time": "7–14 Uhr",
-      "place": "Neptunplatz",
-      "text": "Jeden Freitag: Obst, Gemüse, Käse & mehr",
-      "url": "https://www.koeln.de/leben/ll/die-koelner-wochenmaerkte-im-ueberblick/das-sind-die-wochenmaerkte-in-ehrenfeld/",
-      "tags": [
+        "weihnachtsmarkt",
         "markt",
-        "wochenmarkt"
+        "fest",
+        "kostenlos",
+        "veedel"
       ]
     },
     {
@@ -104,11 +26,260 @@
       "date": "2026-11-14",
       "time": "11–16 Uhr",
       "place": "Pattenhalle, Christianstraße 82",
-      "text": "Kleidung & Accessoires, Eintritt 5 €, nur Kartenzahlung",
+      "text": "Flohmarkt für Kleidung, Schuhe und Taschen, Eintritt 5 €",
       "url": "https://maedelsflohmarkt.de/standort/koeln-ehrenfeld/",
       "tags": [
         "flohmarkt",
-        "second hand"
+        "trödel",
+        "kleidung",
+        "markt"
+      ]
+    },
+    {
+      "emoji": "📚",
+      "title": "Ehrenfelder Lesekreis",
+      "date": "2026-11-14",
+      "time": "11–12:30 Uhr",
+      "place": "Stadtteilbibliothek Ehrenfeld",
+      "text": "Offener Lesekreis für Erwachsene, kostenlos",
+      "url": "https://www.stadt-koeln.de/leben-in-koeln/freizeit-natur-sport/veranstaltungskalender/ehrenfelder-lesekreis-6",
+      "tags": [
+        "lesung",
+        "bücher",
+        "kostenlos",
+        "bibliothek"
+      ]
+    },
+    {
+      "emoji": "🎸",
+      "title": "Die Kammer live",
+      "date": "2026-11-14",
+      "time": "19:30 Uhr",
+      "place": "Helios37, Heliosstraße 35–37",
+      "text": "Rock-Konzert, Tour „Season VI“",
+      "url": "https://www.mvp.de/koeln/veranstaltungen/die-kammer-season-vi-tour-2026-helios37-koeln/",
+      "tags": [
+        "konzert",
+        "band",
+        "live",
+        "rock"
+      ]
+    },
+    {
+      "emoji": "🎭",
+      "title": "„Songs For Nobodies“",
+      "date": "2026-11-14",
+      "dateTo": "2026-11-23",
+      "time": "19:30 Uhr (Spieltage auf der Webseite)",
+      "place": "Theater&Ehrenfeld, Platenstraße 32",
+      "text": "Musiktheater, letzte Vorstellungen",
+      "url": "https://theaterehrenfeld.de/veranstaltungen/songs-for-nobodies-musical-von-joanna-murray-smith/",
+      "tags": [
+        "theater",
+        "musical",
+        "musik"
+      ]
+    },
+    {
+      "emoji": "👻",
+      "title": "„2:22 Uhr – eine Geistergeschichte“",
+      "date": "2026-11-14",
+      "dateTo": "2026-12-11",
+      "time": "19:30 Uhr (Spieltage auf der Webseite)",
+      "place": "Theater&Ehrenfeld, Platenstraße 32",
+      "text": "Gruseliger Mystery-Thriller auf der Bühne",
+      "url": "https://theaterehrenfeld.de/veranstaltungen/222-uhr-eine-geistergeschichte-mystery-thriller-von-danny-robins/",
+      "tags": [
+        "theater",
+        "grusel",
+        "krimi"
+      ]
+    },
+    {
+      "emoji": "🍭",
+      "title": "Supercandy Pop-Up Museum",
+      "date": "2026-11-14",
+      "dateTo": "2027-01-06",
+      "time": "Zeitfenster mit Ticket",
+      "place": "Oskar-Jäger-Str. 145",
+      "text": "Bunte Mitmach-Ausstellung mit vielen Foto-Kulissen, Tickets online",
+      "url": "https://www.mvp.de/nordrhein-westfalen/veranstaltungen/supercandy-koeln-ehrenfeld-supercandy-pop-up-museum/",
+      "tags": [
+        "ausstellung",
+        "kunst",
+        "familie",
+        "kinder",
+        "fotos"
+      ]
+    },
+    {
+      "emoji": "🇫🇷",
+      "title": "DELUXE live",
+      "date": "2026-11-15",
+      "time": "20 Uhr (Einlass 19 Uhr)",
+      "place": "Club Bahnhof Ehrenfeld",
+      "text": "Französische Funk- und Pop-Band, Tickets ca. 35 €",
+      "url": "https://rausgegangen.de/events/deluxe-la-tournee-qui-fait-plaisir-0/",
+      "tags": [
+        "konzert",
+        "band",
+        "live",
+        "funk",
+        "pop"
+      ]
+    },
+    {
+      "emoji": "🎤",
+      "title": "Undacava live",
+      "date": "2026-11-16",
+      "time": "20 Uhr",
+      "place": "Yuca, Bartholomäus-Schink-Str. 65/67",
+      "text": "Deutschrap, „Echter Berliner Tour 2026“",
+      "url": "https://www.regioactive.de/konzert/undacava-echter-berliner-tour-2026-koeln-yuca-2026-11-16-CRdZgww0m3",
+      "tags": [
+        "konzert",
+        "live",
+        "rap",
+        "hiphop"
+      ]
+    },
+    {
+      "emoji": "🎸",
+      "title": "King No-One live",
+      "date": "2026-11-17",
+      "time": "20 Uhr",
+      "place": "Yuca, Bartholomäus-Schink-Str. 65/67",
+      "text": "Britische Alternative-Rock-Band, Support: The Latin Greek",
+      "url": "https://www.mvp.de/koeln/veranstaltungen/king-no-one-the-burden-of-empathy-tour-2026-yuca-koeln/",
+      "tags": [
+        "konzert",
+        "band",
+        "live",
+        "rock"
+      ]
+    },
+    {
+      "emoji": "😂",
+      "title": "BOING! Comedy Open Mic",
+      "date": "2026-11-19",
+      "time": "20 Uhr",
+      "place": "The Bär, Thebäerstraße 10",
+      "text": "Stand-up mit geheimem Line-up, Tickets ca. 10 €",
+      "url": "https://www.koeln.de/event/boing-comedy-open-mic-ehrenfeld/2026-11-19/",
+      "tags": [
+        "comedy",
+        "kabarett",
+        "stand-up",
+        "live"
+      ]
+    },
+    {
+      "emoji": "🥕",
+      "title": "Wochenmarkt Neptunplatz",
+      "date": "2026-11-20",
+      "time": "7–14 Uhr",
+      "place": "Neptunplatz",
+      "text": "Obst, Gemüse, Käse und mehr – jeden Freitag",
+      "url": "https://www.stadt-koeln.de/wirtschaft/maerkte/wochenmaerkte/wochenmaerkte-nach-wochentagen",
+      "tags": [
+        "markt",
+        "wochenmarkt",
+        "essen",
+        "kostenlos"
+      ]
+    },
+    {
+      "emoji": "👶",
+      "title": "Bücherbabys",
+      "date": "2026-11-21",
+      "time": "10:30–11 Uhr",
+      "place": "Stadtteilbibliothek Ehrenfeld",
+      "text": "Lieder, Fingerspiele und Bilderbücher für Kinder ab ca. 6 Monaten, kostenlos",
+      "url": "https://www.stadt-koeln.de/leben-in-koeln/freizeit-natur-sport/veranstaltungskalender/buecherbabys-die-literarische-krabbelgruppe-516",
+      "tags": [
+        "kinder",
+        "familie",
+        "baby",
+        "kostenlos",
+        "bibliothek"
+      ]
+    },
+    {
+      "emoji": "🌙",
+      "title": "Moonlight Market",
+      "date": "2026-11-21",
+      "time": "17–23 Uhr",
+      "place": "Pattenhalle, Christianstraße 82",
+      "text": "Nacht-Flohmarkt mit über 100 Ständen, Foodtrucks und Live-Bands, Eintritt 5 €",
+      "url": "https://www.koeln.de/eventreihe/moonlight-market/",
+      "tags": [
+        "flohmarkt",
+        "trödel",
+        "markt",
+        "vintage",
+        "live",
+        "essen"
+      ]
+    },
+    {
+      "emoji": "🤘",
+      "title": "Artakke! Nr. 5",
+      "date": "2026-11-21",
+      "time": "19–23 Uhr",
+      "place": "Artheater, Ehrenfeldgürtel 127",
+      "text": "Punk-Abend mit Fahnenflucht, Bronko, Keine Ahnung und Frl. Rottenmeier",
+      "url": "https://www.regioactive.de/festival/artakke-nr-5-mit-fahnenflucht-bronko-keine-ahnung-frl-rottenmeier-koeln-artheater-2026-11-21-xZXBh63wgK",
+      "tags": [
+        "konzert",
+        "band",
+        "live",
+        "punk"
+      ]
+    },
+    {
+      "emoji": "🎸",
+      "title": "Daily Thompson live",
+      "date": "2026-11-21",
+      "time": "19:30 Uhr",
+      "place": "Helios37, Heliosstraße 35–37",
+      "text": "Desert-Rock und Grunge, Support: Constance Tomb, Tickets ab ca. 25 €",
+      "url": "https://www.regioactive.de/konzert/daily-thompson-glue-tour-koeln-helios37-2026-11-21-tickets-jSpBWFHL8J",
+      "tags": [
+        "konzert",
+        "band",
+        "live",
+        "rock"
+      ]
+    },
+    {
+      "emoji": "🚲",
+      "title": "Gebrauchtradmarkt Ehrenfeld",
+      "date": "2026-11-28",
+      "time": "8–16 Uhr",
+      "place": "Neptunplatz",
+      "text": "Gebrauchte Fahrräder kaufen und verkaufen",
+      "url": "https://www.koeln.de/event/gebrauchtradmarkt-ehrenfeld/2026-11-28/",
+      "tags": [
+        "markt",
+        "fahrrad",
+        "flohmarkt",
+        "trödel"
+      ]
+    },
+    {
+      "emoji": "🛍️",
+      "title": "Großer Flohmarkt bei Tante Astrid",
+      "date": "2026-11-28",
+      "time": "13–17 Uhr",
+      "place": "Tante Astrid e.V., Vogelsanger Str. 282",
+      "text": "Flohmarkt für Erwachsene: Kleidung, Vintage, Bücher, Pflanzen; Eintritt frei",
+      "url": "https://www.koeln.de/event/der-grosse-flohmarkt-in-ehrenfeld-im-tante-astrid-e-v/2026-11-28/",
+      "tags": [
+        "flohmarkt",
+        "trödel",
+        "vintage",
+        "kostenlos",
+        "veedel"
       ]
     }
   ]
