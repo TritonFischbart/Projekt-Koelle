@@ -781,3 +781,5 @@ main { overflow-x: clip; }
 .tips-filters { gap: 6px; margin-bottom: 12px; }
 .tips-filters .chip-btn { padding: 6px 11px; font-size: 0.85rem; }
 .tips-count { margin: 0 0 6px; font-size: 0.85rem; }
+
+.poll-date { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 0.8rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }

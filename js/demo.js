@@ -1,7 +1,7 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=42';
+import { weekKey } from './chores.js?v=44';
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -34,6 +34,7 @@ function daysAgo(n) {
 export function createDemoBackend() {
   const user = { uid: 'demo-lukas', email: 'lukas@beispiel.de', displayName: 'Lukas' };
   const all = ['jana', 'julian', 'lukas'];
+  const dayIso = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const created = (n) => new Date(Date.now() - n * 86400000);
 
   const store = {
@@ -73,7 +74,8 @@ export function createDemoBackend() {
         responses: { julian: 'yes' }, createdBy: 'jana', createdAt: created(0) },
     ],
     polls: [
-      { id: 'p1', question: 'Pizza oder Sushi am Freitag?', options: ['Pizza 🍕', 'Sushi 🍣', 'Selber kochen'], votes: { jana: 1, julian: 0 }, closed: false, createdBy: 'jana', createdAt: created(1) },
+      { id: 'p1', question: 'Pizza oder Sushi am Freitag?', options: ['Pizza 🍕', 'Sushi 🍣', 'Selber kochen'], until: dayIso(3), votes: { jana: 1, julian: 0 }, closed: false, createdBy: 'jana', createdAt: created(1) },
+      { id: 'p0', question: 'Grillen gestern?', options: ['Ja', 'Nein'], until: dayIso(-1), votes: {}, closed: false, createdBy: 'julian', createdAt: created(3) },
     ],
     notes: [
       { id: 'n1', title: '📶 WLAN', text: 'Netzwerk: Koelle-WG\nPasswort: DomBlick2026!', createdBy: 'lukas', createdAt: created(20), updatedBy: 'lukas', updatedAt: created(20) },
