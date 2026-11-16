@@ -785,3 +785,48 @@ main { overflow-x: clip; }
 .tips-count { margin: 0 0 6px; font-size: 0.85rem; }
 
 .poll-date { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 0.8rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }
+
+/* ---------- Einklappbare Karten (Tipp auf die Überschrift) ---------- */
+.fold-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left;
+  padding: 10px 0; margin: -10px 0; /* größere Tippfläche, gleiches Aussehen */
+}
+.fold-chev {
+  flex: none; width: 7px; height: 7px; margin: 0 2px 3px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg); transition: transform 0.15s;
+}
+.fold-btn[aria-expanded="false"] .fold-chev { transform: rotate(-45deg); margin-bottom: 0; }
+.card-head h2 { min-width: 0; }
+.card-head { gap: 12px; }
+.card-head .link-btn { flex: none; }
+.folded .card-head { margin-bottom: 0; }
+.fold-sum { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+.fold-alert { color: var(--brand); font-weight: 600; }
+
+/* Zeile zum Auf-/Zuklappen innerhalb einer Karte (z. B. Nachrichtenarten) */
+.fold-btn.fold-row {
+  display: flex; width: 100%; justify-content: space-between;
+  margin: 12px 0 0; padding: 12px 0; border-top: 1px solid var(--border);
+}
+.fold-row-text { display: grid; font-weight: 600; }
+.fold-row-text small { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+
+/* ---------- Fenster von unten (Monatsübersicht, Auswahl …) ---------- */
+.panel-body { display: grid; gap: 12px; }
+.panel-body .hint { margin: 0; }
+.panel-body .history:first-of-type { border-top: 0; }
+.entry-arrow { flex: none; color: var(--muted); font-size: 1.4rem; line-height: 1; }
+.choices { list-style: none; margin: 0; padding: 0; }
+.choices li + li { border-top: 1px solid var(--border); }
+.choice {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 52px; padding: 10px 4px;
+  background: none; border: 0; color: var(--text); font: inherit; font-weight: 600; text-align: left;
+}
+.choice small { color: var(--muted); font-weight: 400; font-size: 0.8rem; margin-left: 4px; }
+.choice.active { color: var(--brand); }
+.choice-check { color: var(--brand); font-size: 1.1rem; }
+.note-sort-btn { font-size: 0.85rem; }
+.month-panel .hint { margin-top: 14px; }
