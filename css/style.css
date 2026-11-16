@@ -272,6 +272,8 @@ main {
 .btn.full { width: 100%; }
 .welcome .btn { width: 100%; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--muted); font-size: 0.8rem; text-decoration: underline; }
+/* Größere Tippfläche (ca. 40 px hoch), ohne dass sich das Aussehen ändert */
+.link-btn { padding: 11px 8px; margin: -11px -8px; position: relative; }
 .icon-btn {
   width: 36px; height: 36px; border-radius: 50%;
   border: 0; background: var(--bg); color: var(--muted); font-size: 1rem;
@@ -611,7 +613,7 @@ a.btn.full { width: 100%; }
 .poll-option[disabled] { cursor: default; color: inherit; }
 .poll-voters { display: flex; gap: 2px; }
 .poll-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; color: var(--muted); font-size: 0.82rem; }
-.poll-foot .link-btn + .link-btn { margin-left: 10px; }
+.poll-foot .link-btn + .link-btn { margin-left: 2px; }
 .poll-input {
   width: 100%; min-height: 44px; padding: 8px 12px;
   border: 1px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 1rem;
@@ -773,7 +775,7 @@ main { overflow-x: clip; }
 .tip-sub { color: var(--brand); font-size: 0.85rem; font-weight: 600; }
 .tip-text { color: var(--muted); font-size: 0.85rem; }
 .tip-arrow { flex: none; color: var(--muted); font-size: 1.3rem; }
-.tips-more { margin-top: 10px; }
+.tips-more { margin-top: -1px; } /* 10 px Abstand minus Tipp-Polster */
 .tips-hint { margin: 10px 0 0; font-size: 0.8rem; }
 
 .tips-search { width: 100%; min-height: 44px; margin: 4px 0 10px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: inherit; font: inherit; }
