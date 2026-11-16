@@ -389,6 +389,23 @@ Claude-Sitzung (Operator), die so arbeitet:
    was geprüft wurde, was geändert wurde (mit PR-Links), was gefunden aber nicht geändert wurde
    (Vorschläge für Lukas). Auch wenn nichts zu tun war („Alles in Ordnung“).
 
+## 🔁 Übergabe an die nächste Sitzung (Stand 16. Nov. 2026)
+
+- **Offen: Automatische Runden dürfen nicht hochladen.** „Projekt Kölle – Wochentipps Ehrenfeld“
+  (Mo 7:41) und „Projekt Kölle – wöchentlicher Wartungs-Operator“ (Sa 10:23) recherchieren/prüfen, aber
+  `git push` scheitert mit 403 „TritonFischbart/Projekt-Koelle is not in this session's authorized repository
+  set … add the repository to the session's sources“; `add_repo` ist in diesen Sitzungen nicht verfügbar.
+  Ursache: per `create_trigger` angelegte Routinen haben keine Repo-Quelle. Lukas hat GitHub-App-Zugriff
+  auf alle Repos erteilt (nötig, reicht aber nicht). **Lösung:** Lukas trägt auf claude.ai/code/routines bei
+  beiden Routinen unter „Repository“ (evtl. „Advanced settings“) `TritonFischbart/Projekt-Koelle` ein –
+  mit Screenshot begleiten – danach Wochentipps-Runde per „Run now“/fire_trigger testen und prüfen, ob sie
+  selbst mergt. Notfalls Routinen auf claude.ai neu anlegen (Prompts: siehe list_triggers) und alte löschen.
+  Gleiches Problem vermutlich bei seinen **Kreidezeit-Routinen** (Boulder-App).
+- Wochentipps in `data/wochentipps.json` reichen bis **28.11.2026**. Zwei gescheiterte Runden hatten neue
+  Tipps (16.–29.11.); bei Bedarf neu recherchieren und selbst einstellen.
+- GitHub-Konto war 7.–12. Nov. von GitHubs Missbrauchs-Erkennung gesperrt (Support-Ticket 4968104,
+  aufgehoben). Danach musste Claude neu mit GitHub verbunden werden.
+
 ## Merkliste / To-do für später (noch nicht gebaut)
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
