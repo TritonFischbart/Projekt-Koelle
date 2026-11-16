@@ -2,28 +2,28 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=44';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=44';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=45';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=45';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=44';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=44';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=44';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=44';
-import { compressImage } from './images.js?v=44';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=44';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=44';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=44';
-import { toPlain, expensesCsv } from './export.js?v=44';
-import { firebaseConfig } from './firebase-config.js?v=44';
-import { weisheitDesTages } from './koelsch.js?v=44';
-import { noteTextHtml, continueList } from './notetext.js?v=44';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=44';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=44';
+} from './chores.js?v=45';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=45';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=45';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=45';
+import { compressImage } from './images.js?v=45';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=45';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=45';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=45';
+import { toPlain, expensesCsv } from './export.js?v=45';
+import { firebaseConfig } from './firebase-config.js?v=45';
+import { weisheitDesTages } from './koelsch.js?v=45';
+import { noteTextHtml, continueList } from './notetext.js?v=45';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=45';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=45';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=44) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=45) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -157,9 +157,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=44')).createDemoBackend();
+      backend = (await import('./demo.js?v=45')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=44')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=45')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;

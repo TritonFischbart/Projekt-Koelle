@@ -106,6 +106,10 @@ früheren Gesprächen besprochen und entschieden wurde.
 - Beide Backends (`firebase.js`, `demo.js`) haben dieselben Funktionen:
   `onUser, login, logout, watch, add, update, remove, set, settleAll, now`
   (Demo zusätzlich `demoEvents`). Neue Funktionen in beiden ergänzen.
+- Text-Knöpfe (`.link-btn`, z. B. „＋ Neu“, „Bearbeiten“) haben ein unsichtbares Polster (Padding + gleich
+  großer negativer Rand), damit die Tippfläche ~41 px hoch ist, ohne dass sich das Aussehen ändert. Eigene
+  `margin`-Regeln für einzelne Text-Knöpfe deshalb um 11 px (oben/unten) bzw. 8 px (seitlich) verringern
+  (Operator, 16. Nov. 2026).
 - Texte aus der Datenbank immer mit `esc()` ausgeben (Schutz vor HTML-Einschleusung).
 - Formulare liegen als `<dialog>` statisch in `index.html` – nicht in Bereiche
   rendern, die bei jeder Datenänderung neu gezeichnet werden (sonst gehen Eingaben verloren).
