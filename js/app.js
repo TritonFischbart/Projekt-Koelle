@@ -2,28 +2,28 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=45';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=45';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=46';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=46';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=45';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=45';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=45';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=45';
-import { compressImage } from './images.js?v=45';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=45';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=45';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=45';
-import { toPlain, expensesCsv } from './export.js?v=45';
-import { firebaseConfig } from './firebase-config.js?v=45';
-import { weisheitDesTages } from './koelsch.js?v=45';
-import { noteTextHtml, continueList } from './notetext.js?v=45';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=45';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=45';
+} from './chores.js?v=46';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=46';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=46';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=46';
+import { compressImage } from './images.js?v=46';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=46';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=46';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=46';
+import { toPlain, expensesCsv } from './export.js?v=46';
+import { firebaseConfig } from './firebase-config.js?v=46';
+import { weisheitDesTages } from './koelsch.js?v=46';
+import { noteTextHtml, continueList } from './notetext.js?v=46';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=46';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=46';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=45) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=46) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -68,6 +68,29 @@ let backend = null;
 let unsubscribers = [];
 
 // ---------- Kleine Helfer ----------
+
+// Einklappbare Karten: Tipp auf die Überschrift klappt zu/auf. Jedes Handy merkt sich das selbst.
+const FOLD_KEY = 'koelle.folded';
+let folds = {};
+try { folds = JSON.parse(localStorage.getItem(FOLD_KEY)) ?? {}; } catch { /* privater Modus */ }
+const isFolded = (id, byDefault = false) => folds[id] ?? byDefault;
+function toggleFold(id, byDefault = false) {
+  folds[id] = !isFolded(id, byDefault);
+  try { localStorage.setItem(FOLD_KEY, JSON.stringify(folds)); } catch { /* privater Modus */ }
+}
+function foldButton(id, label, byDefault = false, cls = '') {
+  const folded = isFolded(id, byDefault);
+  return `<button type="button" class="fold-btn${cls}" data-action="fold" data-fold="${id}" data-default="${byDefault ? 1 : 0}" aria-expanded="${!folded}">${label}<span class="fold-chev" aria-hidden="true"></span></button>`;
+}
+// Karte mit Überschrift zum Einklappen. Zugeklappt steht nur eine kurze Zusammenfassung da.
+function foldCard(id, { title, action = '', body, summary = '', byDefault = false }) {
+  const folded = isFolded(id, byDefault);
+  return `
+    <section class="card foldable${folded ? ' folded' : ''}">
+      <div class="card-head"><h2>${foldButton(id, title, byDefault)}</h2>${action}</div>
+      ${folded ? (summary ? `<p class="fold-sum">${summary}</p>` : '') : body}
+    </section>`;
+}
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) => (
@@ -157,9 +180,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=45')).createDemoBackend();
+      backend = (await import('./demo.js?v=46')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=45')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=46')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -324,6 +347,7 @@ function renderAll() {
   renderInfos();
   renderSettings();
   renderStart();
+  renderPanel();
   const open = myOpenChores().length;
   const tabButton = document.querySelector('.tabbar [data-tab=putzplan]');
   tabButton.classList.toggle('has-badge', open > 0);
@@ -445,8 +469,6 @@ function onTouchEnd(event) {
 
 function renderAusgaben() {
   if (!state.me) return;
-  const openHistory = new Set([...document.querySelectorAll('details.history[open]')].map((d) => d.dataset.id));
-
   const expenses = activeExpenses();
   const payments = activePayments();
   const balances = computeBalances(PERSON_IDS, expenses, payments);
@@ -457,10 +479,60 @@ function renderAusgaben() {
     balancesCard(balances),
     transfersCard(transfers, expenses.length + payments.length > 0),
     entriesCard(expenses, payments),
-    monthCard(),
-    recurringCard(),
-    historyCard(openHistory),
+    moreCard(),
   ].join('');
+}
+
+// Seltener Gebrauchtes öffnet sich als Fenster von unten, statt die Seite lang zu machen.
+function moreCard() {
+  const rows = [];
+  if (state.expenses.length) {
+    const month = currentMonth();
+    rows.push(['month', '📊', 'Monatsübersicht', `${monthName(month)}: ${formatEuro(monthStats(state.expenses, month).total)}`]);
+  }
+  const rec = state.recurring.length;
+  rows.push(['recurring', '🔁', 'Daueraufträge', rec ? `${rec} ${rec === 1 ? 'Auftrag' : 'Aufträge'} · jeden Monat automatisch` : 'z. B. Internet, Strom oder Netflix']);
+  const done = state.settlements.length;
+  if (done) rows.push(['history', '🗂️', 'Frühere Abrechnungen', `${done} ${done === 1 ? 'Abrechnung' : 'Abrechnungen'}`]);
+  return `
+    <section class="card">
+      <ul class="entries">${rows.map(([id, icon, title, sub]) => `
+        <li><button class="entry" data-action="panel-open" data-panel="${id}">
+          <span class="entry-icon" aria-hidden="true">${icon}</span>
+          <span class="entry-main"><span class="entry-title">${title}</span><span class="entry-sub">${sub}</span></span>
+          <span class="entry-arrow" aria-hidden="true">›</span>
+        </button></li>`).join('')}</ul>
+    </section>`;
+}
+
+// ---------- Fenster von unten (Inhalt wird bei neuen Daten mit aktualisiert) ----------
+
+const PANELS = {
+  month: () => ({ title: '📊 Monatsübersicht', body: monthBody() }),
+  recurring: () => ({ title: '🔁 Daueraufträge', body: recurringBody() }),
+  history: () => ({ title: '🗂️ Frühere Abrechnungen', body: historyBody() }),
+  'note-new': () => ({ title: '＋ Neue Notiz', body: noteNewBody() }),
+  'note-sort': () => ({ title: '↕️ Notizen sortieren', body: noteSortBody() }),
+};
+
+function openPanel(id) {
+  if (!PANELS[id]) return;
+  state.panel = id;
+  if (id === 'month') state.monthOffset = 0;
+  renderPanel();
+  const dialog = $('#panel-dialog');
+  if (!dialog.open) dialog.showModal();
+}
+
+function renderPanel() {
+  if (!state.panel || !state.me) return;
+  const content = PANELS[state.panel]();
+  $('#panel-title').textContent = content.title;
+  $('#panel-body').innerHTML = content.body;
+}
+
+function closePanel() {
+  if ($('#panel-dialog').open) $('#panel-dialog').close();
 }
 
 function heroCard(balance) {
@@ -525,8 +597,8 @@ function barList(entries, label) {
     </li>`).join('')}</ul>`;
 }
 
-function monthCard() {
-  if (!state.expenses.length) return '';
+function monthBody() {
+  if (!state.expenses.length) return '<p class="empty">Noch keine Ausgaben.</p>';
   const month = addMonths(currentMonth(), state.monthOffset);
   const stats = monthStats(state.expenses, month);
   const trend = monthTrend(state.expenses, month, 6);
@@ -536,12 +608,12 @@ function monthCard() {
   const payers = PERSON_IDS.filter((id) => stats.byPayer[id]).map((id) => [id, stats.byPayer[id]]);
 
   return `
-    <section class="card">
+    <div class="month-panel">
       <div class="week-nav">
         <button class="icon-btn" data-action="month" data-step="-1" aria-label="Monat zurück">‹</button>
         <button class="week-title" data-action="month" data-step="0">
-          <strong>Monatsübersicht</strong>
-          <small>${monthName(month)}</small>
+          <strong>${monthName(month)}</strong>
+          <small>${state.monthOffset ? 'Tippen = aktueller Monat' : 'aktueller Monat'}</small>
         </button>
         <button class="icon-btn" data-action="month" data-step="1" aria-label="Monat vor"${state.monthOffset >= 0 ? ' disabled' : ''}>›</button>
       </div>
@@ -556,12 +628,13 @@ function monthCard() {
         ${barList(categories, (id) => `${categoryOf(id).icon} ${esc(categoryOf(id).name)}`)}
         <h3 class="sub-title">Wer hat bezahlt</h3>
         ${barList(payers, (id) => esc(personName(id)))}` : '<p class="empty">In diesem Monat gibt es keine Ausgaben.</p>'}
-    </section>`;
+      <p class="hint">Zählt alle Ausgaben, auch schon abgerechnete.</p>
+    </div>`;
 }
 
 // ---------- Daueraufträge ----------
 
-function recurringCard() {
+function recurringBody() {
   const items = [...state.recurring].sort((a, b) => a.dayOfMonth - b.dayOfMonth);
   const list = items.length
     ? `<ul class="entries">${items.map((r) => `
@@ -575,11 +648,9 @@ function recurringCard() {
         </button></li>`).join('')}</ul>`
     : '<p class="empty">Noch keine. Zum Beispiel Internet, Strom oder Netflix.</p>';
   return `
-    <section class="card">
-      <div class="card-head"><h2>Daueraufträge</h2><button class="link-btn" data-action="add-recurring">＋ Neu</button></div>
-      ${list}
-      <p class="hint">Werden jeden Monat automatisch als Ausgabe eingetragen.</p>
-    </section>`;
+    ${list}
+    <button class="btn outline full" data-action="add-recurring">＋ Neuer Dauerauftrag</button>
+    <p class="hint">Werden am gewählten Tag jeden Monat automatisch als Ausgabe eingetragen. Antippen zum Ändern oder Löschen.</p>`;
 }
 
 // Fällige Daueraufträge eintragen – kurz warten, bis die Daten vom Server da sind.
@@ -674,8 +745,9 @@ function entriesCard(expenses, payments) {
   </section>`;
 }
 
-function historyCard(openIds) {
-  if (!state.settlements.length) return '';
+function historyBody() {
+  const openIds = new Set([...document.querySelectorAll('details.history[open]')].map((d) => d.dataset.id));
+  if (!state.settlements.length) return '<p class="empty">Noch keine Abrechnungen.</p>';
   const items = [...state.settlements]
     .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt))
     .map((s) => {
@@ -688,7 +760,7 @@ function historyCard(openIds) {
           ${entryList(expenses, payments, true)}
         </details>`;
     }).join('');
-  return `<section class="card"><h2>Frühere Abrechnungen</h2>${items}</section>`;
+  return `${items}<p class="hint">Antippen, um die Einträge einer Abrechnung zu sehen.</p>`;
 }
 
 // ---------- Putzplan ----------
@@ -864,11 +936,12 @@ function upcomingCard() {
     return `<li class="plan-row" ${columns}><span class="plan-week">KW ${isoWeek(monday).week}</span>${cells}</li>`;
   }).join('');
   const head = choreAreas().map((c) => `<span class="plan-cell head">${c.icon} ${esc(c.name)}</span>`).join('');
-  return `
-    <section class="card">
-      <h2>Die nächsten Wochen</h2>
-      <ul class="plan"><li class="plan-row plan-head" ${columns}><span class="plan-week"></span>${head}</li>${rows}</ul>
-    </section>`;
+  return foldCard('plan', {
+    title: '📆 Die nächsten Wochen',
+    byDefault: true,
+    summary: 'Wer in den nächsten 4 Wochen dran ist',
+    body: `<ul class="plan"><li class="plan-row plan-head" ${columns}><span class="plan-week"></span>${head}</li>${rows}</ul>`,
+  });
 }
 
 function renderPutzplan() {
@@ -1416,6 +1489,30 @@ const NOTE_TEMPLATES = [
   { title: '🚨 Notfall & Handwerker', text: 'Hausmeister: \nSchlüsseldienst: ' },
 ];
 
+// Vorlagen, die es noch nicht als Notiz gibt
+const noteTemplatesLeft = () => {
+  const existing = new Set(state.notes.map((n) => n.title));
+  return NOTE_TEMPLATES.filter((t) => !existing.has(t.title));
+};
+
+function choiceRow(attrs, label, active = false) {
+  return `<li><button class="choice${active ? ' active' : ''}" ${attrs}><span>${label}</span>${active ? '<span class="choice-check" aria-hidden="true">✓</span>' : ''}</button></li>`;
+}
+
+function noteNewBody() {
+  return `<ul class="choices">
+    ${choiceRow('data-action="note-blank"', '📝 Leere Notiz')}
+    ${noteTemplatesLeft().map((t) => choiceRow(`data-action="note-template" data-index="${NOTE_TEMPLATES.indexOf(t)}"`, `${esc(t.title)} <small>Vorlage</small>`)).join('')}
+  </ul>
+  <p class="hint">Vorlagen sind schon vorausgefüllt – du musst nur noch ergänzen.</p>`;
+}
+
+function noteSortBody() {
+  const mode = noteSort();
+  return `<ul class="choices">${NOTE_SORTS.map((o) => choiceRow(`data-action="note-sort" data-mode="${o.id}"`, o.label, o.id === mode)).join('')}</ul>
+  <p class="hint">Angeheftete Notizen stehen immer oben. Gilt nur auf diesem Gerät.</p>`;
+}
+
 let noteDrag = null; // Notiz, die gerade verschoben wird (siehe unten)
 
 // Angeheftete zuerst, dann in der selbst gewählten Reihenfolge (neue Notizen ans Ende)
@@ -1445,8 +1542,6 @@ const sortedNotes = () => {
 function renderInfos() {
   if (noteDrag?.active) { noteDrag.dirty = true; return; } // nicht mitten im Verschieben neu zeichnen
   const notes = sortedNotes();
-  const existing = new Set(notes.map((n) => n.title));
-  const templates = NOTE_TEMPLATES.filter((t) => !existing.has(t.title));
 
   const noteCards = notes.map((n) => `
     <article class="card note${n.pinned ? ' pinned' : ''}" data-id="${esc(n.id)}">
@@ -1470,10 +1565,7 @@ function renderInfos() {
     <section class="card">
       <div class="card-head"><h2>📌 Schwarzes Brett</h2><button class="link-btn" data-action="note-new">＋ Notiz</button></div>
       <p class="hint left">Alles, was man in der WG immer wieder sucht.${notes.length > 1 ? ' Lange auf eine Notiz drücken, um sie zu verschieben.' : ''}</p>
-      ${notes.length > 1 ? `<div class="chips note-sort no-swipe"><span class="note-sort-label">Sortieren:</span>${NOTE_SORTS.map((o) => `
-        <button class="chip-btn${noteSort() === o.id ? ' active' : ''}" data-action="note-sort" data-mode="${o.id}">${o.label}</button>`).join('')}</div>` : ''}
-      ${templates.length ? `<div class="quick-chips">${templates.map((t, i) => `
-        <button class="quick-chip" data-action="note-template" data-index="${NOTE_TEMPLATES.indexOf(t)}">＋ ${esc(t.title)}</button>`).join('')}</div>` : ''}
+      ${notes.length > 1 ? `<button class="link-btn note-sort-btn" data-action="panel-open" data-panel="note-sort">↕️ ${esc(NOTE_SORTS.find((o) => o.id === noteSort())?.label ?? '')}</button>` : ''}
     </section>
     ${noteCards}`;
 }
@@ -1621,8 +1713,10 @@ function pushCard() {
     status = `<button class="btn primary full" data-action="push-on"${state.pushBusy ? ' disabled' : ''}>${state.pushBusy ? 'Einen Moment …' : '🔔 Auf diesem Handy einschalten'}</button>
       <p class="hint left">Einschalten musst du auf jedem Handy/iPad einmal, auf dem du Nachrichten möchtest.</p>`;
   }
-  const toggles = backend.pushReady ? `
-    <h3 class="sub-title">Was möchtest du bekommen?</h3>
+  const onCount = PUSH_TYPES.filter(pushTypeOn).length;
+  const toggles = !backend.pushReady ? '' : isFolded('push-types', true) ? `
+    ${foldButton('push-types', `<span class="fold-row-text">Was möchtest du bekommen?<small>${onCount} von ${PUSH_TYPES.length} Arten an · Antippen zum Ändern</small></span>`, true, ' fold-row')}` : `
+    ${foldButton('push-types', '<span class="fold-row-text">Was möchtest du bekommen?</span>', true, ' fold-row')}
     <ul class="push-types">${PUSH_TYPES.map((t) => `
       <li>
         <label class="switch-row">
@@ -1630,7 +1724,7 @@ function pushCard() {
           <input type="checkbox" class="switch" data-push-type="${t.id}"${pushTypeOn(t) ? ' checked' : ''}>
         </label>
       </li>`).join('')}</ul>
-    <p class="hint left">Gilt für alle deine Geräte. Nachrichten über deine eigenen Einträge bekommst du nicht.</p>` : '';
+    <p class="hint left">Gilt für alle deine Geräte. Nachrichten über deine eigenen Einträge bekommst du nicht.</p>`;
   return `<section class="card"><h2>🔔 Benachrichtigungen</h2>${status}${toggles}</section>`;
 }
 
@@ -1969,23 +2063,27 @@ function tipsCard() {
   const today = isoDay(new Date());
   const tips = upcomingTips(state.tips, today);
   // Die Karte bleibt immer da – auch wenn gerade keine Tipps aktuell sind
+  const title = '🎪 Diese Woche in Ehrenfeld';
   if (!tips.length) {
-    return `
-    <section class="card">
-      <div class="card-head"><h2>🎪 Diese Woche in Ehrenfeld</h2></div>
-      <p class="empty">${state.tips ? 'Gerade keine aktuellen Tipps – neue kommen jeden Montag.' : 'Tipps werden geladen …'}</p>
-    </section>`;
+    return foldCard('tips', {
+      title,
+      body: `<p class="empty">${state.tips ? 'Gerade keine aktuellen Tipps – neue kommen jeden Montag.' : 'Tipps werden geladen …'}</p>`,
+    });
   }
   const q = state.tipsQuery ?? '';
-  return `
-    <section class="card">
-      <div class="card-head"><h2>🎪 Diese Woche in Ehrenfeld</h2></div>
-      <input type="search" id="tips-search" class="tips-search" placeholder="🔍 Suchen: Flohmarkt, Band, Party …" value="${esc(q)}" autocomplete="off" enterkeyhint="search">
+  // Suche nur auf Wunsch aufklappen (bleibt offen, solange etwas gesucht wird)
+  const searchOpen = state.tipsSearch || Boolean(q);
+  return foldCard('tips', {
+    title,
+    action: `<button class="link-btn" data-action="tips-search-toggle">${searchOpen ? 'Suche schließen' : '🔍 Suchen'}</button>`,
+    summary: `${tips.length} ${tips.length === 1 ? 'Tipp' : 'Tipps'} – Konzerte, Märkte, Partys …`,
+    body: `
+      ${searchOpen ? `<input type="search" id="tips-search" class="tips-search" placeholder="Flohmarkt, Band, Party …" value="${esc(q)}" autocomplete="off" enterkeyhint="search">
       <div class="chips tips-filters no-swipe">${TIP_FILTERS.map((f) => `
-        <button class="chip-btn${q.toLowerCase() === f.q ? ' active' : ''}" data-action="tips-filter" data-q="${f.q}">${f.label}</button>`).join('')}</div>
+        <button class="chip-btn${q.toLowerCase() === f.q ? ' active' : ''}" data-action="tips-filter" data-q="${f.q}">${f.label}</button>`).join('')}</div>` : ''}
       <div id="tips-list">${tipsListHtml(tips, today)}</div>
-      <p class="hint left tips-hint">Jeden Montag neu zusammengesucht – Angaben ohne Gewähr, im Zweifel beim Veranstalter nachsehen.</p>
-    </section>`;
+      <p class="hint left tips-hint">Jeden Montag neu zusammengesucht – Angaben ohne Gewähr, im Zweifel beim Veranstalter nachsehen.</p>`,
+  });
 }
 
 // Nur die Liste neu zeichnen (beim Tippen bleibt das Suchfeld so erhalten)
@@ -2034,11 +2132,13 @@ function startCalendarCard() {
           ${g.events.slice(0, 3).map((e) => `<button type="button" class="start-event" data-action="event-open" data-id="${esc(e.id)}"><span>${e.allDay ? 'ganztägig' : sameDay(e.start, g.day) ? timeOf(e.start) : 'läuft'}</span>${esc(e.title)}</button>`).join('')}
         </div>`).join('')
         : '<p class="empty">Keine Termine in den nächsten Wochen.</p>';
-  return `
-    <section class="card">
-      <div class="card-head"><h2>📅 Nächste Termine</h2><button class="link-btn" data-action="tab" data-tab="kalender">Ganzer Kalender ›</button></div>
-      ${body}
-    </section>`;
+  const first = groups[0]?.events[0];
+  return foldCard('events', {
+    title: '📅 Nächste Termine',
+    action: '<button class="link-btn" data-action="tab" data-tab="kalender">Ganzer Kalender ›</button>',
+    body,
+    summary: first ? `${dayTitle(groups[0].day)}: ${esc(first.title)}` : '',
+  });
 }
 
 function startChoreCard(myChores) {
@@ -2049,16 +2149,18 @@ function startChoreCard(myChores) {
       <span class="banner-arrow" aria-hidden="true">›</span>
     </button>`;
   }
-  return `
-    <section class="card">
-      <div class="card-head"><h2>🧹 Deine Aufgabe diese Woche</h2><button class="link-btn" data-action="tab" data-tab="putzplan">Putzplan ›</button></div>
-      ${myChores.map((c) => `
+  const openOnes = myChores.filter((c) => !c.doneBy);
+  return foldCard('chore', {
+    title: '🧹 Deine Aufgabe diese Woche',
+    action: '<button class="link-btn" data-action="tab" data-tab="putzplan">Putzplan ›</button>',
+    summary: openOnes.length ? `Noch offen: ${openOnes.map((c) => `${c.chore.icon} ${esc(c.chore.name)}`).join(', ')}` : 'Alles erledigt ✓',
+    body: myChores.map((c) => `
         <div class="start-chore${c.doneBy ? ' done' : ''}">
           <span class="start-chore-name">${c.chore.icon} ${esc(c.chore.name)}</span>
           ${c.doneBy ? '<span class="done-label">✓ erledigt</span>'
             : `<button class="btn small primary" data-action="chore-done-start" data-id="${c.docId}">Erledigt ✓</button>`}
-        </div>`).join('')}
-    </section>`;
+        </div>`).join(''),
+  });
 }
 
 // ---------- Abwesenheiten ----------
@@ -2076,11 +2178,13 @@ function absencesCard() {
       </button>
       <button class="icon-btn small" data-action="absence-delete" data-id="${esc(a.id)}" aria-label="Abwesenheit löschen">✕</button>
     </li>`).join('');
-  return `
-    <section class="card">
-      <div class="card-head"><h2>🌴 Wer ist weg?</h2><button class="link-btn" data-action="absence-new">＋ Eintragen</button></div>
-      ${items ? `<ul class="rows">${items}</ul>` : '<p class="empty">Alle sind da.</p>'}
-    </section>`;
+  const names = [...new Set(list.map((a) => personName(a.person)))];
+  return foldCard('away', {
+    title: '🌴 Wer ist weg?',
+    action: '<button class="link-btn" data-action="absence-new">＋ Eintragen</button>',
+    body: items ? `<ul class="rows">${items}</ul>` : '<p class="empty">Alle sind da.</p>',
+    summary: names.length ? `Bald weg: ${esc(names.join(', '))}` : 'Alle sind da.',
+  });
 }
 
 // Neu eintragen oder (mit absence) bearbeiten – Antippen eines Eintrags in „Wer ist weg?“
@@ -2155,11 +2259,15 @@ function invitesCard() {
         </div>
       </div>`;
   }).join('');
-  return `
-    <section class="card">
-      <div class="card-head"><h2>🙋 Wer hat Bock?</h2><button class="link-btn" data-action="invite-new">＋ Neu</button></div>
-      ${items || '<p class="empty">Gerade nichts los. Kochst du? Lust auf Film oder Bouldern? Frag die anderen!</p>'}
-    </section>`;
+  const active = activeInvites();
+  const waiting = active.filter((i) => i.createdBy !== state.me && !i.responses?.[state.me]).length;
+  return foldCard('invites', {
+    title: '🙋 Wer hat Bock?',
+    action: '<button class="link-btn" data-action="invite-new">＋ Neu</button>',
+    body: items || '<p class="empty">Gerade nichts los. Kochst du? Lust auf Film oder Bouldern? Frag die anderen!</p>',
+    summary: !active.length ? 'Gerade nichts los.'
+      : `${active.map((i) => `${esc(i.emoji ?? '🙋')} ${esc(i.title)}`).join(' · ')}${waiting ? ' · <strong class="fold-alert">wartet auf deine Antwort</strong>' : ''}`,
+  });
 }
 
 function openInviteForm() {
@@ -2253,11 +2361,15 @@ function pollsCard() {
         </div>
       </div>`;
   }).join('');
-  return `
-    <section class="card">
-      <div class="card-head"><h2>🗳️ Abstimmungen</h2><button class="link-btn" data-action="poll-new">＋ Neu</button></div>
-      ${cards || '<p class="empty">Gerade keine Abstimmung. Zum Beispiel: „Pizza oder Sushi am Freitag?“</p>'}
-    </section>`;
+  const open = polls.filter((p) => !p.closed);
+  const missing = open.filter((p) => p.votes?.[state.me] == null).length;
+  return foldCard('polls', {
+    title: '🗳️ Abstimmungen',
+    action: '<button class="link-btn" data-action="poll-new">＋ Neu</button>',
+    body: cards || '<p class="empty">Gerade keine Abstimmung. Zum Beispiel: „Pizza oder Sushi am Freitag?“</p>',
+    summary: !polls.length ? 'Gerade keine Abstimmung.'
+      : `${open.length ? `${open.length} offen` : 'Alle beendet'}${missing ? ` · <strong class="fold-alert">${missing === 1 ? 'deine Stimme fehlt' : `${missing}× fehlt deine Stimme`}</strong>` : ''}`,
+  });
 }
 
 function pollOptionInput(value = '') {
@@ -2657,6 +2769,15 @@ function onClick(event) {
     case 'push-test': pushTest(); break;
     case 'claim': claim(el.dataset.person); break;
     case 'tab': switchTab(el.dataset.tab); break;
+    case 'fold': toggleFold(el.dataset.fold, el.dataset.default === '1'); renderAll(); break;
+    case 'panel-open': openPanel(el.dataset.panel); break;
+    case 'tips-search-toggle':
+      state.tipsSearch = !(state.tipsSearch || state.tipsQuery);
+      if (!state.tipsSearch) state.tipsQuery = '';
+      else if (isFolded('tips')) toggleFold('tips');
+      renderStart();
+      if (state.tipsSearch) $('#tips-search')?.focus();
+      break;
     case 'add-expense': openExpenseForm(); break;
     case 'edit-expense': openExpenseForm(state.expenses.find((e) => e.id === el.dataset.id)); break;
     case 'close-form': el.closest('dialog').close(); break;
@@ -2707,12 +2828,16 @@ function onClick(event) {
     case 'month': {
       const step = Number(el.dataset.step);
       state.monthOffset = step === 0 ? 0 : Math.min(0, state.monthOffset + step);
-      renderAusgaben();
+      renderPanel();
       break;
     }
-    case 'note-new': openNoteForm(); break;
-    case 'note-sort': setNoteSort(el.dataset.mode); renderInfos(); break;
-    case 'note-template': openNoteForm(null, NOTE_TEMPLATES[Number(el.dataset.index)]); break;
+    case 'note-new':
+      if (noteTemplatesLeft().length) openPanel('note-new');
+      else openNoteForm();
+      break;
+    case 'note-blank': closePanel(); openNoteForm(); break;
+    case 'note-sort': setNoteSort(el.dataset.mode); renderInfos(); closePanel(); break;
+    case 'note-template': closePanel(); openNoteForm(null, NOTE_TEMPLATES[Number(el.dataset.index)]); break;
     case 'note-edit': openNoteForm(state.notes.find((n) => n.id === el.dataset.id)); break;
     case 'note-delete': deleteNote(); break;
     case 'note-copy': copyNote(el.dataset.id); break;
@@ -2866,5 +2991,6 @@ $('#shop-form').addEventListener('submit', onSubmitShopping);
 document.querySelectorAll('dialog').forEach((dialog) => dialog.addEventListener('click', (event) => {
   if (event.target === dialog) dialog.close();
 }));
+$('#panel-dialog').addEventListener('close', () => { state.panel = null; });
 
 start();

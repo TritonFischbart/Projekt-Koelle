@@ -188,6 +188,15 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   „N’Ovend“ bis 23, sonst „Jode Naach“, am 11.11. „Kölle Alaaf“ – `koelscheBegruessung`), nächste Termine, Kontostand, Einkaufsliste, eigene
   Putzaufgabe (mit „Erledigt“), „Wer hat Bock?“, Abstimmungen, „Wer ist weg?“, Wochentipps (Bock vor
   Abstimmungen – Wunsch von Lukas, Nov. 2026).
+- **Aufgeräumt (Wunsch von Lukas, 16. Nov. 2026):** Karten lassen sich per Tipp auf die Überschrift
+  **einklappen** (Pfeil ⌄/›, `foldCard`/`foldButton` in `app.js`); jedes Handy merkt sich das
+  (`localStorage` `koelle.folded`). Zugeklappt steht eine kurze Zusammenfassung da (z. B. „deine Stimme
+  fehlt“ in Rot). Einklappbar: alle Karten der Startseite, „Die nächsten Wochen“ im Putzplan (standardmäßig
+  zu) und „Was möchtest du bekommen?“ in ⚙️ (standardmäßig zu). Selten Gebrauchtes öffnet sich als
+  **Fenster von unten** (`#panel-dialog`, `openPanel`/`PANELS`; Inhalt wird bei neuen Daten mit
+  aktualisiert): Monatsübersicht, Daueraufträge, Frühere Abrechnungen (bei Ausgaben ganz unten als drei
+  Zeilen), „＋ Notiz“ (Leere Notiz oder Vorlage) und Notizen sortieren. Wochentipps-Suche erst nach
+  „🔍 Suchen“.
 - **Rückgängig**: Gelöschte Ausgaben, Daueraufträge, Überweisungen, Einkäufe, Notizen,
   Abstimmungen und Abwesenheiten lassen sich 6 Sekunden lang über die Meldung zurückholen.
 - **Offline-Hinweis** oben, wenn das Handy kein Netz hat (Firestore speichert später).
