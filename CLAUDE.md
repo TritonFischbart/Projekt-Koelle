@@ -110,6 +110,9 @@ früheren Gesprächen besprochen und entschieden wurde.
   großer negativer Rand), damit die Tippfläche ~41 px hoch ist, ohne dass sich das Aussehen ändert. Eigene
   `margin`-Regeln für einzelne Text-Knöpfe deshalb um 11 px (oben/unten) bzw. 8 px (seitlich) verringern
   (Operator, 16. Nov. 2026).
+- Kleine runde Symbol-Knöpfe (`.icon-btn.small`, z. B. ✕ und Kategorie-Symbol im Einkauf, ✕ bei „Wer ist weg?“)
+  sind sichtbar 30 px groß, haben aber per `::after` eine unsichtbar größere Tippfläche (ca. 36 × 42 px).
+  Dafür braucht der Knopf `position: relative` (Operator, 21. Nov. 2026).
 - Texte aus der Datenbank immer mit `esc()` ausgeben (Schutz vor HTML-Einschleusung).
 - Formulare liegen als `<dialog>` statisch in `index.html` – nicht in Bereiche
   rendern, die bei jeder Datenänderung neu gezeichnet werden (sonst gehen Eingaben verloren).

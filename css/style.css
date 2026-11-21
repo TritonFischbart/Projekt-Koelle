@@ -468,7 +468,9 @@ main {
 .shop-meta { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
 .shop-item.done .shop-check { background: var(--brand); }
 .shop-item.done .shop-name { text-decoration: line-through; color: var(--muted); font-weight: 400; }
-.icon-btn.small { width: 30px; height: 30px; font-size: 0.85rem; flex: none; }
+.icon-btn.small { width: 30px; height: 30px; font-size: 0.85rem; flex: none; position: relative; }
+/* Unsichtbar größere Tippfläche (ca. 36 × 42 px), Aussehen bleibt gleich */
+.icon-btn.small::after { content: ''; position: absolute; inset: -6px -3px; }
 
 .tabbar button[data-count]:not([data-count=""])::after {
   content: attr(data-count); position: absolute; top: 6px; left: calc(50% + 8px);
@@ -597,7 +599,7 @@ a.btn.full { width: 100%; }
 .start-chore { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .start-chore-name { font-weight: 700; font-size: 1.05rem; }
 .start-chore.done .start-chore-name { text-decoration: line-through; color: var(--muted); }
-.back-link { justify-self: start; background: none; border: 0; padding: 4px 0; color: var(--brand); font-weight: 700; }
+.back-link { justify-self: start; background: none; border: 0; padding: 10px 8px; margin: -6px -8px; color: var(--brand); font-weight: 700; }
 
 /* ---------- Abstimmungen ---------- */
 .poll + .poll { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }

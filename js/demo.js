@@ -1,7 +1,7 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=46';
+import { weekKey } from './chores.js?v=47';
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -74,7 +74,7 @@ export function createDemoBackend() {
         responses: { julian: 'yes' }, createdBy: 'jana', createdAt: created(0) },
     ],
     polls: [
-      { id: 'p1', question: 'Pizza oder Sushi am Freitag?', options: ['Pizza 🍕', 'Sushi 🍣', 'Selber kochen'], until: dayIso(3), votes: { jana: 1, julian: 0 }, closed: false, createdBy: 'jana', createdAt: created(1) },
+      { id: 'p1', question: 'Pizza oder Sushi am Freitag?', options: ['Pizza 🍕', 'Sushi 🍣', 'Selber kochen'], until: dayIso((5 - new Date().getDay() + 7) % 7), votes: { jana: 1, julian: 0 }, closed: false, createdBy: 'jana', createdAt: created(1) },
       { id: 'p0', question: 'Grillen gestern?', options: ['Ja', 'Nein'], until: dayIso(-1), votes: {}, closed: false, createdBy: 'julian', createdAt: created(3) },
     ],
     notes: [
