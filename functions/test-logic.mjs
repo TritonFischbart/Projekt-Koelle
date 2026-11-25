@@ -1,7 +1,7 @@
 // Nur zum Testen (wird nicht bereitgestellt): node functions/test-logic.mjs
 process.env.TZ = 'Europe/Berlin';
 import assert from 'node:assert';
-import { wants, inviteMessages, pollMessages, expenseMessages, expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
+import { wants, inviteMessages, pollMessages, expenseMessages, expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages, tripMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
 import { mondayOf, weekKey } from './shared/chores.js';
 
 // Einstellungen: Standard + eigene Wahl
@@ -83,4 +83,15 @@ assert.deepEqual(dueJobs(new Date(2026, 10, 8, 18)), ['choreReminder']);
 assert.deepEqual(dueJobs(new Date(2026, 10, 3, 8)), ['calendar']);
 assert.deepEqual(dueJobs(new Date(2026, 10, 3, 19)), ['shopping']);
 assert.deepEqual(dueJobs(new Date(2026, 10, 3, 12)), []);
+// „Ich geh jetzt einkaufen“: an die anderen, nicht bei „Bin zurück“ oder gleichem Start
+const trip = { person: 'lukas', at: '2026-11-25T14:00:00.000Z' };
+const tm = tripMessages(null, trip);
+assert.deepEqual(tm.map((m) => m.person), ['jana', 'julian']);
+assert.equal(tm[0].type, 'trips');
+assert.equal(tm[0].title, '🏃 Lukas geht jetzt einkaufen');
+assert.equal(tripMessages(trip, null).length, 0);
+assert.equal(tripMessages(trip, { ...trip }).length, 0);
+assert.equal(tripMessages(trip, { ...trip, at: '2026-11-26T10:00:00.000Z' }).length, 2);
+assert.equal(wants({}, 'jana', 'trips'), true);
+
 console.log('OK', start.map(m => `${m.person}: ${m.body}`));

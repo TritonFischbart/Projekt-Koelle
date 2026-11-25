@@ -1,7 +1,7 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=48';
+import { weekKey } from './chores.js?v=49';
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -63,6 +63,10 @@ export function createDemoBackend() {
     ],
     noteImages: [
       { id: 'img1', noteId: 'n3', data: demoFloorPlan(), width: 800, height: 520, createdBy: 'lukas', createdAt: created(10) },
+    ],
+    // Jul ist gerade einkaufen (zeigt den Hinweis „Jul geht gerade einkaufen“)
+    shoppingTrips: [
+      { id: 'julian', person: 'julian', at: new Date(Date.now() - 20 * 60000).toISOString() },
     ],
     absences: [
       { id: 'a1', person: 'jana', from: daysAgo(-1), to: daysAgo(-4), note: 'Hamburg' },

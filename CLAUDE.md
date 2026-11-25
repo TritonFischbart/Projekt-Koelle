@@ -137,8 +137,9 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `settings/einkauf` | Eigene Reihenfolge der Einkaufs-Kategorien (`order[]`) |
 | `absences` | Abwesenheiten: `person, from, to ("2026-11-10"), note, createdBy, updatedBy` |
 | `invites` | „Wer hat Bock?“: `emoji, title, note, at (ISO oder null = jetzt), kind (food/other), responses {person: yes/no}` |
+| `shoppingTrips/{person}` | „Ich geh jetzt einkaufen“: `person, at` (ISO-Zeit); gilt 2 Std., „Bin zurück“ löscht |
 | `pushTokens/{token}` | Ein Gerät, das Nachrichten bekommt: `person, device` (ungültige räumt der Dienst auf) |
-| `pushSettings/{person}` | Welche Nachrichtenarten eine Person will: `types {invites, polls, expenses, chores, calendar, shopping}` |
+| `pushSettings/{person}` | Welche Nachrichtenarten eine Person will: `types {invites, polls, expenses, notes, absences, chores, calendar, trips, shopping}` |
 | `pushTests` | „Test-Nachricht senden“ – der Dienst schickt sie und löscht den Eintrag |
 | `polls` | Abstimmungen: `question, options[], until?, votes {person: index}, closed, closedAt, closedBy` (Stimme per `votes.{person}` speichern) |
 
@@ -243,6 +244,10 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Automatische Zuordnung per Stichwort (bei zusammengesetzten Wörtern zählt das
   Ende: „Orangensaft“ → Getränke). Kategorie lässt sich pro Eintrag ändern; die
   App merkt sich das in `favorites`.
+- **„🏃 Ich geh jetzt einkaufen“** (aus der Ideen-Sammlung #15, umgesetzt 25. Nov. 2026): Knopf über „Fehlt noch“.
+  Die anderen sehen 2 Std. lang „Jul geht gerade einkaufen – trag schnell noch ein, was fehlt!“ (auch auf der
+  Start-Kachel „🏃 Jul kauft ein“) und bekommen eine Push-Nachricht (Art `trips`, Standard an, `pushTrip`/`tripMessages`).
+  Wer unterwegs ist, sieht „Bin zurück“ (löscht den Eintrag; dabei keine Nachricht).
 - **Eigene Reihenfolge** der Kategorien („↕️ Reihenfolge“ mit ▲▼, passend zum
   Stamm-Supermarkt), gespeichert in `settings/einkauf` (`order[]`), gilt für alle.
 
@@ -301,7 +306,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   geänderte Notiz (nur Titel/Text, Verschieben/Anheften nicht) · 🌴 neue Abwesenheit · 🧹 Putzplan
   (Mo 9 Uhr: deine Aufgabe; So 18 Uhr: falls noch offen) · 📅 Termine heute (8 Uhr) · 🛒 Einkaufsliste (19 Uhr).
   Änderungen kamen am 5. Nov. 2026 dazu (Wunsch von Lukas: „wenn jemand etwas ändert“). Gelöschtes
-  wird nicht gemeldet (wegen „Rückgängig“). Funktionen: `pushExpenseChange`, `pushNote`,
+  wird nicht gemeldet (wegen „Rückgängig“). 🏃 „Ich geh jetzt einkaufen“ · Funktionen: `pushTrip`, `pushExpenseChange`, `pushNote`,
   `pushInviteAnswer`, `pushPollClosed`, `pushAbsence`, `pushAbsenceChange`.
 - Zeitgesteuertes läuft über **einen** stündlichen Job (`pushHourly`, im Gratis-Kontingent).
   Region `europe-west3`, Zeitzone Europe/Berlin.
@@ -450,7 +455,7 @@ Claude-Sitzung (Operator), die so arbeitet:
   gemeinsame Spotify-Playlist einbetten. Vorher mit Lukas klären, welche Variante.
 - **Müllabfuhr-Termine** der AWB Köln in den Google-Kalender übernehmen (ohne Code).
 - ~~Test mit Jana und Jul (#10)~~ – erledigt am 1. Nov. 2026: Anmeldung bei allen dreien klappt.
-- **Ideen-Sammlung** (#15, erst nach dem Test entscheiden): „Ich geh jetzt einkaufen“,
+- **Ideen-Sammlung** (#15): ~~„Ich geh jetzt einkaufen“~~ (erledigt 25. Nov. 2026),
   Schnell-Notizen auf der Startseite, Bewertung für den WG-Abend.
 - **Ausdrücklich nicht gewünscht** (nicht bauen): Erinnerung an offene Schulden,
   mehrere Einkaufslisten, Frist bei Abstimmungen.
