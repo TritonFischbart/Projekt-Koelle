@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "chatgpt": {
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/tools/chatgpt-kontrolle.mjs"]
+    }
+  }
+}

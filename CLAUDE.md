@@ -95,6 +95,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `js/demo.js` | Demo-Backend mit Beispieldaten (`?demo`) |
 | `manifest.webmanifest`, `icons/` | App-Symbol (Ehrenfelder Wappen in Rot-Weiß) für den Home-Bildschirm |
 | `ANLEITUNG.md` | Einrichtungs-Anleitung für Lukas (Firebase, Pages, Kalender) |
+| `tools/chatgpt-kontrolle.mjs`, `.mcp.json`, `.claude/settings.json` | ChatGPT-Gegenprüfung (Tool `ask_chatgpt`, siehe unten) – gehört nicht zur Website |
 
 ### Wichtige Regeln im Code
 
@@ -378,6 +379,28 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Regeln: **nur echte Termine mit Quelle** (Veranstalter-, Stadt- oder Ticketseite), nichts erfinden,
   unsichere Angaben weglassen statt raten, 10–20 Tipps (wegen der Suche gern mehr), jeder mit `tags`,
   bunte Mischung, keine Werbung für Zweifelhaftes.
+
+## 🔍 ChatGPT-Gegenprüfung (seit 25. Nov. 2026, Wunsch von Lukas)
+
+Claude hat das Tool **`ask_chatgpt`** (MCP-Server `chatgpt` aus `.mcp.json`, Code in
+`tools/chatgpt-kontrolle.mjs`, ohne npm). Damit holt Claude eine zweite Meinung von ChatGPT ein.
+
+- **Wann nutzen:** Nach **größeren** Änderungen, bevor die Pull Request gemergt wird – vor allem bei
+  neuen Funktionen, Geld-Logik (`money.js`), Putzplan-Verteilung, Push-Dienst (`functions/`),
+  Datenbank-Feldern und allem, was alte Daten betrifft. Bei kleinen Text-/Design-Änderungen nicht
+  nötig (kostet Lukas jedes Mal ein paar Cent).
+- **Wie:** Den Diff bzw. die betroffenen Code-Stellen als `context` mitschicken und konkret fragen
+  (z. B. „Findest du Bugs oder Randfälle?“). ChatGPT kennt weder das Gespräch noch das Repo.
+- **Nie mitschicken:** API-Schlüssel, E-Mail-Adressen, Kalender-ID, Inhalte aus der Datenbank.
+- **Einwände kritisch prüfen**, nicht blind übernehmen – ChatGPT kann sich irren. Was übernommen
+  wurde, in der PR-Beschreibung kurz erwähnen („ChatGPT-Prüfung: …“).
+- **Wenn das Tool fehlt oder einen Fehler meldet** (z. B. kein Guthaben): normal weiterarbeiten und
+  Lukas den Fehler in einem Satz nennen. Nicht deswegen die Arbeit abbrechen.
+- **Einrichtung (nur in Lukas' Claude-Code-Umgebung, nie im Repo!):** Der OpenAI-API-Schlüssel ist als
+  **Network Secret** der Cloud-Umgebung hinterlegt (Website `api.openai.com`, Kopfzeile `Authorization`,
+  Präfix `Bearer`). Der Proxy hängt ihn an Anfragen an – im Code steht kein Schlüssel. Modell
+  `gpt-6.2-sol`, änderbar über die Umgebungsvariable `OPENAI_MODEL`. Guthaben: platform.openai.com
+  → Billing.
 
 ## 🤖 Wartungs-Operator (seit 7. Nov. 2026, Wunsch von Lukas)
 
