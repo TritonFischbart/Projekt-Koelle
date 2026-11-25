@@ -143,6 +143,18 @@ export function absenceMessages(abs, changedFrom = null) {
   }));
 }
 
+// „Kurz notiert“ (Startseite): neue Zettel an die anderen – gleiche Einstellung wie Schwarzes Brett.
+export function quickNoteMessages(note) {
+  if (!note?.createdBy || !note.text) return [];
+  const text = String(note.text).replace(/\s*\n+\s*/g, ' · ').trim();
+  return others(note.createdBy).map((person) => ({
+    person,
+    type: 'notes',
+    title: `📝 ${personName(note.createdBy)} hat etwas notiert`,
+    body: text.length > 120 ? `${text.slice(0, 117)}…` : text,
+  }));
+}
+
 // „Ich geh jetzt einkaufen“: an die anderen, damit sie noch etwas auf die Liste setzen können.
 // Nur beim Losgehen (neu oder neu gestartet), nicht bei „Bin zurück“.
 export function tripMessages(before, after) {

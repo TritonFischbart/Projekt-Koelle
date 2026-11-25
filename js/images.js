@@ -25,11 +25,14 @@ async function loadImage(file) {
 }
 
 // Liefert { data: "data:image/jpeg;base64,…", width, height } oder wirft einen Fehler.
-export async function compressImage(file) {
+// Kassenbons: kleiner (max. 1400 px, ~250 KB) – Text bleibt lesbar, die Datenbank bleibt schlank.
+export const RECEIPT_OPTIONS = { sizes: [1400, 1200, 1000, 800], maxChars: 350000 };
+
+export async function compressImage(file, { sizes = SIZES, maxChars = MAX_CHARS } = {}) {
   const source = await loadImage(file);
   const srcW = source.width;
   const srcH = source.height;
-  for (const size of SIZES) {
+  for (const size of sizes) {
     const scale = Math.min(1, size / Math.max(srcW, srcH));
     const width = Math.round(srcW * scale);
     const height = Math.round(srcH * scale);
@@ -42,7 +45,7 @@ export async function compressImage(file) {
     ctx.drawImage(source, 0, 0, width, height);
     for (const quality of QUALITIES) {
       const data = canvas.toDataURL('image/jpeg', quality);
-      if (data.length <= MAX_CHARS) return { data, width, height };
+      if (data.length <= maxChars) return { data, width, height };
     }
   }
   throw new Error('Das Bild ist zu groß.');

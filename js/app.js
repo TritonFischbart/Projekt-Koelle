@@ -2,28 +2,30 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=50';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=50';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=52';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=52';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=50';
-import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=50';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=50';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=50';
-import { compressImage } from './images.js?v=50';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=50';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=50';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=50';
-import { toPlain, expensesCsv } from './export.js?v=50';
-import { firebaseConfig } from './firebase-config.js?v=50';
-import { weisheitDesTages } from './koelsch.js?v=50';
-import { noteTextHtml, continueList } from './notetext.js?v=50';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=50';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=50';
+} from './chores.js?v=52';
+import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=52';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=52';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=52';
+import { compressImage, RECEIPT_OPTIONS } from './images.js?v=52';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji, inviteParticipants, isRatingOpen, ratingSummary, bestEvenings } from './invites.js?v=52';
+import { allStations, isStreamUrl, isWebUrl, playlistService } from './radio.js?v=52';
+import { visibleQuickNotes, agoText, QUICK_NOTE_MAX } from './quicknotes.js?v=52';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=52';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=52';
+import { toPlain, expensesCsv } from './export.js?v=52';
+import { firebaseConfig } from './firebase-config.js?v=52';
+import { weisheitDesTages } from './koelsch.js?v=52';
+import { noteTextHtml, continueList } from './notetext.js?v=52';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=52';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=52';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=50) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=52) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -58,6 +60,12 @@ const state = {
   tab: 'start',
   absences: [],
   trips: [],
+  quickNotes: [],
+  radioSettings: null,
+  receiptCache: {},
+  formReceipts: [],
+  pendingReceipts: [],
+  removedReceipts: [],
   polls: [],
   invites: [],
   pushSettings: {},
@@ -81,7 +89,10 @@ function toggleFold(id, byDefault = false) {
 }
 function foldButton(id, label, byDefault = false, cls = '') {
   const folded = isFolded(id, byDefault);
-  return `<button type="button" class="fold-btn${cls}" data-action="fold" data-fold="${id}" data-default="${byDefault ? 1 : 0}" aria-expanded="${!folded}">${label}<span class="fold-chev" aria-hidden="true"></span></button>`;
+  const chev = '<span class="fold-chev" aria-hidden="true"></span>';
+  // Pfeil ans letzte Wort kleben, damit er bei Umbruch nicht allein in der neuen Zeile steht
+  const content = label.includes('<') ? `${label}${chev}` : label.replace(/(\S+)$/, `<span class="nowrap">$1${chev}</span>`);
+  return `<button type="button" class="fold-btn${cls}" data-action="fold" data-fold="${id}" data-default="${byDefault ? 1 : 0}" aria-expanded="${!folded}">${content}</button>`;
 }
 // Karte mit Überschrift zum Einklappen. Zugeklappt steht nur eine kurze Zusammenfassung da.
 function foldCard(id, { title, action = '', body, summary = '', byDefault = false }) {
@@ -181,9 +192,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=50')).createDemoBackend();
+      backend = (await import('./demo.js?v=52')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=50')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=52')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -218,6 +229,11 @@ function handleUser(user) {
   listen('noteImages', (docs) => { state.noteImages = docs; renderAll(); });
   listen('absences', (docs) => { state.absences = docs; renderAll(); });
   listen('shoppingTrips', (docs) => { state.trips = docs; renderAll(); });
+  listen('quickNotes', (docs) => {
+    state.quickNotes = docs;
+    cleanupQuickNotes();
+    renderAll();
+  });
   listen('polls', (docs) => { state.polls = docs; renderAll(); });
   listen('invites', (docs) => { state.invites = docs; renderAll(); });
   listen('pushSettings', (docs) => { state.pushSettings = Object.fromEntries(docs.map((d) => [d.id, d])); renderAll(); });
@@ -229,6 +245,7 @@ function handleUser(user) {
     state.areas = plan?.areas?.length ? plan.areas : null;
     state.backup = docs.find((d) => d.id === 'backup') ?? null;
     state.shopOrder = docs.find((d) => d.id === 'einkauf')?.order ?? null;
+    state.radioSettings = docs.find((d) => d.id === 'radio') ?? null;
     const kal = docs.find((d) => d.id === 'kalender');
     const config = kal?.calendarId && kal?.apiKey ? { calendarId: kal.calendarId, apiKey: kal.apiKey } : null;
     const changed = JSON.stringify(config) !== JSON.stringify(state.calendar.config);
@@ -350,6 +367,7 @@ function renderAll() {
   renderSettings();
   renderStart();
   renderPanel();
+  renderRadio();
   const open = myOpenChores().length;
   const tabButton = document.querySelector('.tabbar [data-tab=putzplan]');
   tabButton.classList.toggle('has-badge', open > 0);
@@ -357,7 +375,8 @@ function renderAll() {
   // Punkt an "Start": Abstimmung oder Aktion wartet auf deine Antwort
   document.querySelector('.tabbar [data-tab=start]').classList.toggle('has-badge',
     openPolls().some((p) => p.votes?.[state.me] == null)
-    || activeInvites().some((i) => i.createdBy !== state.me && !i.responses?.[state.me]));
+    || activeInvites().some((i) => i.createdBy !== state.me && !i.responses?.[state.me])
+    || ratableInvites().some((i) => !i.ratings?.[state.me]));
 }
 
 // ---------- Wischen zwischen den Bereichen ----------
@@ -515,6 +534,13 @@ const PANELS = {
   history: () => ({ title: '🗂️ Frühere Abrechnungen', body: historyBody() }),
   'note-new': () => ({ title: '＋ Neue Notiz', body: noteNewBody() }),
   'note-sort': () => ({ title: '↕️ Notizen sortieren', body: noteSortBody() }),
+  best: () => ({ title: '🏆 Beste WG-Abende', body: bestEveningsBody() }),
+  receipts: () => ({
+    title: '🧾 Kassenbons',
+    body: `<div class="note-thumbs">${(state.receiptCache[state.receiptPanel] ?? []).map((r, i) => `
+      <button type="button" class="receipt-view" data-action="receipt-panel-view" data-key="${i}" aria-label="Kassenbon ${i + 1} groß ansehen"><img src="${esc(r.data)}" alt="Kassenbon ${i + 1}"></button>`).join('')}</div>
+      <p class="hint">Antippen = groß ansehen.</p>`,
+  }),
 };
 
 function openPanel(id) {
@@ -704,7 +730,7 @@ function expenseRow(e, readonly) {
   const inner = `
     <span class="entry-icon" aria-hidden="true">${c.icon}</span>
     <span class="entry-main">
-      <span class="entry-title">${e.recurringId ? '🔁 ' : ''}${esc(e.description)}</span>
+      <span class="entry-title">${e.recurringId ? '🔁 ' : ''}${esc(e.description)}${e.receipts ? ' <span class="receipt-flag" title="mit Kassenbon">🧾</span>' : ''}</span>
       <span class="entry-sub">${esc(personName(e.paidBy))} hat bezahlt · ${esc(forWhom(e.splitAmong ?? []))}${e.items ? ' (nach Posten)' : e.shares ? ' (ungleich)' : ''} · ${formatDate(e.date)}</span>
     </span>
     <span class="entry-right">
@@ -712,7 +738,9 @@ function expenseRow(e, readonly) {
       <span class="entry-share">${myShare ? `dein Anteil ${formatEuro(myShare)}` : 'ohne dich'}</span>
     </span>`;
   return readonly
-    ? `<li><div class="entry">${inner}</div></li>`
+    ? (e.receipts
+      ? `<li><button class="entry" data-action="receipt-show" data-id="${esc(e.id)}" aria-label="Kassenbon ansehen">${inner}</button></li>`
+      : `<li><div class="entry">${inner}</div></li>`)
     : `<li><button class="entry" data-action="edit-expense" data-id="${esc(e.id)}">${inner}</button></li>`;
 }
 
@@ -1989,7 +2017,7 @@ function renderNoteFormImages() {
   ];
   $('#n-images').innerHTML = all.map((img) => `
     <span class="note-thumb">
-      <img src="${img.data}" alt="Bild">
+      <img src="${esc(img.data)}" alt="Bild">
       <button type="button" class="thumb-remove" data-action="note-image-remove" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Bild entfernen">✕</button>
     </span>`).join('');
 }
@@ -2112,6 +2140,8 @@ async function exportJson() {
     absences: state.absences,
     polls: state.polls,
     invites: state.invites,
+    quickNotes: state.quickNotes,
+    radio: state.radioSettings,
   });
   const saved = await saveFile(`projekt-koelle-sicherung-${todayISO()}.json`, JSON.stringify(data, null, 2), 'application/json');
   if (saved) {
@@ -2185,6 +2215,7 @@ function renderStartContent() {
       </button>
     </div>
     ${startChoreCard(myChores)}
+    ${quickNotesCard()}
     ${invitesCard()}
     ${pollsCard()}
     ${absencesCard()}
@@ -2372,6 +2403,306 @@ function deleteAbsence(id) {
   if (absence) removeWithUndo('Abwesenheit gelöscht', [{ col: 'absences', doc: absence }]);
 }
 
+// ---------- 📝 Kurz notiert (Startseite) ----------
+
+function quickNotesCard() {
+  const notes = visibleQuickNotes(state.quickNotes, toMillis);
+  const items = notes.map((n) => `
+      <li class="quick-note">
+        <button class="quick-note-main" data-action="quicknote-edit" data-id="${esc(n.id)}">
+          <span class="quick-note-text">${esc(n.text)}</span>
+          <span class="quick-note-meta">${esc(personName(n.createdBy))} · ${esc(agoText(toMillis(n.createdAt)))}${n.updatedBy && n.updatedBy !== n.createdBy ? ` · geändert von ${esc(personName(n.updatedBy))}` : ''}</span>
+        </button>
+        <button class="icon-btn small" data-action="quicknote-delete" data-id="${esc(n.id)}" aria-label="Zettel löschen">✕</button>
+      </li>`).join('');
+  return foldCard('quicknotes', {
+    title: '📝 Kurz notiert',
+    action: '<button class="link-btn" data-action="quicknote-new">＋ Neu</button>',
+    body: items ? `<ul class="quick-list">${items}</ul>` : '<p class="empty">Nichts notiert. Kurze Info für die anderen? „Bin heute spät da“, „Paket im Flur“ …</p>',
+    summary: notes.length ? `${notes.length === 1 ? '1 Zettel' : `${notes.length} Zettel`}: ${esc(notes[0].text.slice(0, 60))}${notes[0].text.length > 60 ? '…' : ''}` : 'Nichts notiert.',
+  });
+}
+
+// Zettel, die älter als 7 Tage sind, einmal pro App-Start aus der Datenbank löschen
+let quickCleaned = false;
+function cleanupQuickNotes() {
+  if (quickCleaned || !state.quickNotes.length) return;
+  quickCleaned = true;
+  const visible = new Set(visibleQuickNotes(state.quickNotes, toMillis).map((n) => n.id));
+  state.quickNotes
+    .filter((n) => !visible.has(n.id) && toMillis(n.createdAt) > 0)
+    .forEach((n) => backend.remove('quickNotes', n.id).catch((err) => console.error(err)));
+}
+
+function openQuickForm(note = null) {
+  state.editingQuick = note?.id ?? null;
+  $('#q-head').textContent = note ? 'Zettel bearbeiten' : 'Kurz notiert';
+  $('#q-text').value = note?.text ?? '';
+  $('#q-error').textContent = '';
+  $('#q-delete').hidden = !note;
+  $('#quick-dialog').showModal();
+}
+
+function onSubmitQuick(event) {
+  event.preventDefault();
+  const text = $('#q-text').value.trim().slice(0, QUICK_NOTE_MAX);
+  if (!text) {
+    $('#q-error').textContent = 'Bitte etwas eintragen.';
+    return;
+  }
+  const id = state.editingQuick;
+  (id
+    ? backend.update('quickNotes', id, { text, updatedBy: state.me, updatedAt: backend.now() })
+    : backend.add('quickNotes', { text, createdBy: state.me, createdAt: backend.now() })).catch(showError);
+  $('#quick-dialog').close();
+  toast(id ? 'Zettel geändert ✓' : 'Notiert ✓ Die anderen sehen es auf der Startseite.');
+}
+
+function deleteQuick(id) {
+  const note = state.quickNotes.find((n) => n.id === id);
+  if (!note) return;
+  if ($('#quick-dialog').open) $('#quick-dialog').close();
+  removeWithUndo('Zettel gelöscht', [{ col: 'quickNotes', doc: note }]);
+}
+
+// ---------- ⭐ Wie war's? (Bewertung für den WG-Abend) ----------
+
+const ratableInvites = () => state.invites
+  .filter((i) => isRatingOpen(i, toMillis(i.createdAt), PERSON_IDS) && inviteParticipants(i, PERSON_IDS).includes(state.me))
+  .sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+
+function starsHtml(inv, mine) {
+  return `<div class="stars" role="group" aria-label="Bewertung für ${esc(inv.title)}">${[1, 2, 3, 4, 5].map((n) => `
+    <button type="button" class="star${mine >= n ? ' on' : ''}" data-action="rate" data-id="${esc(inv.id)}" data-stars="${n}" aria-label="${n} ${n === 1 ? 'Stern' : 'Sterne'}"${mine === n ? ' aria-pressed="true"' : ''}>★</button>`).join('')}</div>`;
+}
+
+function ratingBlock(inv) {
+  const mine = inv.ratings?.[state.me] ?? 0;
+  const sum = ratingSummary(inv);
+  const people = inviteParticipants(inv, PERSON_IDS).length;
+  return `
+    <div class="rating">
+      <span class="rating-title">${mine ? 'Deine Bewertung' : 'Wie war\'s?'} ${esc(inv.emoji || '🙋')} ${esc(inv.title)}</span>
+      ${starsHtml(inv, mine)}
+      <span class="rating-sub">${sum ? `<span class="rating-result">⭐ ${sum.text}</span> · ${sum.count} von ${people} ${sum.count === 1 ? 'hat' : 'haben'} bewertet` : 'Noch keine Bewertung – sei die/der Erste!'}${mine ? ' · nochmal tippen = ändern' : ''}</span>
+    </div>`;
+}
+
+function rateInvite(id, stars) {
+  const inv = state.invites.find((i) => i.id === id);
+  if (!inv) return;
+  const current = inv.ratings?.[state.me];
+  backend.update('invites', id, { [`ratings.${state.me}`]: stars }).catch(showError);
+  toast(current ? 'Bewertung geändert ✓' : 'Danke für deine Bewertung ⭐');
+}
+
+function bestEveningsBody() {
+  const best = bestEvenings(state.invites, toMillis);
+  if (!best.length) return '<p class="empty">Noch keine bewerteten WG-Abende. Nach einer „Wer hat Bock?“-Aktion könnt ihr sie mit Sternen bewerten.</p>';
+  return `<ol class="best-list">${best.map(({ inv, sum }, i) => `
+    <li class="best">
+      <span class="best-emoji" aria-hidden="true">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : esc(inv.emoji || '🙋')}</span>
+      <span class="best-main"><strong>${esc(inv.emoji || '')} ${esc(inv.title)}</strong>
+        <small>${esc(personName(inv.createdBy))} · ${new Date(Date.parse(inv.at ?? '') || toMillis(inv.createdAt)).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })} · ${sum.count} ${sum.count === 1 ? 'Bewertung' : 'Bewertungen'}</small></span>
+      <span class="best-score">⭐ ${sum.text}</span>
+    </li>`).join('')}</ol>`;
+}
+
+// ---------- 📻 WG-Radio ----------
+
+const radio = { id: null, status: 'off' }; // status: off | loading | playing | paused | error
+const radioStations = () => allStations(state.radioSettings?.stations ?? []);
+const currentStation = () => radioStations().find((s) => s.id === radio.id) ?? null;
+
+function openRadio() {
+  if (!$('#radio-dialog').open) $('#radio-dialog').showModal();
+  renderRadio();
+}
+
+function playStation(id) {
+  const station = radioStations().find((s) => s.id === id);
+  if (!station) return;
+  if (radio.id === id && (radio.status === 'playing' || radio.status === 'loading')) {
+    pauseRadio();
+    return;
+  }
+  radio.id = id;
+  startStream(station);
+}
+
+// Live-Radio immer frisch starten (sonst spielt es nach einer Pause Altes ab)
+function startStream(station) {
+  const audio = $('#radio-audio');
+  radio.status = 'loading';
+  clearTimeout(radio.timer);
+  const id = station.id;
+  radio.timer = setTimeout(() => { if (radio.id === id && radio.status === 'loading') radioFailed(); }, 15000);
+  audio.src = station.url;
+  audio.play().catch((err) => {
+    if (err?.name === 'AbortError') return; // anderer Sender gewählt
+    if (err?.name === 'NotAllowedError') {
+      radio.status = 'paused';
+      renderRadio();
+      return;
+    }
+    radioFailed();
+  });
+  if ('mediaSession' in navigator && window.MediaMetadata) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: station.name,
+      artist: 'WG-Radio · Projekt Kölle',
+      artwork: [{ src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
+    });
+  }
+  renderRadio();
+}
+
+function pauseRadio() {
+  $('#radio-audio').pause();
+  radio.status = 'paused';
+  renderRadio();
+}
+
+function toggleRadio() {
+  const station = currentStation();
+  if (!station) return;
+  if (radio.status === 'playing' || radio.status === 'loading') pauseRadio();
+  else startStream(station);
+}
+
+function stopRadio() {
+  clearTimeout(radio.timer);
+  const audio = $('#radio-audio');
+  audio.pause();
+  audio.removeAttribute('src');
+  audio.load();
+  radio.id = null;
+  radio.status = 'off';
+  renderRadio();
+}
+
+function radioFailed() {
+  if (!radio.id) return;
+  radio.status = 'error';
+  renderRadio();
+}
+
+function radioStateText(status) {
+  return { loading: 'Lädt …', playing: 'Läuft', paused: 'Pause', error: 'Geht gerade nicht' }[status] ?? '';
+}
+
+function renderRadio() {
+  const station = currentStation();
+  if (radio.id && !station) { stopRadio(); return; } // Sender wurde gelöscht
+  const on = Boolean(station);
+  document.body.classList.toggle('radio-on', on);
+  document.body.classList.toggle('radio-playing', on && radio.status === 'playing');
+  $('#radio-bar').hidden = !on;
+  $('#radio-btn').setAttribute('aria-pressed', String(on));
+  if (on) {
+    $('#radio-bar-name').textContent = station.name;
+    $('#radio-bar-state').textContent = `WG-Radio · ${radioStateText(radio.status)}`;
+    const playing = radio.status === 'playing' || radio.status === 'loading';
+    $('#radio-bar-toggle').textContent = playing ? '⏸' : '▶︎';
+    $('#radio-bar-toggle').setAttribute('aria-label', playing ? 'Pause' : 'Weiterhören');
+  }
+  if (!$('#radio-dialog').open) return;
+  const playlist = isWebUrl(state.radioSettings?.playlistUrl ?? '') ? state.radioSettings.playlistUrl : '';
+  const stationRow = (s) => {
+    const active = s.id === radio.id;
+    return `
+      <li class="station">
+        <button type="button" class="station-play${active ? ' active' : ''}" data-action="radio-play" data-id="${esc(s.id)}">
+          <span class="station-icon" aria-hidden="true">${esc(s.icon)}</span>
+          <span class="station-text"><strong>${esc(s.name)}</strong>${s.hint ? `<small>${esc(s.hint)}</small>` : '<small>Eigener Sender</small>'}</span>
+          <span class="station-state">${active ? radioStateText(radio.status) : '▶︎'}</span>
+        </button>
+        ${s.custom ? `<button type="button" class="icon-btn small" data-action="radio-edit" data-id="${esc(s.id)}" aria-label="${esc(s.name)} bearbeiten">✎</button>` : ''}
+      </li>`;
+  };
+  $('#radio-body').innerHTML = `
+    ${radio.status === 'error' && station ? `<p class="radio-error">„${esc(station.name)}“ ist gerade nicht erreichbar. Versuch es gleich nochmal oder nimm einen anderen Sender.</p>` : ''}
+    <ul class="station-list">${radioStations().map(stationRow).join('')}</ul>
+    <button type="button" class="link-btn" data-action="radio-edit" style="margin-top: 1px">＋ Eigenen Sender hinzufügen</button>
+    <h3 class="radio-section-title">🎵 Unsere Playlist</h3>
+    <div class="radio-playlist">
+      ${playlist
+        ? `<a class="btn primary full" href="${esc(playlist)}" target="_blank" rel="noopener">🎵 Playlist in ${esc(playlistService(playlist))} öffnen</a>
+           <button type="button" class="link-btn" data-action="radio-playlist">Link ändern</button>`
+        : `<p class="hint">Habt ihr eine gemeinsame Playlist, z. B. bei Spotify? Link hier eintragen – dann ist sie für alle mit einem Tipp da.</p>
+           <button type="button" class="btn outline full" data-action="radio-playlist">＋ Playlist-Link eintragen</button>`}
+    </div>
+    <p class="hint">Das Radio läuft weiter, während du in der App unterwegs bist. Unten erscheint dann eine Leiste zum Anhalten.</p>`;
+}
+
+function openRadioEdit(id = null, kind = 'station') {
+  state.radioEdit = { id, kind };
+  const station = id ? (state.radioSettings?.stations ?? []).find((s) => s.id === id) : null;
+  const isPlaylist = kind === 'playlist';
+  $('#r-head').textContent = isPlaylist ? 'Playlist-Link' : station ? 'Sender bearbeiten' : 'Eigener Sender';
+  $('#r-name-row').hidden = isPlaylist;
+  $('#r-name').value = station?.name ?? '';
+  $('#r-url-label').textContent = isPlaylist ? 'Link zur Playlist' : 'Stream-Adresse';
+  $('#r-url').value = isPlaylist ? (state.radioSettings?.playlistUrl ?? '') : (station?.url ?? '');
+  $('#r-hint').textContent = isPlaylist
+    ? 'In Spotify: Playlist → „…“ → „Teilen“ → „Link kopieren“. Feld leeren = Link entfernen.'
+    : 'Die Adresse des Streams (beginnt mit https://), oft auf der Webseite des Senders unter „Webradio“ oder „Stream-URL“.';
+  $('#r-error').textContent = '';
+  $('#r-delete').hidden = isPlaylist || !station;
+  $('#radio-edit-dialog').showModal();
+}
+
+function saveRadioSettings(changes) {
+  const current = state.radioSettings ?? {};
+  return backend.set('settings', 'radio', {
+    stations: current.stations ?? [],
+    playlistUrl: current.playlistUrl ?? '',
+    ...changes,
+    updatedBy: state.me,
+    updatedAt: backend.now(),
+  }).catch(showError);
+}
+
+function onSubmitRadioEdit(event) {
+  event.preventDefault();
+  const { id, kind } = state.radioEdit ?? {};
+  const url = $('#r-url').value.trim();
+  if (kind === 'playlist') {
+    if (url && !isWebUrl(url)) {
+      $('#r-error').textContent = 'Das sieht nicht wie ein Link aus. Er beginnt mit https://';
+      return;
+    }
+    saveRadioSettings({ playlistUrl: url });
+    $('#radio-edit-dialog').close();
+    toast(url ? 'Playlist-Link gespeichert ✓' : 'Playlist-Link entfernt');
+    return;
+  }
+  const name = $('#r-name').value.trim();
+  const error = !name ? 'Bitte einen Namen eingeben.'
+    : !isStreamUrl(url) ? 'Bitte eine Stream-Adresse eingeben, die mit https:// beginnt.' : '';
+  $('#r-error').textContent = error;
+  if (error) return;
+  const stations = [...(state.radioSettings?.stations ?? [])];
+  if (id) {
+    const i = stations.findIndex((s) => s.id === id);
+    if (i >= 0) stations[i] = { ...stations[i], name, url };
+  } else {
+    stations.push({ id: `own${Date.now().toString(36)}`, name, url, createdBy: state.me });
+  }
+  saveRadioSettings({ stations });
+  $('#radio-edit-dialog').close();
+  toast(id ? 'Sender geändert ✓' : 'Sender hinzugefügt ✓ Antippen zum Hören.');
+}
+
+function deleteRadioStation() {
+  const id = state.radioEdit?.id;
+  const station = (state.radioSettings?.stations ?? []).find((s) => s.id === id);
+  if (!station || !confirm(`Sender „${station.name}“ für alle löschen?`)) return;
+  saveRadioSettings({ stations: (state.radioSettings?.stations ?? []).filter((s) => s.id !== id) });
+  $('#radio-edit-dialog').close();
+  toast('Sender gelöscht');
+}
+
 // ---------- Wer hat Bock? ----------
 
 const activeInvites = () => state.invites
@@ -2409,12 +2740,21 @@ function invitesCard() {
   }).join('');
   const active = activeInvites();
   const waiting = active.filter((i) => i.createdBy !== state.me && !i.responses?.[state.me]).length;
+  const ratable = ratableInvites();
+  const unrated = ratable.filter((i) => !i.ratings?.[state.me]);
+  const ratings = ratable.map(ratingBlock).join('');
+  const hasBest = state.invites.some((i) => ratingSummary(i));
+  const best = hasBest ? '<button class="link-btn best-link" data-action="panel-open" data-panel="best">🏆 Beste WG-Abende</button>' : '';
+  const summaryParts = [
+    active.length ? active.map((i) => `${esc(i.emoji ?? '🙋')} ${esc(i.title)}`).join(' · ') : 'Gerade nichts los.',
+    waiting ? '<strong class="fold-alert">wartet auf deine Antwort</strong>' : '',
+    unrated.length ? '<strong class="fold-alert">Wie war\'s? Bitte bewerten</strong>' : '',
+  ].filter(Boolean);
   return foldCard('invites', {
     title: '🙋 Wer hat Bock?',
     action: '<button class="link-btn" data-action="invite-new">＋ Neu</button>',
-    body: items || '<p class="empty">Gerade nichts los. Kochst du? Lust auf Film oder Bouldern? Frag die anderen!</p>',
-    summary: !active.length ? 'Gerade nichts los.'
-      : `${active.map((i) => `${esc(i.emoji ?? '🙋')} ${esc(i.title)}`).join(' · ')}${waiting ? ' · <strong class="fold-alert">wartet auf deine Antwort</strong>' : ''}`,
+    body: `${items || (ratings ? '' : '<p class="empty">Gerade nichts los. Kochst du? Lust auf Film oder Bouldern? Frag die anderen!</p>')}${ratings}${best}`,
+    summary: summaryParts.join(' · '),
   });
 }
 
@@ -2596,7 +2936,7 @@ function renderSearch() {
 
 // ---------- Sicherung zurückspielen ----------
 
-const RESTORE_COLLECTIONS = ['expenses', 'payments', 'settlements', 'recurring', 'shopping', 'favorites', 'chores', 'notes', 'noteImages', 'absences', 'polls', 'invites'];
+const RESTORE_COLLECTIONS = ['expenses', 'payments', 'settlements', 'recurring', 'shopping', 'favorites', 'chores', 'notes', 'noteImages', 'absences', 'polls', 'invites', 'quickNotes'];
 
 async function restoreBackup(file) {
   let data;
@@ -2620,6 +2960,10 @@ async function restoreBackup(file) {
       const { id, ...rest } = item;
       backend.set(col, id, rest).catch(showError);
     }
+  }
+  if (data.radio && typeof data.radio === 'object') {
+    const { id, ...radioData } = data.radio;
+    backend.set('settings', 'radio', radioData).catch(showError);
   }
   if (Array.isArray(data.choreAreas) && data.choreAreas.length) {
     backend.set('settings', 'putzplan', { areas: data.choreAreas, updatedBy: state.me, updatedAt: backend.now() }).catch(showError);
@@ -2658,6 +3002,29 @@ function openExpenseForm(expense, opts = {}) {
   $('#f-date').value = expense?.date ?? todayISO();
   $('#f-date-row').hidden = recurring;
   $('#f-day-row').hidden = !recurring;
+  $('#f-receipt-row').hidden = recurring;
+  state.formToken = (state.formToken ?? 0) + 1;
+  state.receiptBusy = 0;
+  state.pendingReceipts = [];
+  state.removedReceipts = [];
+  state.formReceipts = [];
+  // Solange die Fotos nicht geladen sind, bleibt die gespeicherte Anzahl erhalten (z. B. ohne Netz)
+  state.receiptsUnknown = !recurring && Boolean(expense?.receipts);
+  renderReceiptThumbs();
+  if (state.receiptsUnknown) {
+    if ((state.receiptCache[expense.id]?.length ?? -1) !== expense.receipts) delete state.receiptCache[expense.id];
+    const token = state.formToken;
+    loadReceipts(expense.id).then((list) => {
+      // anderes Formular offen, Laden fehlgeschlagen oder (offline) noch nichts da
+      if (state.formToken !== token || !list || list.length < expense.receipts) {
+        if (state.formToken === token && list) delete state.receiptCache[expense.id];
+        return;
+      }
+      state.formReceipts = list;
+      state.receiptsUnknown = false;
+      renderReceiptThumbs();
+    });
+  }
   const day = expense?.dayOfMonth ?? 1;
   $('#f-day').innerHTML = Array.from({ length: 28 }, (_, i) => `<option value="${i + 1}"${i + 1 === day ? ' selected' : ''}>${i + 1}.</option>`).join('');
 
@@ -2821,6 +3188,10 @@ function onSubmitExpense(event) {
     $('#f-error').textContent = problem;
     return;
   }
+  if (state.receiptBusy > 0) {
+    $('#f-error').textContent = 'Das Kassenbon-Foto wird noch vorbereitet – einen Moment, dann nochmal „Speichern“.';
+    return;
+  }
   if (withoutPrice && !confirm(`${withoutPrice === 1 ? '1 Posten hat' : `${withoutPrice} Posten haben`} keinen Preis und ${withoutPrice === 1 ? 'wird' : 'werden'} weggelassen. Trotzdem speichern?`)) return;
 
   const id = state.editingId;
@@ -2836,10 +3207,24 @@ function onSubmitExpense(event) {
     return;
   }
 
+  // Neue Ausgaben bekommen ihre ID gleich hier, damit die Kassenbons wissen, wohin sie gehören.
+  const expenseId = id ?? `e${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  const existing = state.expenses.find((e) => e.id === id);
+  const keptReceipts = state.receiptsUnknown
+    ? (existing?.receipts ?? 0)
+    : state.formReceipts.filter((r) => !state.removedReceipts.includes(r.id)).length;
+  const receipts = keptReceipts + state.pendingReceipts.length;
   const saving = id
-    ? backend.update('expenses', id, { ...data, updatedAt: backend.now(), updatedBy: state.me })
-    : backend.add('expenses', { ...data, createdAt: backend.now(), createdBy: state.me, settlementId: null });
+    ? backend.update('expenses', id, { ...data, receipts, updatedAt: backend.now(), updatedBy: state.me })
+    : backend.set('expenses', expenseId, { ...data, receipts, createdAt: backend.now(), createdBy: state.me, settlementId: null });
   saving.catch(showError);
+  state.pendingReceipts.forEach((img) => backend.add('receiptImages', {
+    expenseId, data: img.data, width: img.width, height: img.height, createdBy: state.me, createdAt: backend.now(),
+  }).catch(showError));
+  state.removedReceipts.forEach((rid) => backend.remove('receiptImages', rid).catch(showError));
+  delete state.receiptCache[expenseId];
+  state.pendingReceipts = [];
+  state.removedReceipts = [];
   // Besorgte Einkäufe als abgerechnet markieren
   state.pendingShopIds.forEach((shopId) => backend.update('shopping', shopId, { expensed: true }).catch(showError));
   state.pendingShopIds = [];
@@ -2847,7 +3232,7 @@ function onSubmitExpense(event) {
   toast(id ? 'Änderung gespeichert ✓' : 'Ausgabe eingetragen ✓');
 }
 
-function deleteExpense() {
+async function deleteExpense() {
   const id = state.editingId;
   if (state.formMode === 'recurring') {
     const rec = state.recurring.find((r) => r.id === id);
@@ -2858,8 +3243,100 @@ function deleteExpense() {
   }
   const expense = state.expenses.find((e) => e.id === id);
   if (!expense) return;
+  let receipts = [];
+  if (expense.receipts) {
+    delete state.receiptCache[id];
+    receipts = await loadReceipts(id);
+    if (!receipts || receipts.length < expense.receipts) {
+      $('#f-error').textContent = 'Die Kassenbon-Fotos konnten gerade nicht geladen werden. Bitte später nochmal löschen, wenn du online bist.';
+      return;
+    }
+  }
   $('#expense-dialog').close();
-  removeWithUndo('Ausgabe gelöscht', [{ col: 'expenses', doc: expense }]);
+  removeWithUndo('Ausgabe gelöscht', [
+    { col: 'expenses', doc: expense },
+    ...receipts.map((doc) => ({ col: 'receiptImages', doc })),
+  ]);
+  delete state.receiptCache[id];
+}
+
+// ---------- 🧾 Kassenbon-Fotos ----------
+// Die Fotos werden nur geladen, wenn man eine Ausgabe öffnet – so bleibt der App-Start schnell.
+
+async function loadReceipts(expenseId) {
+  if (!state.receiptCache[expenseId]) {
+    try {
+      const list = await backend.getWhere('receiptImages', 'expenseId', expenseId);
+      state.receiptCache[expenseId] = list.sort((a, b) => toMillis(a.createdAt) - toMillis(b.createdAt));
+    } catch (err) {
+      console.error(err);
+      toast('Der Kassenbon konnte nicht geladen werden. Bist du online?', true);
+      return null;
+    }
+  }
+  return state.receiptCache[expenseId];
+}
+
+function renderReceiptThumbs() {
+  const saved = state.formReceipts.filter((r) => !state.removedReceipts.includes(r.id))
+    .map((r) => ({ key: r.id, data: r.data, kind: 'saved' }));
+  const fresh = state.pendingReceipts.map((r, i) => ({ key: String(i), data: r.data, kind: 'new' }));
+  $('#f-receipts').innerHTML = [...saved, ...fresh].map((img) => `
+    <span class="note-thumb">
+      <button type="button" class="receipt-view" data-action="receipt-view" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Kassenbon groß ansehen"><img src="${esc(img.data)}" alt="Kassenbon"></button>
+      <button type="button" class="thumb-remove" data-action="receipt-remove" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Kassenbon entfernen">✕</button>
+    </span>`).join('');
+}
+
+async function addReceipts(files) {
+  const token = state.formToken;
+  for (const file of files) {
+    if (state.formReceipts.length - state.removedReceipts.length + state.pendingReceipts.length >= 3) {
+      toast('Höchstens 3 Fotos pro Ausgabe.', true);
+      return;
+    }
+    try {
+      toast('Foto wird vorbereitet …');
+      state.receiptBusy += 1;
+      const img = await compressImage(file, RECEIPT_OPTIONS).finally(() => { state.receiptBusy -= 1; });
+      if (state.formToken !== token || !$('#expense-dialog').open) return; // Formular inzwischen zu
+      state.pendingReceipts.push(img);
+      renderReceiptThumbs();
+      toast('Kassenbon hinzugefügt ✓ Zum Speichern unten auf „Speichern“ tippen.');
+    } catch (err) {
+      console.error(err);
+      toast('Dieses Foto konnte nicht gelesen werden. Versuch es nochmal.', true);
+    }
+  }
+}
+
+function showImageData(data) {
+  $('#viewer-img').src = data;
+  $('#viewer-scroll').classList.remove('zoomed');
+  $('#image-dialog').showModal();
+}
+
+function viewFormReceipt(kind, key) {
+  const img = kind === 'new' ? state.pendingReceipts[Number(key)] : state.formReceipts.find((r) => r.id === key);
+  if (img) showImageData(img.data);
+}
+
+function removeFormReceipt(kind, key) {
+  if (kind === 'new') state.pendingReceipts.splice(Number(key), 1);
+  else state.removedReceipts.push(key);
+  renderReceiptThumbs();
+}
+
+// Abgerechnete Ausgabe: Kassenbon nur ansehen
+async function showExpenseReceipt(expenseId) {
+  const list = await loadReceipts(expenseId);
+  if (!list) return;
+  if (!list.length) toast('Kein Kassenbon gefunden.');
+  else if (list.length === 1) showImageData(list[0].data);
+  else {
+    state.receiptPanel = expenseId;
+    openPanel('receipts');
+  }
 }
 
 // ---------- Ausgleichen ----------
@@ -2919,6 +3396,26 @@ function onClick(event) {
     case 'tab': switchTab(el.dataset.tab); break;
     case 'fold': toggleFold(el.dataset.fold, el.dataset.default === '1'); renderAll(); break;
     case 'panel-open': openPanel(el.dataset.panel); break;
+    case 'quicknote-new': openQuickForm(); break;
+    case 'quicknote-edit': openQuickForm(state.quickNotes.find((n) => n.id === el.dataset.id)); break;
+    case 'quicknote-delete': deleteQuick(el.dataset.id); break;
+    case 'quicknote-delete-form': deleteQuick(state.editingQuick); break;
+    case 'rate': rateInvite(el.dataset.id, Number(el.dataset.stars)); break;
+    case 'radio-open': openRadio(); break;
+    case 'radio-play': playStation(el.dataset.id); break;
+    case 'radio-toggle': toggleRadio(); break;
+    case 'radio-stop': stopRadio(); break;
+    case 'radio-edit': openRadioEdit(el.dataset.id || null); break;
+    case 'radio-playlist': openRadioEdit(null, 'playlist'); break;
+    case 'radio-delete': deleteRadioStation(); break;
+    case 'receipt-view': viewFormReceipt(el.dataset.kind, el.dataset.key); break;
+    case 'receipt-remove': removeFormReceipt(el.dataset.kind, el.dataset.key); break;
+    case 'receipt-show': showExpenseReceipt(el.dataset.id); break;
+    case 'receipt-panel-view': {
+      const r = (state.receiptCache[state.receiptPanel] ?? [])[Number(el.dataset.key)];
+      if (r) showImageData(r.data);
+      break;
+    }
     case 'tips-search-toggle':
       state.tipsSearch = !(state.tipsSearch || state.tipsQuery);
       if (!state.tipsSearch) state.tipsQuery = '';
@@ -3094,6 +3591,26 @@ $('#n-file').addEventListener('change', (event) => {
 });
 $('#absence-form').addEventListener('submit', onSubmitAbsence);
 $('#newevent-form').addEventListener('submit', onSubmitEvent);
+$('#quick-form').addEventListener('submit', onSubmitQuick);
+$('#radio-edit-form').addEventListener('submit', onSubmitRadioEdit);
+$('#f-receipt-file').addEventListener('change', (e) => {
+  addReceipts([...e.target.files]);
+  e.target.value = '';
+});
+{
+  const audio = $('#radio-audio');
+  audio.addEventListener('playing', () => { if (radio.id) { radio.status = 'playing'; renderRadio(); } });
+  audio.addEventListener('waiting', () => { if (radio.id && radio.status === 'playing') { radio.status = 'loading'; renderRadio(); } });
+  audio.addEventListener('pause', () => { if (radio.id && radio.status !== 'error') { radio.status = 'paused'; renderRadio(); } });
+  audio.addEventListener('error', () => { if (audio.getAttribute('src')) radioFailed(); });
+  if ('mediaSession' in navigator) {
+    try {
+      navigator.mediaSession.setActionHandler('play', () => toggleRadio());
+      navigator.mediaSession.setActionHandler('pause', () => pauseRadio());
+      navigator.mediaSession.setActionHandler('stop', () => stopRadio());
+    } catch { /* ältere Browser */ }
+  }
+}
 $('#e-allday').addEventListener('change', updateEventFormMode);
 // Datum geändert -> Bis-Datum mitziehen, Von-Uhrzeit geändert -> Bis eine Stunde später
 $('#e-date').addEventListener('change', () => {

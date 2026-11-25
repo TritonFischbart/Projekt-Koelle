@@ -80,3 +80,34 @@ export function inviteWhen(invite, now = new Date()) {
   if (diff === 1) return `morgen ${time}`;
   return `${at.toLocaleDateString('de-DE', { weekday: 'short' })} ${time}`;
 }
+
+// ---------- Wie war's? (Bewertung für den WG-Abend) ----------
+
+export const RATING_HOURS = 48;
+
+// Wer war dabei? Ersteller und alle mit „Bin dabei“.
+export function inviteParticipants(invite, people) {
+  return people.filter((id) => id === invite.createdBy || invite.responses?.[id] === 'yes');
+}
+
+// Nach dem Ende 48 Std. lang bewertbar – nur wenn mindestens zwei dabei waren.
+export function isRatingOpen(invite, createdMillis, people, now = Date.now()) {
+  const end = inviteEndsAt(invite, createdMillis);
+  return now >= end && now < end + RATING_HOURS * HOUR && inviteParticipants(invite, people).length >= 2;
+}
+
+export function ratingSummary(invite) {
+  const values = Object.values(invite.ratings ?? {}).filter((v) => v >= 1 && v <= 5);
+  if (!values.length) return null;
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  return { avg, count: values.length, text: avg.toFixed(1).replace('.', ',') };
+}
+
+// Beste WG-Abende: bewertete Aktionen, beste zuerst (bei Gleichstand mehr Stimmen, dann neuer)
+export function bestEvenings(invites, toMillis, limit = 10) {
+  return invites
+    .map((inv) => ({ inv, sum: ratingSummary(inv) }))
+    .filter((x) => x.sum)
+    .sort((a, b) => b.sum.avg - a.sum.avg || b.sum.count - a.sum.count || toMillis(b.inv.createdAt) - toMillis(a.inv.createdAt))
+    .slice(0, limit);
+}
