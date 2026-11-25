@@ -324,9 +324,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   3 Tage. Der Dienst schreibt pro Nachricht eine Zeile „PUSH typ an person: … angekommen, … Fehler“.
   Repo ist öffentlich → nichts Geheimes ausgeben (lange Kennungen werden unkenntlich gemacht).
 - VAPID-Schlüssel (öffentlich) steht in `js/firebase-config.js` → `vapidKey` (eingetragen 1. Nov. 2026).
-- ⚠️ Das Google-Cloud-Rechnungskonto lief am 1. Nov. 2026 als **kostenlose Testphase (90 Tage)**.
-  Wird es bis Ende Januar 2027 nicht auf ein vollständiges Konto umgestellt („Upgrade“ in der
-  Google Cloud Console), stoppt Google die Dienste → Push-Nachrichten würden aufhören.
+- Google-Cloud-Rechnungskonto: seit 25. Nov. 2026 bestätigt **„Paid account“** (vollständiges Konto, keine
+  Testphase mehr). Kosten Nov. 2026: 0,30 €, komplett durch Guthaben gedeckt → 0,00 €.
 
 ### 📌 Infos
 - **Schwarzes Brett**: Notizen mit Vorlagen (WLAN, Vermieter, Zählerstände, Schlüssel,
@@ -366,7 +365,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   muss direkt nach dem Tippen aufgehen (vorher nichts abwarten, sonst blockiert Safari). Einrichtung bei Google:
   ANLEITUNG.md Teil F (Bereich `calendar.events` unter „Datenzugriff“ eintragen, ggf. Testnutzer; Jana/Jul brauchen
   „Änderungen an Terminen vornehmen“). Erwartet: Warnung „App nicht überprüft“ → „Erweitert“ → weiter. Kleiner Link
-  „Google Kalender öffnen“ bleibt als Ausweg. **Stand 25. Nov.: Lukas richtet es am Nachmittag ein – echter Test steht aus.**
+  „Google Kalender öffnen“ bleibt als Ausweg. **25. Nov. 2026: Lukas hat die Google-Einstellungen gemacht und den Test auf seinem Gerät abgehakt
+  (Termin eintragen + löschen); Jana und Jul sind informiert.** Abhakliste für Lukas: Artifact „Kölle Kalender-Einrichtung“.
   Startseite zeigt nur die nächsten 3 Tage mit Terminen.
 - **Termin antippen** (Kalender und Startseite) öffnet ein Fenster in der App mit Zeit, Ort
   (Link zu Google Maps), Beschreibung (HTML von Google → Text, Links antippbar) und
@@ -445,7 +445,7 @@ Claude-Sitzung (Operator), die so arbeitet:
 ## Merkliste / To-do für später (noch nicht gebaut)
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
-> #11 Termine direkt eintragen (gebaut, Test ausstehend) ·
+> #11 Termine direkt eintragen (bei Lukas getestet, Jana/Jul ausstehend) ·
 > #13 Kassenbon-Fotos · #14 Müllabfuhr-Termine · #15 Ideen-Sammlung · #24 WG-Radio.
 > Wenn etwas davon erledigt ist, das Issue schließen und hier austragen.
 
