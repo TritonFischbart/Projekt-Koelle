@@ -8,11 +8,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Kölle">
   <title>Projekt Kölle</title>
-  <link rel="icon" href="icons/icon.svg?v=50" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=50">
-  <link rel="manifest" href="manifest.webmanifest?v=50">
-  <link rel="stylesheet" href="css/style.css?v=50">
-  <script type="module" src="js/app.js?v=50"></script>
+  <link rel="icon" href="icons/icon.svg?v=51" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=51">
+  <link rel="manifest" href="manifest.webmanifest?v=51">
+  <link rel="stylesheet" href="css/style.css?v=51">
+  <script type="module" src="js/app.js?v=51"></script>
 </head>
 <body>
   <!-- Ladebildschirm -->
@@ -23,7 +23,7 @@
   <!-- Firebase ist noch nicht eingerichtet -->
   <div id="screen-setup" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=50" alt="" class="logo">
+      <img src="icons/icon.svg?v=51" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p id="setup-text">Fast geschafft! Die Verbindung zur gemeinsamen Datenbank (Firebase) ist noch nicht eingerichtet. Wie das geht, steht in der Datei <strong>ANLEITUNG.md</strong>.</p>
       <a class="btn primary" href="?demo">Demo ansehen</a>
@@ -33,7 +33,7 @@
   <!-- Anmelden -->
   <div id="screen-login" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=50" alt="" class="logo">
+      <img src="icons/icon.svg?v=51" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p>Die WG-Seite von Jana, Jul und Lukas.</p>
       <button class="btn primary" data-action="login">Mit Google anmelden</button>
@@ -66,8 +66,9 @@
       <span class="pull-text visually-hidden">Zum Aktualisieren ziehen</span>
     </div>
     <header class="topbar">
-      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=50" alt=""> Projekt Kölle</button>
+      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=51" alt=""> Projekt Kölle</button>
       <span class="topbar-actions">
+        <button class="icon-btn settings-btn" id="radio-btn" data-action="radio-open" aria-label="WG-Radio">📻</button>
         <button class="icon-btn settings-btn" data-action="tab" data-tab="settings" aria-label="Einstellungen">⚙️</button>
         <button class="me-button" id="me-button" data-action="tab" data-tab="settings"></button>
       </span>
@@ -99,6 +100,17 @@
     </main>
 
     <button class="fab" data-action="add-expense"><span aria-hidden="true">＋</span> Ausgabe</button>
+
+    <!-- WG-Radio: läuft weiter, während man in der App herumtippt -->
+    <audio id="radio-audio" preload="none"></audio>
+    <div id="radio-bar" class="radio-bar" hidden>
+      <button type="button" class="radio-bar-main" data-action="radio-open">
+        <span class="radio-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="radio-bar-text"><small id="radio-bar-state">WG-Radio</small><strong id="radio-bar-name"></strong></span>
+      </button>
+      <button type="button" class="icon-btn" id="radio-bar-toggle" data-action="radio-toggle" aria-label="Pause">⏸</button>
+      <button type="button" class="icon-btn" data-action="radio-stop" aria-label="Radio ausschalten">✕</button>
+    </div>
 
     <nav class="tabbar">
       <button data-action="tab" data-tab="start" aria-current="page"><span class="tab-icon">🏠</span>Start</button>
@@ -166,6 +178,16 @@
         <span class="label">Datum</span>
         <input type="date" id="f-date">
       </label>
+
+      <div class="field" id="f-receipt-row">
+        <span class="label">Kassenbon (optional)</span>
+        <div class="note-thumbs" id="f-receipts"></div>
+        <label class="btn outline">
+          🧾 Foto vom Kassenbon
+          <input type="file" id="f-receipt-file" accept="image/*" hidden>
+        </label>
+        <span class="hint">Wird verkleinert gespeichert. Antippen = groß ansehen.</span>
+      </div>
 
       <label class="field" id="f-day-row" hidden>
         <span class="label">Jeden Monat am</span>
@@ -281,6 +303,61 @@
       <div class="form-actions">
         <button type="button" class="btn danger" id="e-delete" data-action="event-delete" hidden>Löschen</button>
         <button type="submit" class="btn primary" id="e-save">Eintragen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- WG-Radio -->
+  <dialog id="radio-dialog" class="sheet">
+    <div class="sheet-form">
+      <div class="sheet-head">
+        <h2>📻 WG-Radio</h2>
+        <button type="button" class="icon-btn" data-action="close-form" aria-label="Schließen">✕</button>
+      </div>
+      <div id="radio-body"></div>
+    </div>
+  </dialog>
+
+  <!-- Formular: eigener Sender / Playlist-Link -->
+  <dialog id="radio-edit-dialog" class="sheet">
+    <form id="radio-edit-form" class="sheet-form" novalidate>
+      <div class="sheet-head">
+        <h2 id="r-head">Eigener Sender</h2>
+        <button type="button" class="icon-btn" data-action="close-form" aria-label="Schließen">✕</button>
+      </div>
+      <label class="field" id="r-name-row">
+        <span class="label">Name</span>
+        <input id="r-name" maxlength="40" autocomplete="off" placeholder="z. B. Radio Köln">
+      </label>
+      <label class="field">
+        <span class="label" id="r-url-label">Stream-Adresse</span>
+        <input id="r-url" type="url" inputmode="url" autocomplete="off" placeholder="https://…">
+        <span class="hint" id="r-hint"></span>
+      </label>
+      <p class="error" id="r-error"></p>
+      <div class="form-actions">
+        <button type="button" class="btn danger" id="r-delete" data-action="radio-delete" hidden>Löschen</button>
+        <button type="submit" class="btn primary">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Kurz notiert (Startseite) -->
+  <dialog id="quick-dialog" class="sheet">
+    <form id="quick-form" class="sheet-form" novalidate>
+      <div class="sheet-head">
+        <h2 id="q-head">Kurz notiert</h2>
+        <button type="button" class="icon-btn" data-action="close-form" aria-label="Schließen">✕</button>
+      </div>
+      <label class="field">
+        <span class="label">Was sollen die anderen wissen?</span>
+        <textarea id="q-text" rows="3" maxlength="200" placeholder="z. B. Bin heute erst spät da · Paket für Jul liegt im Flur"></textarea>
+        <span class="hint">Steht 7 Tage auf der Startseite, dann verschwindet es von selbst.</span>
+      </label>
+      <p class="error" id="q-error"></p>
+      <div class="form-actions">
+        <button type="button" class="btn danger" id="q-delete" data-action="quick-delete-form" hidden>Löschen</button>
+        <button type="submit" class="btn primary">Speichern</button>
       </div>
     </form>
   </dialog>

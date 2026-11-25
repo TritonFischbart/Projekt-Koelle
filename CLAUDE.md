@@ -85,6 +85,8 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `js/notetext.js` | Schwarzes Brett: Aufzählungen erkennen/anzeigen, Liste beim Tippen fortsetzen |
 | `js/tipps.js`, `data/wochentipps.json` | Wochentipps „Diese Woche in Ehrenfeld“ (Startseite) |
 | `js/koelsch.js` | Geheimnis: Kölsche Weisheit des Tages (Tipp auf „Projekt Kölle“) |
+| `js/radio.js` | WG-Radio: feste Sender (`DEFAULT_STATIONS`), Prüfung eigener Stream-/Playlist-Links |
+| `js/quicknotes.js` | „Kurz notiert“: welche Zettel sichtbar sind (7 Tage), „vor 5 Min.“ |
 | `js/firebase.js` | Firebase-Anbindung (Backend), inkl. Push ein/aus |
 | `firebase-messaging-sw.js` | Service Worker: zeigt Push-Nachrichten, wenn die App zu ist (Firebase-Werte doppelt eingetragen) |
 | `functions/index.js` | Versand-Dienst: Auslöser (neue Aktion/Abstimmung/Ausgabe, Test) + stündlicher Lauf |
@@ -104,7 +106,7 @@ früheren Gesprächen besprochen und entschieden wurde.
   Die Nummer wird unten unter „Infos“ angezeigt („Version N“) – so kann Lukas prüfen,
   ob sein Handy schon die neue Version hat.
 - Beide Backends (`firebase.js`, `demo.js`) haben dieselben Funktionen:
-  `onUser, login, logout, watch, add, update, remove, set, settleAll, now`
+  `onUser, login, logout, watch, add, update, remove, set, getWhere, settleAll, now, calendarWrite`
   (Demo zusätzlich `demoEvents`). Neue Funktionen in beiden ergänzen.
 - Text-Knöpfe (`.link-btn`, z. B. „＋ Neu“, „Bearbeiten“) haben ein unsichtbares Polster (Padding + gleich
   großer negativer Rand), damit die Tippfläche ~41 px hoch ist, ohne dass sich das Aussehen ändert. Eigene
@@ -114,7 +116,7 @@ früheren Gesprächen besprochen und entschieden wurde.
   sind sichtbar 30 px groß, haben aber per `::after` eine unsichtbar größere Tippfläche (ca. 36 × 42 px).
   Dafür braucht der Knopf `position: relative` (Operator, 21. Nov. 2026).
 - Termine auf der Startseite (`.start-event`) haben dasselbe unsichtbare Polster (9 px innen, −6 px Rand).
-  Einklappbare Überschriften in Karten sind `display: inline`, damit der Pfeil bei Umbruch direkt hinter dem Wort steht.
+  Einklappbare Überschriften in Karten sind `display: inline`; `foldButton` klebt den Pfeil per `.nowrap` ans letzte Wort.
 - Texte aus der Datenbank immer mit `esc()` ausgeben (Schutz vor HTML-Einschleusung).
 - Formulare liegen als `<dialog>` statisch in `index.html` – nicht in Bereiche
   rendern, die bei jeder Datenänderung neu gezeichnet werden (sonst gehen Eingaben verloren).
@@ -124,7 +126,7 @@ früheren Gesprächen besprochen und entschieden wurde.
 | Sammlung | Inhalt |
 |---|---|
 | `members/{jana,julian,lukas}` | Wer welcher Person zugeordnet ist (`uid`, `email`) – beim ersten Login „Wer bist du?“ |
-| `expenses` | Ausgaben: `description, amountCents, paidBy, splitAmong[], category, date, settlementId`, optional `shares {person: cent}` und `items [{name, cents, for[]}]` |
+| `expenses` | Ausgaben: `description, amountCents, paidBy, splitAmong[], category, date, settlementId`, optional `shares {person: cent}`, `items [{name, cents, for[]}]` und `receipts` (Anzahl Kassenbon-Fotos) |
 | `payments` | Abgehakte Überweisungen: `from, to, amountCents, date, settlementId` |
 | `settlements` | Abrechnungen („Alles ausgeglichen“): `expenseCount, totalCents, createdAt` |
 | `chores/{KW}_{bereich}` | Putzplan-Status pro Woche: `assignee, doneBy, doneAt` |
@@ -138,7 +140,10 @@ früheren Gesprächen besprochen und entschieden wurde.
 | `settings/backup` | Wann zuletzt gesichert wurde (`at`, `by`) |
 | `settings/einkauf` | Eigene Reihenfolge der Einkaufs-Kategorien (`order[]`) |
 | `absences` | Abwesenheiten: `person, from, to ("2026-11-10"), note, createdBy, updatedBy` |
-| `invites` | „Wer hat Bock?“: `emoji, title, note, at (ISO oder null = jetzt), kind (food/other), responses {person: yes/no}` |
+| `invites` | „Wer hat Bock?“: `emoji, title, note, at (ISO oder null = jetzt), kind (food/other), responses {person: yes/no}`, `ratings {person: 1–5}` |
+| `quickNotes` | „Kurz notiert“ (Startseite): `text, createdBy, createdAt, updatedBy?` |
+| `receiptImages` | Kassenbon-Fotos: `expenseId, data` (JPEG-Data-URL, ~≤ 250 KB), `width, height` – werden **nur bei Bedarf** geladen (`getWhere`) |
+| `settings/radio` | WG-Radio: eigene Sender `stations[] {id, name, url}`, `playlistUrl` |
 | `shoppingTrips/{person}` | „Ich geh jetzt einkaufen“: `person, at` (ISO-Zeit); gilt 2 Std., „Bin zurück“ löscht |
 | `pushTokens/{token}` | Ein Gerät, das Nachrichten bekommt: `person, device` (ungültige räumt der Dienst auf) |
 | `pushSettings/{person}` | Welche Nachrichtenarten eine Person will: `types {invites, polls, expenses, notes, absences, chores, calendar, trips, shopping}` |
@@ -229,6 +234,12 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   „Frühere Abrechnungen“).
 - **Monatsübersicht**: Summe pro Monat, Balken der letzten 6 Monate, nach Kategorie
   und nach Person (zählt alle Ausgaben, auch abgerechnete).
+- **🧾 Kassenbon-Fotos** (#13, 25. Nov. 2026, ohne Firebase Storage): im Ausgaben-Formular „🧾 Foto vom Kassenbon“
+  (bis 3 Fotos, verkleinert mit `RECEIPT_OPTIONS` in `images.js`), antippen = groß, ✕ = entfernen. Gespeichert in
+  `receiptImages`; die Ausgabe merkt sich nur die Anzahl (`receipts`) und zeigt 🧾 in der Liste. Fotos werden erst beim
+  Öffnen geladen (`loadReceipts`, Zwischenspeicher `receiptCache`), damit der App-Start schnell bleibt. Löschen der Ausgabe
+  löscht die Fotos mit (Rückgängig holt alles zurück). Abgerechnete Einträge: antippen zeigt den Bon. Nicht bei
+  Daueraufträgen. Fotos sind **nicht** in der JSON-Datensicherung (zu groß).
 - **Daueraufträge** (z. B. Internet, Netflix): werden am gewählten Tag (1.–28.)
   automatisch eingetragen, sobald jemand die App öffnet. Markiert mit 🔁.
 
@@ -274,6 +285,11 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - **Urlaubs-Modus**: Wer in einer Woche mindestens 4 Tage weg ist, bekommt keine
   Putzaufgabe; seine Bereiche gehen an die Anwesenden („statt Jana – nicht da“).
 
+### 📝 Kurz notiert (Startseite, aus Ideen-Sammlung #15, 25. Nov. 2026)
+- Karte nach „Deine Aufgabe“: kurze Zettel wie am Kühlschrank („Paket im Flur“), max. 200 Zeichen, „＋ Neu“,
+  antippen = bearbeiten (jeder darf alle), ✕ = löschen mit Rückgängig. Nach **7 Tagen** nicht mehr angezeigt.
+  Push an die anderen unter der Art „Schwarzes Brett“ (`pushQuickNote`/`quickNoteMessages`). In der Datensicherung enthalten.
+
 ### 🗳️ Abstimmungen
 - Auf der Startseite: Frage + 2–6 Antworten (oder „Ja / Nein“). Antippen = abstimmen,
   nochmal tippen = Stimme zurücknehmen. „Beenden“ zeigt das Ergebnis (bleibt 7 Tage sichtbar).
@@ -293,6 +309,10 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   selbst eins ein, bleibt es (Wunsch von Lukas: freie Wahl erhalten); Feld leeren = wieder automatisch.
   Beim Essen werden „Portionen“ gezählt (auch erkannt an
   Wörtern wie koch/essen/grill/back). Ersteller kann „Absagen“ (mit Rückgängig).
+- **⭐ Wie war's?** (Bewertung für den WG-Abend, #15, 25. Nov. 2026): Nach dem Ende einer Aktion können alle, die dabei
+  waren (Ersteller + „Bin dabei“, mind. 2 Personen), **48 Std. lang** 1–5 Sterne geben (`ratings.{person}`, ändern = neu
+  tippen). Roter Punkt an „Start“, solange die eigene Bewertung fehlt. „🏆 Beste WG-Abende“ (Fenster von unten,
+  `bestEvenings` in `invites.js`) zeigt die besten bewerteten Aktionen.
 - Verschwindet von selbst: mit Uhrzeit 4 Std. danach, „Jetzt“ nach 6 Std. (spätestens
   3 Uhr nachts) – Regeln in `js/invites.js`. Roter Punkt an „Start“, solange man auf eine
   Aktion der anderen noch nicht geantwortet hat.
@@ -374,6 +394,17 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - **Widgets** für den Home-Bildschirm gehen mit einer Web-App nicht (bräuchte eine echte
   iPhone-/Android-App). Lukas gefragt am 1. Nov. 2026 – Alternative: Widget der Google-Kalender-App.
 
+### 📻 WG-Radio (#24, 25. Nov. 2026)
+- Knopf 📻 oben rechts (neben ⚙️) öffnet `#radio-dialog`: feste Sender 1LIVE, WDR 2 Rheinland, WDR 4, COSMO,
+  Deutschlandfunk, Deutschlandfunk Nova (Streams `icecastssl.wdr.de` / `sslstream.dlf.de`; aus der Cloud-Umgebung nicht
+  prüfbar – WDR-4-Adresse per Websuche als funktionierend bestätigt, die anderen folgen demselben Muster). Fällt ein Sender
+  aus: Meldung „… ist gerade nicht erreichbar“. **Eigene Sender** (https-Stream) und ein **Playlist-Link** (Spotify o. ä.,
+  öffnet extern) in `settings/radio`, für alle gleich. Radio Köln hat keine bestätigte Stream-Adresse → bei Bedarf als
+  eigener Sender eintragen.
+- Läuft weiter beim Wechseln der Bereiche; Leiste über der unteren Leiste (`#radio-bar`: Pause/Weiter/✕), Media Session
+  für Sperrbildschirm. Nach Pause startet der Stream frisch (live). `<audio id="radio-audio">` liegt statisch in index.html.
+- Varianten laut.fm/eigener Sender wurden nicht gebaut (eigener Sender lässt sich aber als Stream eintragen).
+
 ## 🎪 Wochentipps „Diese Woche in Ehrenfeld“ (seit 7. Nov. 2026, Wunsch von Lukas)
 
 - Karte ganz unten auf der Startseite: Events, Konzerte, Partys, Märkte, Flohmärkte in Ehrenfeld
@@ -445,8 +476,8 @@ Claude-Sitzung (Operator), die so arbeitet:
 ## Merkliste / To-do für später (noch nicht gebaut)
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
-> #11 Termine direkt eintragen (bei Lukas getestet, Jana/Jul ausstehend) ·
-> #13 Kassenbon-Fotos · #14 Müllabfuhr-Termine · #15 Ideen-Sammlung · #24 WG-Radio.
+> #11 Termine direkt eintragen (bei Lukas getestet, Jana/Jul ausstehend) · #14 Müllabfuhr-Termine.
+> Gebaut am 25. Nov. 2026 (Test durch Lukas ausstehend): #13 Kassenbon-Fotos · #15 Ideen-Sammlung · #24 WG-Radio.
 > Wenn etwas davon erledigt ist, das Issue schließen und hier austragen.
 
 - **Termine direkt in der App eintragen** (#11): gebaut am 25. Nov. 2026 (siehe Kalender). Issue erst schließen,
@@ -460,14 +491,12 @@ Claude-Sitzung (Operator), die so arbeitet:
   Zeitplan existiert. Jede Bereitstellung schreibt `functions/deploy-stamp.txt` (nicht eingecheckt), damit
   firebase-tools nichts als „unverändert“ überspringt (`FUNCTIONS_DEPLOY_UNCHANGED` hat nicht gewirkt).
   Beim allerersten Bereitstellen kam „Eventarc Service Agent“ – das löst sich nach ein paar Minuten von selbst.
-- **Kassenbon-Fotos** bei Ausgaben – bräuchte Firebase Storage (ebenfalls „Blaze“).
-- **WG-Radio** (#24): Radio in der App, gespeist über einen Anbieter. Möglichkeiten:
-  Kölner Sender per Stream einbinden, eigener kostenloser WG-Sender (z. B. laut.fm) oder
-  gemeinsame Spotify-Playlist einbetten. Vorher mit Lukas klären, welche Variante.
+- ~~**Kassenbon-Fotos** (#13)~~ – gebaut 25. Nov. 2026 (in Firestore statt Storage, siehe Ausgaben).
+- ~~**WG-Radio** (#24)~~ – gebaut 25. Nov. 2026 (Kölner/NRW-Sender + eigene Sender + Playlist-Link).
 - **Müllabfuhr-Termine** der AWB Köln in den Google-Kalender übernehmen (ohne Code).
 - ~~Test mit Jana und Jul (#10)~~ – erledigt am 1. Nov. 2026: Anmeldung bei allen dreien klappt.
-- **Ideen-Sammlung** (#15): ~~„Ich geh jetzt einkaufen“~~ (erledigt 25. Nov. 2026),
-  Schnell-Notizen auf der Startseite, Bewertung für den WG-Abend.
+- ~~**Ideen-Sammlung** (#15)~~: „Ich geh jetzt einkaufen“, „Kurz notiert“ (Schnell-Notizen) und „Wie war's?“
+  (Bewertung für den WG-Abend) – alle gebaut am 25. Nov. 2026.
 - **Ausdrücklich nicht gewünscht** (nicht bauen): Erinnerung an offene Schulden,
   mehrere Einkaufslisten, Frist bei Abstimmungen.
 

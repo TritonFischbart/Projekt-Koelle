@@ -846,3 +846,79 @@ main { overflow-x: clip; }
 /* „＋ Termin eintragen“ unter den nächsten Terminen (Startseite) – Text-Knopf mit Polster, deshalb −1 px = 10 px sichtbar */
 .start-event-add { display: inline-block; margin-top: -1px; }
 .event-detail .form-actions .btn { flex: 1; }
+
+/* ---------- 📻 WG-Radio ---------- */
+.radio-bar {
+  position: fixed; z-index: 10; left: 0; right: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px max(12px, calc((100vw - 720px) / 2 + 12px));
+  background: var(--card); border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
+}
+.radio-bar-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; color: inherit; font: inherit; text-align: left; }
+.radio-bar-text { display: grid; min-width: 0; }
+.radio-bar-text small { color: var(--brand); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.radio-bar-text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.radio-eq { display: inline-flex; align-items: flex-end; gap: 2px; width: 18px; height: 18px; flex: none; }
+.radio-eq i { flex: 1; background: var(--brand); border-radius: 1px; height: 30%; }
+.radio-on.radio-playing .radio-eq i { animation: radio-eq 0.9s ease-in-out infinite alternate; }
+.radio-eq i:nth-child(2) { animation-delay: -0.3s !important; }
+.radio-eq i:nth-child(3) { animation-delay: -0.6s !important; }
+@keyframes radio-eq { from { height: 25%; } to { height: 100%; } }
+@media (prefers-reduced-motion: reduce) { .radio-eq i { animation: none !important; height: 60%; } }
+body.radio-on main { padding-bottom: calc(var(--tabbar-h) + 150px + env(safe-area-inset-bottom)); }
+body.radio-on .fab { bottom: calc(var(--tabbar-h) + 72px + env(safe-area-inset-bottom)); }
+#radio-btn[aria-pressed="true"] { background: #fff; }
+
+.station-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.station { display: flex; align-items: center; gap: 8px; }
+.station-play {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--card); color: inherit; font: inherit; text-align: left; min-height: 56px;
+}
+.station-play.active { border-color: var(--brand); background: var(--brand-soft); }
+.station-icon { font-size: 1.5rem; flex: none; width: 32px; text-align: center; }
+.station-text { display: grid; min-width: 0; }
+.station-text strong { overflow-wrap: anywhere; }
+.station-text small { color: var(--muted); font-size: 0.82rem; }
+.station-state { margin-left: auto; flex: none; color: var(--brand); font-weight: 700; font-size: 0.85rem; }
+.radio-section-title { margin: 18px 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.radio-error { margin: 10px 0 0; color: var(--brand); font-weight: 600; }
+.radio-playlist { display: grid; gap: 8px; }
+
+/* ---------- 🧾 Kassenbon ---------- */
+.receipt-flag { font-size: 0.9em; }
+.receipt-view { background: none; border: 0; padding: 0; width: 100%; text-align: left; color: inherit; font: inherit; }
+
+/* ---------- 📝 Kurz notiert ---------- */
+.quick-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.quick-note { display: flex; align-items: flex-start; gap: 6px; }
+.quick-note-main {
+  flex: 1; min-width: 0; display: grid; gap: 2px; text-align: left; color: inherit; font: inherit;
+  padding: 10px 12px; border: 0; border-radius: 12px; background: var(--brand-soft);
+}
+.quick-note-text { white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 600; }
+.quick-note-meta { color: var(--muted); font-size: 0.8rem; }
+.quick-note .icon-btn.small { margin-top: 6px; }
+
+/* ---------- ⭐ Wie war's? ---------- */
+.rating { display: grid; gap: 6px; padding: 12px; border-radius: 12px; background: var(--brand-soft); }
+.rating + .rating, .invite + .rating, .rating + .invite { margin-top: 10px; }
+.rating-title { font-weight: 700; }
+.rating-sub { color: var(--muted); font-size: 0.85rem; }
+.stars { display: flex; gap: 2px; }
+.star { background: none; border: 0; padding: 4px; width: 44px; height: 44px; font-size: 1.7rem; line-height: 1; color: var(--muted); }
+.star.on { color: #f5a400; }
+.rating-result { font-weight: 700; }
+.best-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.best { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.best:last-child { border-bottom: 0; }
+.best-emoji { font-size: 1.6rem; width: 34px; text-align: center; flex: none; }
+.best-main { flex: 1; min-width: 0; display: grid; }
+.best-main small { color: var(--muted); font-size: 0.82rem; }
+.best-score { font-weight: 800; color: var(--brand); white-space: nowrap; }
+
+.nowrap { white-space: nowrap; }
+.station-state { font-size: 0.8rem; }

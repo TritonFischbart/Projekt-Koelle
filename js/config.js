@@ -28,7 +28,7 @@ export const PUSH_TYPES = [
   { id: 'invites', icon: '🙋', label: 'Wer hat Bock?', hint: 'Wenn jemand etwas vorhat – und wer bei deiner Aktion dabei ist', default: true },
   { id: 'polls', icon: '🗳️', label: 'Abstimmungen', hint: 'Neue Frage und das Ergebnis', default: true },
   { id: 'expenses', icon: '💶', label: 'Ausgaben', hint: 'Neu oder geändert – nur wenn sie dich betrifft, mit deinem Anteil', default: true },
-  { id: 'notes', icon: '📌', label: 'Schwarzes Brett', hint: 'Neue oder geänderte Notizen', default: true },
+  { id: 'notes', icon: '📌', label: 'Schwarzes Brett', hint: 'Neue oder geänderte Notizen und neue Zettel bei „Kurz notiert“', default: true },
   { id: 'absences', icon: '🌴', label: 'Wer ist weg?', hint: 'Wenn jemand Urlaub oder Abwesenheit einträgt', default: true },
   { id: 'chores', icon: '🧹', label: 'Putzplan', hint: 'Montags deine Aufgabe, sonntags 18 Uhr falls noch offen', default: true },
   { id: 'calendar', icon: '📅', label: 'Termine heute', hint: 'Morgens um 8 Uhr, wenn etwas ansteht', default: true },

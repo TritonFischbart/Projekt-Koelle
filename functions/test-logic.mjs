@@ -1,7 +1,7 @@
 // Nur zum Testen (wird nicht bereitgestellt): node functions/test-logic.mjs
 process.env.TZ = 'Europe/Berlin';
 import assert from 'node:assert';
-import { wants, inviteMessages, pollMessages, expenseMessages, expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages, tripMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
+import { wants, inviteMessages, pollMessages, expenseMessages, expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages, tripMessages, quickNoteMessages, choreWeekStartMessages, choreReminderMessages, calendarMessages, shoppingMessages, dueJobs, weekChores } from './logic.js';
 import { mondayOf, weekKey } from './shared/chores.js';
 
 // Einstellungen: Standard + eigene Wahl
@@ -93,5 +93,12 @@ assert.equal(tripMessages(trip, null).length, 0);
 assert.equal(tripMessages(trip, { ...trip }).length, 0);
 assert.equal(tripMessages(trip, { ...trip, at: '2026-11-26T10:00:00.000Z' }).length, 2);
 assert.equal(wants({}, 'jana', 'trips'), true);
+
+// „Kurz notiert“
+const qn = quickNoteMessages({ text: 'Paket im Flur\nfür Jul', createdBy: 'jana' });
+assert.deepEqual(qn.map((m) => m.person), ['julian', 'lukas']);
+assert.equal(qn[0].type, 'notes');
+assert.equal(qn[0].body, 'Paket im Flur · für Jul');
+assert.equal(quickNoteMessages({ text: '', createdBy: 'jana' }).length, 0);
 
 console.log('OK', start.map(m => `${m.person}: ${m.body}`));

@@ -1,8 +1,19 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=50';
-import { normalizeEvent } from './calendar.js?v=50';
+import { weekKey } from './chores.js?v=51';
+import { normalizeEvent } from './calendar.js?v=51';
+
+// Gezeichneter Beispiel-Kassenbon
+function demoReceipt() {
+  const lines = [['Milch 1,5%', '1,19'], ['Bananen', '1,79'], ['Hafermilch', '2,29'], ['Spaghetti', '0,99'], ['Tomaten passiert', '1,49'], ['Kölsch 6er', '6,99'], ['Klopapier 8 Rollen', '3,95'], ['…', ''], ['SUMME EUR', '64,20']];
+  const rows = lines.map(([n, p], i) => `<text x="30" y="${170 + i * 44}">${n}</text><text x="370" y="${170 + i * 44}" text-anchor="end">${p}</text>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 640"><rect width="400" height="640" fill="#fbfaf6"/>
+    <g font-family="monospace" font-size="22" fill="#222"><text x="200" y="60" text-anchor="middle" font-size="30" font-weight="bold">REWE</text>
+    <text x="200" y="95" text-anchor="middle" font-size="16">Venloer Str. · Köln-Ehrenfeld</text>${rows}
+    <text x="200" y="600" text-anchor="middle" font-size="16">Vielen Dank für Ihren Einkauf!</text></g></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -45,7 +56,7 @@ export function createDemoBackend() {
       { id: 'jana', uid: 'demo-jana' },
     ],
     expenses: [
-      { id: 'e1', description: 'Wocheneinkauf Rewe', amountCents: 6420, paidBy: 'lukas', splitAmong: all, category: 'lebensmittel', date: daysAgo(1), createdAt: created(1), settlementId: null },
+      { id: 'e1', description: 'Wocheneinkauf Rewe', amountCents: 6420, paidBy: 'lukas', splitAmong: all, category: 'lebensmittel', date: daysAgo(1), createdAt: created(1), settlementId: null, receipts: 1 },
       { id: 'e2', description: 'Klopapier & Spülmittel', amountCents: 1290, paidBy: 'jana', splitAmong: all, category: 'haushalt', date: daysAgo(3), createdAt: created(3), settlementId: null },
       { id: 'e3', description: 'Internet Oktober', amountCents: 3999, paidBy: 'lukas', splitAmong: all, category: 'nebenkosten', date: daysAgo(5), createdAt: created(5), settlementId: null },
       { id: 'e4', description: 'Kinotickets', amountCents: 2400, paidBy: 'julian', splitAmong: ['julian', 'jana'], category: 'freizeit', date: daysAgo(6), createdAt: created(6), settlementId: null },
@@ -119,6 +130,22 @@ export function createDemoBackend() {
     ],
   };
 
+  // Kassenbon zur Ausgabe e1, „Kurz notiert“ und WG-Abende zum Bewerten
+  store.receiptImages = [{ id: 'rc1', expenseId: 'e1', data: demoReceipt(), width: 400, height: 640, createdBy: 'lukas', createdAt: created(1) }];
+  store.quickNotes = [
+    { id: 'q1', text: 'Paket für Jul liegt im Flur 📦', createdBy: 'jana', createdAt: new Date(Date.now() - 40 * 60000) },
+    { id: 'q2', text: 'Bin bis Sonntag bei meinen Eltern – Pflanzen bitte gießen 🌱', createdBy: 'julian', createdAt: created(2) },
+  ];
+  const hoursAgo = (h) => new Date(Date.now() - h * 3600000);
+  store.invites.push(
+    { id: 'inv0', emoji: '🎲', title: 'Spieleabend', note: 'Siedler', kind: 'other', at: hoursAgo(20).toISOString(),
+      responses: { jana: 'yes', lukas: 'yes' }, ratings: { jana: 5 }, createdBy: 'julian', createdAt: hoursAgo(26) },
+    { id: 'inv-1', emoji: '🍕', title: 'Pizza selber machen', note: '', kind: 'food', at: hoursAgo(24 * 9).toISOString(),
+      responses: { jana: 'yes', julian: 'yes' }, ratings: { jana: 5, julian: 5, lukas: 4 }, createdBy: 'lukas', createdAt: hoursAgo(24 * 9 + 5) },
+    { id: 'inv-2', emoji: '🎬', title: 'Filmabend: Der Schuh des Manitu', note: '', kind: 'other', at: hoursAgo(24 * 16).toISOString(),
+      responses: { jana: 'yes', lukas: 'yes' }, ratings: { jana: 3, lukas: 4, julian: 4 }, createdBy: 'julian', createdAt: hoursAgo(24 * 16 + 3) },
+  );
+
   // Putzplan-Beispiel: In dieser Woche hat schon jemand eine Aufgabe erledigt.
   const key = weekKey(new Date());
   store.chores.push({ id: `${key}_kueche`, week: key, chore: 'kueche', assignee: 'jana', doneBy: 'jana', doneAt: new Date() });
@@ -173,6 +200,9 @@ export function createDemoBackend() {
     async remove(name, id) {
       store[name] = store[name].filter((item) => item.id !== id);
       notify(name);
+    },
+    async getWhere(name, field, value) {
+      return (store[name] ?? []).filter((item) => item[field] === value).map((item) => ({ ...item }));
     },
     async set(name, id, data) {
       store[name] = store[name].filter((item) => item.id !== id);

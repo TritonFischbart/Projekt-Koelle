@@ -13,7 +13,7 @@ import { eventsUrl, normalizeEvent, groupByDay } from './shared/calendar.js';
 import {
   wants, inviteMessages, pollMessages, expenseMessages, choreWeekStartMessages,
   expenseChangeMessages, noteMessages, inviteAnswerMessages, pollClosedMessages, absenceMessages,
-  choreReminderMessages, calendarMessages, shoppingMessages, tripMessages, dueJobs,
+  choreReminderMessages, calendarMessages, shoppingMessages, tripMessages, quickNoteMessages, dueJobs,
 } from './logic.js';
 
 setGlobalOptions({ region: 'europe-west3', maxInstances: 2 });
@@ -68,6 +68,7 @@ export const pushExpenseChange = onDocumentUpdated('expenses/{id}', (e) => send(
 export const pushNote = onDocumentWritten('notes/{id}', (e) => send(noteMessages(...beforeAfter(e))));
 export const pushInviteAnswer = onDocumentUpdated('invites/{id}', (e) => send(inviteAnswerMessages(...beforeAfter(e))));
 export const pushPollClosed = onDocumentUpdated('polls/{id}', (e) => send(pollClosedMessages(...beforeAfter(e))));
+export const pushQuickNote = onDocumentCreated('quickNotes/{id}', (e) => send(quickNoteMessages(e.data.data())));
 export const pushTrip = onDocumentWritten('shoppingTrips/{id}', (e) => send(tripMessages(...beforeAfter(e))));
 export const pushAbsence = onDocumentCreated('absences/{id}', (e) => send(absenceMessages(e.data.data())));
 export const pushAbsenceChange = onDocumentUpdated('absences/{id}', (e) => {

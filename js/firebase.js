@@ -25,6 +25,9 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
+  query,
+  where,
+  getDocs,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
   getMessaging,
@@ -33,7 +36,7 @@ import {
   isSupported as isMessagingSupported,
   onMessage,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js';
-import { CALENDAR_SCOPE, eventWriteUrl } from './calendar.js?v=50';
+import { CALENDAR_SCOPE, eventWriteUrl } from './calendar.js?v=51';
 
 export function createFirebaseBackend(config) {
   const app = initializeApp(config);
@@ -107,6 +110,11 @@ export function createFirebaseBackend(config) {
     update: (name, id, data) => updateDoc(doc(db, name, id), data),
     remove: (name, id) => deleteDoc(doc(db, name, id)),
     set: (name, id, data) => setDoc(doc(db, name, id), data),
+    // Einträge einmalig holen, bei denen ein Feld einen Wert hat (z. B. Kassenbons einer Ausgabe)
+    async getWhere(name, field, value) {
+      const snap = await getDocs(query(collection(db, name), where(field, '==', value)));
+      return snap.docs.map((d) => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }));
+    },
 
     // Legt eine Abrechnung an und ordnet ihr alle offenen Einträge zu.
     async settleAll(settlement, expenseIds, paymentIds) {
