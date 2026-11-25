@@ -240,6 +240,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Öffnen geladen (`loadReceipts`, Zwischenspeicher `receiptCache`), damit der App-Start schnell bleibt. Löschen der Ausgabe
   löscht die Fotos mit (Rückgängig holt alles zurück). Abgerechnete Einträge: antippen zeigt den Bon. Nicht bei
   Daueraufträgen. Fotos sind **nicht** in der JSON-Datensicherung (zu groß).
+  Speichern ist gesperrt, solange ein Foto noch verkleinert wird; konnten die Fotos (z. B. offline) nicht geladen werden,
+  bleibt die gespeicherte Anzahl unverändert und Löschen wird abgelehnt (keine verwaisten Fotos). Mehrere Bons bei
+  abgerechneten Einträgen: Fenster von unten (`receipts`-Panel).
 - **Daueraufträge** (z. B. Internet, Netflix): werden am gewählten Tag (1.–28.)
   automatisch eingetragen, sobald jemand die App öffnet. Markiert mit 🔁.
 
@@ -287,7 +290,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 
 ### 📝 Kurz notiert (Startseite, aus Ideen-Sammlung #15, 25. Nov. 2026)
 - Karte nach „Deine Aufgabe“: kurze Zettel wie am Kühlschrank („Paket im Flur“), max. 200 Zeichen, „＋ Neu“,
-  antippen = bearbeiten (jeder darf alle), ✕ = löschen mit Rückgängig. Nach **7 Tagen** nicht mehr angezeigt.
+  antippen = bearbeiten (jeder darf alle), ✕ = löschen mit Rückgängig. Nach **7 Tagen** nicht mehr angezeigt und beim
+  nächsten App-Start aus der Datenbank gelöscht (`cleanupQuickNotes`). Aktionsnamen `quicknote-*` (`quick-*` gehört der
+  Einkaufs-Schnellauswahl – Aktionsnamen im Klick-Switch müssen eindeutig sein!).
   Push an die anderen unter der Art „Schwarzes Brett“ (`pushQuickNote`/`quickNoteMessages`). In der Datensicherung enthalten.
 
 ### 🗳️ Abstimmungen
@@ -403,6 +408,7 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   eigener Sender eintragen.
 - Läuft weiter beim Wechseln der Bereiche; Leiste über der unteren Leiste (`#radio-bar`: Pause/Weiter/✕), Media Session
   für Sperrbildschirm. Nach Pause startet der Stream frisch (live). `<audio id="radio-audio">` liegt statisch in index.html.
+- Lädt ein Sender 15 s lang nicht, kommt die Fehlermeldung. Radio-Einstellungen sind in der Datensicherung (`radio`).
 - Varianten laut.fm/eigener Sender wurden nicht gebaut (eigener Sender lässt sich aber als Stream eintragen).
 
 ## 🎪 Wochentipps „Diese Woche in Ehrenfeld“ (seit 7. Nov. 2026, Wunsch von Lukas)

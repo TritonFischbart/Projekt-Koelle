@@ -922,3 +922,8 @@ body.radio-on .fab { bottom: calc(var(--tabbar-h) + 72px + env(safe-area-inset-b
 
 .nowrap { white-space: nowrap; }
 .station-state { font-size: 0.8rem; }
+
+/* Größere Tippflächen (Gegenprüfung 25. Nov. 2026) */
+.thumb-remove { position: absolute; }
+.thumb-remove::after { content: ''; position: absolute; inset: -8px; }
+.radio-bar .icon-btn { width: 42px; height: 42px; }

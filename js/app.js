@@ -2,30 +2,30 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=51';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=51';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=52';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=52';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=51';
-import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=51';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=51';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=51';
-import { compressImage, RECEIPT_OPTIONS } from './images.js?v=51';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji, inviteParticipants, isRatingOpen, ratingSummary, bestEvenings } from './invites.js?v=51';
-import { allStations, isStreamUrl, isWebUrl, playlistService } from './radio.js?v=51';
-import { visibleQuickNotes, agoText, QUICK_NOTE_MAX } from './quicknotes.js?v=51';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=51';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=51';
-import { toPlain, expensesCsv } from './export.js?v=51';
-import { firebaseConfig } from './firebase-config.js?v=51';
-import { weisheitDesTages } from './koelsch.js?v=51';
-import { noteTextHtml, continueList } from './notetext.js?v=51';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=51';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=51';
+} from './chores.js?v=52';
+import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=52';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=52';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=52';
+import { compressImage, RECEIPT_OPTIONS } from './images.js?v=52';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji, inviteParticipants, isRatingOpen, ratingSummary, bestEvenings } from './invites.js?v=52';
+import { allStations, isStreamUrl, isWebUrl, playlistService } from './radio.js?v=52';
+import { visibleQuickNotes, agoText, QUICK_NOTE_MAX } from './quicknotes.js?v=52';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=52';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=52';
+import { toPlain, expensesCsv } from './export.js?v=52';
+import { firebaseConfig } from './firebase-config.js?v=52';
+import { weisheitDesTages } from './koelsch.js?v=52';
+import { noteTextHtml, continueList } from './notetext.js?v=52';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=52';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=52';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=51) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=52) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -192,9 +192,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=51')).createDemoBackend();
+      backend = (await import('./demo.js?v=52')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=51')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=52')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -229,7 +229,11 @@ function handleUser(user) {
   listen('noteImages', (docs) => { state.noteImages = docs; renderAll(); });
   listen('absences', (docs) => { state.absences = docs; renderAll(); });
   listen('shoppingTrips', (docs) => { state.trips = docs; renderAll(); });
-  listen('quickNotes', (docs) => { state.quickNotes = docs; renderAll(); });
+  listen('quickNotes', (docs) => {
+    state.quickNotes = docs;
+    cleanupQuickNotes();
+    renderAll();
+  });
   listen('polls', (docs) => { state.polls = docs; renderAll(); });
   listen('invites', (docs) => { state.invites = docs; renderAll(); });
   listen('pushSettings', (docs) => { state.pushSettings = Object.fromEntries(docs.map((d) => [d.id, d])); renderAll(); });
@@ -531,6 +535,12 @@ const PANELS = {
   'note-new': () => ({ title: '＋ Neue Notiz', body: noteNewBody() }),
   'note-sort': () => ({ title: '↕️ Notizen sortieren', body: noteSortBody() }),
   best: () => ({ title: '🏆 Beste WG-Abende', body: bestEveningsBody() }),
+  receipts: () => ({
+    title: '🧾 Kassenbons',
+    body: `<div class="note-thumbs">${(state.receiptCache[state.receiptPanel] ?? []).map((r, i) => `
+      <button type="button" class="receipt-view" data-action="receipt-panel-view" data-key="${i}" aria-label="Kassenbon ${i + 1} groß ansehen"><img src="${esc(r.data)}" alt="Kassenbon ${i + 1}"></button>`).join('')}</div>
+      <p class="hint">Antippen = groß ansehen.</p>`,
+  }),
 };
 
 function openPanel(id) {
@@ -2007,7 +2017,7 @@ function renderNoteFormImages() {
   ];
   $('#n-images').innerHTML = all.map((img) => `
     <span class="note-thumb">
-      <img src="${img.data}" alt="Bild">
+      <img src="${esc(img.data)}" alt="Bild">
       <button type="button" class="thumb-remove" data-action="note-image-remove" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Bild entfernen">✕</button>
     </span>`).join('');
 }
@@ -2131,6 +2141,7 @@ async function exportJson() {
     polls: state.polls,
     invites: state.invites,
     quickNotes: state.quickNotes,
+    radio: state.radioSettings,
   });
   const saved = await saveFile(`projekt-koelle-sicherung-${todayISO()}.json`, JSON.stringify(data, null, 2), 'application/json');
   if (saved) {
@@ -2398,18 +2409,29 @@ function quickNotesCard() {
   const notes = visibleQuickNotes(state.quickNotes, toMillis);
   const items = notes.map((n) => `
       <li class="quick-note">
-        <button class="quick-note-main" data-action="quick-edit" data-id="${esc(n.id)}">
+        <button class="quick-note-main" data-action="quicknote-edit" data-id="${esc(n.id)}">
           <span class="quick-note-text">${esc(n.text)}</span>
           <span class="quick-note-meta">${esc(personName(n.createdBy))} · ${esc(agoText(toMillis(n.createdAt)))}${n.updatedBy && n.updatedBy !== n.createdBy ? ` · geändert von ${esc(personName(n.updatedBy))}` : ''}</span>
         </button>
-        <button class="icon-btn small" data-action="quick-delete" data-id="${esc(n.id)}" aria-label="Zettel löschen">✕</button>
+        <button class="icon-btn small" data-action="quicknote-delete" data-id="${esc(n.id)}" aria-label="Zettel löschen">✕</button>
       </li>`).join('');
   return foldCard('quicknotes', {
     title: '📝 Kurz notiert',
-    action: '<button class="link-btn" data-action="quick-new">＋ Neu</button>',
+    action: '<button class="link-btn" data-action="quicknote-new">＋ Neu</button>',
     body: items ? `<ul class="quick-list">${items}</ul>` : '<p class="empty">Nichts notiert. Kurze Info für die anderen? „Bin heute spät da“, „Paket im Flur“ …</p>',
     summary: notes.length ? `${notes.length === 1 ? '1 Zettel' : `${notes.length} Zettel`}: ${esc(notes[0].text.slice(0, 60))}${notes[0].text.length > 60 ? '…' : ''}` : 'Nichts notiert.',
   });
+}
+
+// Zettel, die älter als 7 Tage sind, einmal pro App-Start aus der Datenbank löschen
+let quickCleaned = false;
+function cleanupQuickNotes() {
+  if (quickCleaned || !state.quickNotes.length) return;
+  quickCleaned = true;
+  const visible = new Set(visibleQuickNotes(state.quickNotes, toMillis).map((n) => n.id));
+  state.quickNotes
+    .filter((n) => !visible.has(n.id) && toMillis(n.createdAt) > 0)
+    .forEach((n) => backend.remove('quickNotes', n.id).catch((err) => console.error(err)));
 }
 
 function openQuickForm(note = null) {
@@ -2462,7 +2484,7 @@ function ratingBlock(inv) {
     <div class="rating">
       <span class="rating-title">${mine ? 'Deine Bewertung' : 'Wie war\'s?'} ${esc(inv.emoji || '🙋')} ${esc(inv.title)}</span>
       ${starsHtml(inv, mine)}
-      <span class="rating-sub">${sum ? `<span class="rating-result">⭐ ${sum.text}</span> · ${sum.count} von ${people} haben bewertet` : 'Noch keine Bewertung – sei die/der Erste!'}${mine ? ' · nochmal tippen = ändern' : ''}</span>
+      <span class="rating-sub">${sum ? `<span class="rating-result">⭐ ${sum.text}</span> · ${sum.count} von ${people} ${sum.count === 1 ? 'hat' : 'haben'} bewertet` : 'Noch keine Bewertung – sei die/der Erste!'}${mine ? ' · nochmal tippen = ändern' : ''}</span>
     </div>`;
 }
 
@@ -2512,6 +2534,9 @@ function playStation(id) {
 function startStream(station) {
   const audio = $('#radio-audio');
   radio.status = 'loading';
+  clearTimeout(radio.timer);
+  const id = station.id;
+  radio.timer = setTimeout(() => { if (radio.id === id && radio.status === 'loading') radioFailed(); }, 15000);
   audio.src = station.url;
   audio.play().catch((err) => {
     if (err?.name === 'AbortError') return; // anderer Sender gewählt
@@ -2546,6 +2571,7 @@ function toggleRadio() {
 }
 
 function stopRadio() {
+  clearTimeout(radio.timer);
   const audio = $('#radio-audio');
   audio.pause();
   audio.removeAttribute('src');
@@ -2575,13 +2601,13 @@ function renderRadio() {
   $('#radio-btn').setAttribute('aria-pressed', String(on));
   if (on) {
     $('#radio-bar-name').textContent = station.name;
-    $('#radio-bar-state').textContent = radio.status === 'playing' ? 'WG-Radio' : radioStateText(radio.status);
+    $('#radio-bar-state').textContent = `WG-Radio · ${radioStateText(radio.status)}`;
     const playing = radio.status === 'playing' || radio.status === 'loading';
     $('#radio-bar-toggle').textContent = playing ? '⏸' : '▶︎';
     $('#radio-bar-toggle').setAttribute('aria-label', playing ? 'Pause' : 'Weiterhören');
   }
   if (!$('#radio-dialog').open) return;
-  const playlist = state.radioSettings?.playlistUrl ?? '';
+  const playlist = isWebUrl(state.radioSettings?.playlistUrl ?? '') ? state.radioSettings.playlistUrl : '';
   const stationRow = (s) => {
     const active = s.id === radio.id;
     return `
@@ -2935,6 +2961,10 @@ async function restoreBackup(file) {
       backend.set(col, id, rest).catch(showError);
     }
   }
+  if (data.radio && typeof data.radio === 'object') {
+    const { id, ...radioData } = data.radio;
+    backend.set('settings', 'radio', radioData).catch(showError);
+  }
   if (Array.isArray(data.choreAreas) && data.choreAreas.length) {
     backend.set('settings', 'putzplan', { areas: data.choreAreas, updatedBy: state.me, updatedAt: backend.now() }).catch(showError);
   }
@@ -2973,6 +3003,8 @@ function openExpenseForm(expense, opts = {}) {
   $('#f-date-row').hidden = recurring;
   $('#f-day-row').hidden = !recurring;
   $('#f-receipt-row').hidden = recurring;
+  state.formToken = (state.formToken ?? 0) + 1;
+  state.receiptBusy = 0;
   state.pendingReceipts = [];
   state.removedReceipts = [];
   state.formReceipts = [];
@@ -2980,8 +3012,14 @@ function openExpenseForm(expense, opts = {}) {
   state.receiptsUnknown = !recurring && Boolean(expense?.receipts);
   renderReceiptThumbs();
   if (state.receiptsUnknown) {
+    if ((state.receiptCache[expense.id]?.length ?? -1) !== expense.receipts) delete state.receiptCache[expense.id];
+    const token = state.formToken;
     loadReceipts(expense.id).then((list) => {
-      if (state.editingId !== expense.id || !list) return; // anderes Formular offen oder Laden fehlgeschlagen
+      // anderes Formular offen, Laden fehlgeschlagen oder (offline) noch nichts da
+      if (state.formToken !== token || !list || list.length < expense.receipts) {
+        if (state.formToken === token && list) delete state.receiptCache[expense.id];
+        return;
+      }
       state.formReceipts = list;
       state.receiptsUnknown = false;
       renderReceiptThumbs();
@@ -3150,6 +3188,10 @@ function onSubmitExpense(event) {
     $('#f-error').textContent = problem;
     return;
   }
+  if (state.receiptBusy > 0) {
+    $('#f-error').textContent = 'Das Kassenbon-Foto wird noch vorbereitet – einen Moment, dann nochmal „Speichern“.';
+    return;
+  }
   if (withoutPrice && !confirm(`${withoutPrice === 1 ? '1 Posten hat' : `${withoutPrice} Posten haben`} keinen Preis und ${withoutPrice === 1 ? 'wird' : 'werden'} weggelassen. Trotzdem speichern?`)) return;
 
   const id = state.editingId;
@@ -3201,8 +3243,16 @@ async function deleteExpense() {
   }
   const expense = state.expenses.find((e) => e.id === id);
   if (!expense) return;
+  let receipts = [];
+  if (expense.receipts) {
+    delete state.receiptCache[id];
+    receipts = await loadReceipts(id);
+    if (!receipts || receipts.length < expense.receipts) {
+      $('#f-error').textContent = 'Die Kassenbon-Fotos konnten gerade nicht geladen werden. Bitte später nochmal löschen, wenn du online bist.';
+      return;
+    }
+  }
   $('#expense-dialog').close();
-  const receipts = expense.receipts ? (await loadReceipts(id)) ?? [] : [];
   removeWithUndo('Ausgabe gelöscht', [
     { col: 'expenses', doc: expense },
     ...receipts.map((doc) => ({ col: 'receiptImages', doc })),
@@ -3233,12 +3283,13 @@ function renderReceiptThumbs() {
   const fresh = state.pendingReceipts.map((r, i) => ({ key: String(i), data: r.data, kind: 'new' }));
   $('#f-receipts').innerHTML = [...saved, ...fresh].map((img) => `
     <span class="note-thumb">
-      <button type="button" class="receipt-view" data-action="receipt-view" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Kassenbon groß ansehen"><img src="${img.data}" alt="Kassenbon"></button>
+      <button type="button" class="receipt-view" data-action="receipt-view" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Kassenbon groß ansehen"><img src="${esc(img.data)}" alt="Kassenbon"></button>
       <button type="button" class="thumb-remove" data-action="receipt-remove" data-kind="${img.kind}" data-key="${esc(img.key)}" aria-label="Kassenbon entfernen">✕</button>
     </span>`).join('');
 }
 
 async function addReceipts(files) {
+  const token = state.formToken;
   for (const file of files) {
     if (state.formReceipts.length - state.removedReceipts.length + state.pendingReceipts.length >= 3) {
       toast('Höchstens 3 Fotos pro Ausgabe.', true);
@@ -3246,7 +3297,10 @@ async function addReceipts(files) {
     }
     try {
       toast('Foto wird vorbereitet …');
-      state.pendingReceipts.push(await compressImage(file, RECEIPT_OPTIONS));
+      state.receiptBusy += 1;
+      const img = await compressImage(file, RECEIPT_OPTIONS).finally(() => { state.receiptBusy -= 1; });
+      if (state.formToken !== token || !$('#expense-dialog').open) return; // Formular inzwischen zu
+      state.pendingReceipts.push(img);
       renderReceiptThumbs();
       toast('Kassenbon hinzugefügt ✓ Zum Speichern unten auf „Speichern“ tippen.');
     } catch (err) {
@@ -3277,8 +3331,12 @@ function removeFormReceipt(kind, key) {
 async function showExpenseReceipt(expenseId) {
   const list = await loadReceipts(expenseId);
   if (!list) return;
-  if (list.length) showImageData(list[0].data);
-  else toast('Kein Kassenbon gefunden.');
+  if (!list.length) toast('Kein Kassenbon gefunden.');
+  else if (list.length === 1) showImageData(list[0].data);
+  else {
+    state.receiptPanel = expenseId;
+    openPanel('receipts');
+  }
 }
 
 // ---------- Ausgleichen ----------
@@ -3338,10 +3396,10 @@ function onClick(event) {
     case 'tab': switchTab(el.dataset.tab); break;
     case 'fold': toggleFold(el.dataset.fold, el.dataset.default === '1'); renderAll(); break;
     case 'panel-open': openPanel(el.dataset.panel); break;
-    case 'quick-new': openQuickForm(); break;
-    case 'quick-edit': openQuickForm(state.quickNotes.find((n) => n.id === el.dataset.id)); break;
-    case 'quick-delete': deleteQuick(el.dataset.id); break;
-    case 'quick-delete-form': deleteQuick(state.editingQuick); break;
+    case 'quicknote-new': openQuickForm(); break;
+    case 'quicknote-edit': openQuickForm(state.quickNotes.find((n) => n.id === el.dataset.id)); break;
+    case 'quicknote-delete': deleteQuick(el.dataset.id); break;
+    case 'quicknote-delete-form': deleteQuick(state.editingQuick); break;
     case 'rate': rateInvite(el.dataset.id, Number(el.dataset.stars)); break;
     case 'radio-open': openRadio(); break;
     case 'radio-play': playStation(el.dataset.id); break;
@@ -3353,6 +3411,11 @@ function onClick(event) {
     case 'receipt-view': viewFormReceipt(el.dataset.kind, el.dataset.key); break;
     case 'receipt-remove': removeFormReceipt(el.dataset.kind, el.dataset.key); break;
     case 'receipt-show': showExpenseReceipt(el.dataset.id); break;
+    case 'receipt-panel-view': {
+      const r = (state.receiptCache[state.receiptPanel] ?? [])[Number(el.dataset.key)];
+      if (r) showImageData(r.data);
+      break;
+    }
     case 'tips-search-toggle':
       state.tipsSearch = !(state.tipsSearch || state.tipsQuery);
       if (!state.tipsSearch) state.tipsQuery = '';

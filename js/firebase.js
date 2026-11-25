@@ -36,7 +36,7 @@ import {
   isSupported as isMessagingSupported,
   onMessage,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js';
-import { CALENDAR_SCOPE, eventWriteUrl } from './calendar.js?v=51';
+import { CALENDAR_SCOPE, eventWriteUrl } from './calendar.js?v=52';
 
 export function createFirebaseBackend(config) {
   const app = initializeApp(config);
