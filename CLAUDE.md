@@ -113,6 +113,8 @@ früheren Gesprächen besprochen und entschieden wurde.
 - Kleine runde Symbol-Knöpfe (`.icon-btn.small`, z. B. ✕ und Kategorie-Symbol im Einkauf, ✕ bei „Wer ist weg?“)
   sind sichtbar 30 px groß, haben aber per `::after` eine unsichtbar größere Tippfläche (ca. 36 × 42 px).
   Dafür braucht der Knopf `position: relative` (Operator, 21. Nov. 2026).
+- Termine auf der Startseite (`.start-event`) haben dasselbe unsichtbare Polster (9 px innen, −6 px Rand).
+  Einklappbare Überschriften in Karten sind `display: inline`, damit der Pfeil bei Umbruch direkt hinter dem Wort steht.
 - Texte aus der Datenbank immer mit `esc()` ausgeben (Schutz vor HTML-Einschleusung).
 - Formulare liegen als `<dialog>` statisch in `index.html` – nicht in Bereiche
   rendern, die bei jeder Datenänderung neu gezeichnet werden (sonst gehen Eingaben verloren).
