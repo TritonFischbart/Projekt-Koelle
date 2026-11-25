@@ -8,11 +8,17 @@ export async function loadTips() {
   return response.json();
 }
 
-// Nur Tipps ab heute, nach Datum sortiert
+// Nur Tipps ab heute, nach Datum sortiert. Was schon läuft (z. B. ein Weihnachtsmarkt
+// über Wochen), wird einsortiert, als finge es in einer Woche an – sonst verdrängen
+// Dauer-Veranstaltungen die Konzerte und Flohmärkte dieser Woche von der Startseite.
 export function upcomingTips(data, todayIso) {
+  const d = new Date(`${todayIso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 7);
+  const inAWeek = d.toISOString().slice(0, 10);
+  const key = (t) => (t.date < todayIso ? inAWeek : t.date);
   return (data?.tips ?? [])
     .filter((t) => (t.dateTo ?? t.date) >= todayIso)
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .sort((a, b) => key(a).localeCompare(key(b)) || a.date.localeCompare(b.date));
 }
 
 // "Mi, 11.11." (+ " – Do, 12.11.")
