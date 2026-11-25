@@ -361,6 +361,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Karte ganz unten auf der Startseite: Events, Konzerte, Partys, Märkte, Flohmärkte in Ehrenfeld
   (Umgebung ok, z. B. Neuehrenfeld/Bickendorf). Je Tipp: Emoji, Titel, Tag + Uhrzeit, Ort, kurzer Text,
   Link (Antippen öffnet die Quelle). Vergangene Tipps verschwinden von selbst; 4 sichtbar, „Alle … anzeigen“.
+  Reihenfolge nach Datum; schon laufende Dauer-Veranstaltungen (Weihnachtsmarkt, Ausstellung) werden einsortiert,
+  als begännen sie in 7 Tagen – sonst verdrängen sie die Termine dieser Woche (`upcomingTips`, 25. Nov. 2026).
   Die Karte ist **immer** sichtbar (Lukas' Wunsch); ohne aktuelle Tipps steht dort „neue kommen jeden Montag“.
 - **Suche** (Wunsch von Lukas): Suchfeld + Schnell-Knöpfe (Flohmarkt, Konzert, Party, Theater, Markt,
   Familie, Kostenlos). Durchsucht Titel, Text, Ort, Uhrzeit und `tags`; verwandte Wörter zählen mit
