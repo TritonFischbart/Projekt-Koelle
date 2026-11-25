@@ -842,3 +842,7 @@ main { overflow-x: clip; }
 .choice-check { color: var(--brand); font-size: 1.1rem; }
 .note-sort-btn { font-size: 0.85rem; }
 .month-panel .hint { margin-top: 14px; }
+
+/* „＋ Termin eintragen“ unter den nächsten Terminen (Startseite) – Text-Knopf mit Polster, deshalb −1 px = 10 px sichtbar */
+.start-event-add { display: inline-block; margin-top: -1px; }
+.event-detail .form-actions .btn { flex: 1; }
