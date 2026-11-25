@@ -2,28 +2,28 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=48';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=48';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=49';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=49';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=48';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=48';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=48';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=48';
-import { compressImage } from './images.js?v=48';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=48';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=48';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=48';
-import { toPlain, expensesCsv } from './export.js?v=48';
-import { firebaseConfig } from './firebase-config.js?v=48';
-import { weisheitDesTages } from './koelsch.js?v=48';
-import { noteTextHtml, continueList } from './notetext.js?v=48';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=48';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=48';
+} from './chores.js?v=49';
+import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=49';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=49';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=49';
+import { compressImage } from './images.js?v=49';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=49';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=49';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=49';
+import { toPlain, expensesCsv } from './export.js?v=49';
+import { firebaseConfig } from './firebase-config.js?v=49';
+import { weisheitDesTages } from './koelsch.js?v=49';
+import { noteTextHtml, continueList } from './notetext.js?v=49';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=49';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=49';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=48) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=49) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -57,6 +57,7 @@ const state = {
   calendar: { config: null, events: null, error: null, loading: false, loadedAt: 0 },
   tab: 'start',
   absences: [],
+  trips: [],
   polls: [],
   invites: [],
   pushSettings: {},
@@ -180,9 +181,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=48')).createDemoBackend();
+      backend = (await import('./demo.js?v=49')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=48')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=49')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -216,6 +217,7 @@ function handleUser(user) {
   listen('notes', (docs) => { state.notes = docs; renderAll(); });
   listen('noteImages', (docs) => { state.noteImages = docs; renderAll(); });
   listen('absences', (docs) => { state.absences = docs; renderAll(); });
+  listen('shoppingTrips', (docs) => { state.trips = docs; renderAll(); });
   listen('polls', (docs) => { state.polls = docs; renderAll(); });
   listen('invites', (docs) => { state.invites = docs; renderAll(); });
   listen('pushSettings', (docs) => { state.pushSettings = Object.fromEntries(docs.map((d) => [d.id, d])); renderAll(); });
@@ -1091,6 +1093,7 @@ function renderEinkauf() {
     </section>` : '';
 
   $('#shop-list').innerHTML = `
+    ${tripCard()}
     <section class="card">
       <div class="card-head"><h2>Fehlt noch</h2><button class="link-btn" data-action="shoporder-open">↕️ Reihenfolge</button></div>
       ${openList}
@@ -1101,6 +1104,37 @@ function renderEinkauf() {
 
   const tabButton = document.querySelector('.tabbar [data-tab=einkauf]');
   tabButton.dataset.count = open.length || '';
+}
+
+// „Ich geh jetzt einkaufen“: Die anderen sehen 2 Stunden lang einen Hinweis (und bekommen
+// eine Push-Nachricht), damit sie schnell noch etwas auf die Liste setzen können.
+const TRIP_HOURS = 2;
+function activeTrips() {
+  const now = Date.now();
+  return state.trips.filter((t) => now - toMillis(t.at) < TRIP_HOURS * 3600000);
+}
+function tripTime(t) {
+  return new Date(toMillis(t.at)).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+function tripCard() {
+  const trips = activeTrips();
+  const mine = trips.find((t) => t.person === state.me);
+  const others = trips.filter((t) => t.person !== state.me);
+  const otherLines = others.map((t) => `
+      <p class="trip-line"><span aria-hidden="true">🏃</span><span><strong>${esc(personName(t.person))} geht gerade einkaufen</strong> (seit ${tripTime(t)}) – trag schnell noch ein, was fehlt!</span></p>`).join('');
+  const myPart = mine
+    ? `<div class="trip-me"><span>🛒 Du bist unterwegs – die anderen wissen Bescheid.</span><button class="btn outline" data-action="trip-end">Bin zurück</button></div>`
+    : `<button class="btn outline full" data-action="trip-start">🏃 Ich geh jetzt einkaufen</button>
+      <p class="hint">Die anderen bekommen Bescheid und können schnell noch etwas auf die Liste setzen.</p>`;
+  return `<section class="card trip${others.length ? ' trip-active' : ''}">${otherLines}${myPart}</section>`;
+}
+function tripStart() {
+  backend.set('shoppingTrips', state.me, { person: state.me, at: new Date().toISOString() })
+    .then(() => toast('Die anderen wissen Bescheid 🏃'))
+    .catch(showError);
+}
+function tripEnd() {
+  backend.remove('shoppingTrips', state.me).catch(showError);
 }
 
 // Schnellauswahl: Was mindestens so oft eingetragen wurde, erscheint als Knopf.
@@ -2017,6 +2051,7 @@ function renderStartContent() {
   const balance = computeBalances(PERSON_IDS, activeExpenses(), activePayments())[state.me];
   const myChores = weekChores(thisMonday()).filter((c) => c.assignee === state.me);
   const openShop = state.shopping.filter((i) => !i.doneBy);
+  const shopTrip = activeTrips().find((t) => t.person !== state.me);
   const meAway = isAwayOn(state.absences, state.me);
 
   $('#tab-start').innerHTML = `
@@ -2033,7 +2068,7 @@ function renderStartContent() {
       </button>
       <button class="card tile" data-action="tab" data-tab="einkauf">
         <span class="tile-icon">🛒</span>
-        <span class="tile-label">Einkaufsliste</span>
+        <span class="tile-label">${shopTrip ? `🏃 ${esc(personName(shopTrip.person))} kauft ein` : 'Einkaufsliste'}</span>
         <strong class="tile-value">${openShop.length ? `${openShop.length} ${openShop.length === 1 ? 'Sache fehlt' : 'Sachen fehlen'}` : 'alles da'}</strong>
       </button>
     </div>
@@ -2794,6 +2829,8 @@ function onClick(event) {
     case 'shop-toggle': shopToggle(el.dataset.id); break;
     case 'shop-delete': shopDelete(el.dataset.id); break;
     case 'shop-clear': shopClear(); break;
+    case 'trip-start': tripStart(); break;
+    case 'trip-end': tripEnd(); break;
     case 'quick-add': quickAdd(el.dataset.id); break;
     case 'chore-done-start': choreDoneThisWeek(el.dataset.id); break;
     case 'absence-new': openAbsenceForm(); break;

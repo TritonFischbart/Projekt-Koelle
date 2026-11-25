@@ -143,6 +143,19 @@ export function absenceMessages(abs, changedFrom = null) {
   }));
 }
 
+// „Ich geh jetzt einkaufen“: an die anderen, damit sie noch etwas auf die Liste setzen können.
+// Nur beim Losgehen (neu oder neu gestartet), nicht bei „Bin zurück“.
+export function tripMessages(before, after) {
+  if (!after?.person) return [];
+  if (before && before.at === after.at) return [];
+  return others(after.person).map((person) => ({
+    person,
+    type: 'trips',
+    title: `🏃 ${personName(after.person)} geht jetzt einkaufen`,
+    body: 'Fehlt noch was? Schnell auf die Einkaufsliste setzen.',
+  }));
+}
+
 // ---------- Putzplan ----------
 
 // Wie in der App (weekChores): fällige Bereiche, Abwesenheiten, Tausch und Erledigt.

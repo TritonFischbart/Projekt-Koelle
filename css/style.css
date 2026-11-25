@@ -590,11 +590,18 @@ a.btn.full { width: 100%; }
 .tile { display: grid; gap: 4px; text-align: left; padding: 16px; }
 .tile-icon { font-size: 1.5rem; }
 .tile-label { color: var(--muted); font-size: 0.85rem; }
+
+/* „Ich geh jetzt einkaufen“ */
+.trip .hint { margin-bottom: 0; }
+.trip.trip-active { border: 2px solid var(--brand); }
+.trip-line { display: flex; gap: 10px; margin: 0 0 12px; line-height: 1.4; }
+.trip-line strong { color: var(--brand); }
+.trip-me { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 600; }
 .tile-value { font-size: 1.15rem; }
 .start-day + .start-day { margin-top: 10px; }
 .start-day-title { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 700; }
 .start-day-title.today { color: var(--brand); }
-.start-event { display: flex; gap: 10px; padding: 3px 0; font-weight: 600; width: 100%; text-align: left; border: 0; background: none; }
+.start-event { display: flex; gap: 10px; padding: 9px 0; margin: -6px 0; /* Tippfläche ~41 px, gleiches Aussehen */ font-weight: 600; width: 100%; text-align: left; border: 0; background: none; }
 .start-event span { flex: none; width: 76px; color: var(--muted); font-weight: 500; font-size: 0.9rem; }
 .start-chore { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .start-chore-name { font-weight: 700; font-size: 1.05rem; }
@@ -800,6 +807,9 @@ main { overflow-x: clip; }
   transform: rotate(45deg); transition: transform 0.15s;
 }
 .fold-btn[aria-expanded="false"] .fold-chev { transform: rotate(-45deg); margin-bottom: 0; }
+/* In Karten-Überschriften fließt der Pfeil direkt hinter das letzte Wort – auch wenn der Titel umbricht */
+.card-head h2 .fold-btn { display: inline; }
+.card-head h2 .fold-chev { display: inline-block; vertical-align: middle; margin-left: 10px; }
 .card-head h2 { min-width: 0; }
 .card-head { gap: 12px; }
 .card-head .link-btn { flex: none; }

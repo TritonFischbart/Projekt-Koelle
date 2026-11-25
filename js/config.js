@@ -32,5 +32,6 @@ export const PUSH_TYPES = [
   { id: 'absences', icon: '🌴', label: 'Wer ist weg?', hint: 'Wenn jemand Urlaub oder Abwesenheit einträgt', default: true },
   { id: 'chores', icon: '🧹', label: 'Putzplan', hint: 'Montags deine Aufgabe, sonntags 18 Uhr falls noch offen', default: true },
   { id: 'calendar', icon: '📅', label: 'Termine heute', hint: 'Morgens um 8 Uhr, wenn etwas ansteht', default: true },
+  { id: 'trips', icon: '🏃', label: 'Ich geh einkaufen', hint: 'Wenn jemand gleich einkaufen geht – dann kannst du schnell noch was auf die Liste setzen', default: true },
   { id: 'shopping', icon: '🛒', label: 'Einkaufsliste', hint: 'Abends um 19 Uhr, was noch fehlt', default: false },
 ];
