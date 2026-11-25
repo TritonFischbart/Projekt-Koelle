@@ -106,3 +106,52 @@ export async function fetchEvents({ calendarId, apiKey }, days = CALENDAR_DAYS) 
 export function newEventLink(calendarId) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&src=${encodeURIComponent(calendarId)}`;
 }
+
+// ---------- Termine direkt in der App eintragen ----------
+
+export const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+export const TIME_ZONE = 'Europe/Berlin';
+
+// Adresse zum Anlegen (ohne eventId) bzw. Ändern/Löschen eines Termins.
+export function eventWriteUrl(calendarId, eventId = '') {
+  const base = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+  return eventId ? `${base}/${encodeURIComponent(eventId)}` : base;
+}
+
+// "2026-11-25" + n Tage -> "2026-11-26"
+export function addDaysIso(iso, n) {
+  const d = localDate(iso);
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Formular -> Termin für Google. Ganztägig: Google zählt das Ende "exklusiv" (Tag danach).
+// Mit Uhrzeit: Endet er vor dem Anfang (z. B. 22:00–02:00), geht er bis zum nächsten Tag.
+export function eventResource({ title, allDay, date, dateTo, from, to, location = '', description = '' }) {
+  const body = { summary: title.trim(), location: location.trim(), description: description.trim() };
+  if (allDay) {
+    body.start = { date };
+    body.end = { date: addDaysIso(dateTo && dateTo >= date ? dateTo : date, 1) };
+  } else {
+    const endDay = to > from ? date : addDaysIso(date, 1);
+    body.start = { dateTime: `${date}T${from}:00`, timeZone: TIME_ZONE };
+    body.end = { dateTime: `${endDay}T${to}:00`, timeZone: TIME_ZONE };
+  }
+  return body;
+}
+
+// Termin aus der App (normalizeEvent) -> Werte fürs Formular
+export function eventFormValues(e) {
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const hm = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return {
+    title: e.hiddenTitle ? '' : e.title,
+    allDay: e.allDay,
+    date: iso(e.start),
+    dateTo: e.allDay ? addDaysIso(iso(e.end), -1) : iso(e.start),
+    from: e.allDay ? '19:00' : hm(e.start),
+    to: e.allDay ? '20:00' : hm(e.end),
+    location: e.location ?? '',
+    description: e.description ?? '',
+  };
+}

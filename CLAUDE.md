@@ -355,7 +355,18 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
 - Variante „eigenes Design“ (nicht eingebettet): **nächste 12 Monate** (früher 60 Tage –
   Lukas wollte z. B. Karneval im Februar sehen), gruppiert nach Tagen, mit
   Monats-Überschriften ab dem nächsten Monat. Bis zu 4 × 250 Termine (mehrere Abrufe).
-  „＋ Termin eintragen“ öffnet Google Kalender, Aktualisierung alle 5 Minuten.
+  Aktualisierung alle 5 Minuten.
+- **Termine direkt in der App eintragen, bearbeiten, löschen** (#11, gebaut 25. Nov. 2026): „＋ Termin eintragen“
+  (Kalender-Seite und Startseite unter „Nächste Termine“) öffnet `#newevent-dialog` (Was, Ganztägig, Datum/Bis-Datum
+  bzw. Von/Bis-Uhrzeit – endet Bis vor Von, geht es bis zum nächsten Tag –, Ort, Notiz). Im Termin-Fenster
+  „Bearbeiten“/„Löschen“ (nicht bei Terminen ohne sichtbaren Titel). Schreiben läuft über die **bestehende
+  Firebase-Google-Anmeldung** mit zusätzlichem Bereich `calendar.events` (`reauthenticateWithPopup`, Token ~50 Min. in
+  `sessionStorage`, `calendarWrite(method, calendarId, eventId, body)` in beiden Backends; kein eigener OAuth-Client nötig).
+  Lesen weiter per API-Schlüssel. Formular → Google: `eventResource`/`eventFormValues` in `calendar.js`. Das Google-Fenster
+  muss direkt nach dem Tippen aufgehen (vorher nichts abwarten, sonst blockiert Safari). Einrichtung bei Google:
+  ANLEITUNG.md Teil F (Bereich `calendar.events` unter „Datenzugriff“ eintragen, ggf. Testnutzer; Jana/Jul brauchen
+  „Änderungen an Terminen vornehmen“). Erwartet: Warnung „App nicht überprüft“ → „Erweitert“ → weiter. Kleiner Link
+  „Google Kalender öffnen“ bleibt als Ausweg. **Stand 25. Nov.: Lukas richtet es am Nachmittag ein – echter Test steht aus.**
   Startseite zeigt nur die nächsten 3 Tage mit Terminen.
 - **Termin antippen** (Kalender und Startseite) öffnet ein Fenster in der App mit Zeit, Ort
   (Link zu Google Maps), Beschreibung (HTML von Google → Text, Links antippbar) und
@@ -434,14 +445,12 @@ Claude-Sitzung (Operator), die so arbeitet:
 ## Merkliste / To-do für später (noch nicht gebaut)
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
-> #11 Termine direkt eintragen ·
+> #11 Termine direkt eintragen (gebaut, Test ausstehend) ·
 > #13 Kassenbon-Fotos · #14 Müllabfuhr-Termine · #15 Ideen-Sammlung · #24 WG-Radio.
 > Wenn etwas davon erledigt ist, das Issue schließen und hier austragen.
 
-- **Termine direkt in der App eintragen** (statt über Google Kalender). Von Lukas
-  ausdrücklich auf die Merkliste gesetzt. Hürde: Schreibzugriff auf Google Kalender
-  braucht eine Google-Anmeldung mit Kalender-Berechtigung (OAuth, Zustimmungsbildschirm
-  in der Google Cloud Console, im Testmodus Nutzer eintragen) – vorher mit Lukas klären.
+- **Termine direkt in der App eintragen** (#11): gebaut am 25. Nov. 2026 (siehe Kalender). Issue erst schließen,
+  wenn Lukas, Jana und Jul es auf dem Handy erfolgreich ausprobiert haben.
 
 - ~~**Push-Nachrichten** (#12)~~ – erledigt am 1. Nov. 2026: bereitgestellt, Test-Nachricht auf
   Lukas' Handy kam an. Rückmeldungen zum Verhalten (Uhrzeiten, Menge) noch einplanen. Das Dienstkonto `github-deploy` braucht die Rollen

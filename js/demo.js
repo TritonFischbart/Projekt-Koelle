@@ -1,7 +1,8 @@
 // Demo-Modus (Adresse mit ?demo am Ende): Beispieldaten nur im Browser,
 // damit man die Seite ohne Firebase ausprobieren kann. Nichts wird gespeichert.
 
-import { weekKey } from './chores.js?v=49';
+import { weekKey } from './chores.js?v=50';
+import { normalizeEvent } from './calendar.js?v=50';
 
 // Einfacher gezeichneter Grundriss als Beispielbild
 function demoFloorPlan() {
@@ -126,6 +127,7 @@ export function createDemoBackend() {
   let userCallbacks = [];
   let currentUser = user;
   let nextId = 1;
+  let demoCalendar = null;
 
   const snapshot = (name) => store[name].map((item) => ({ ...item }));
   const notify = (name) => (listeners[name] ?? []).forEach((cb) => cb(snapshot(name)));
@@ -197,17 +199,34 @@ export function createDemoBackend() {
 
     // Beispieltermine statt echter Google-Termine
     demoEvents() {
-      const at = (days, h, m = 0) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(h, m, 0, 0); return d; };
-      const day = (days) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + days); return d; };
-      return [
-        { id: 'k1', title: 'WG-Abend: Pizza & Film', location: 'Wohnzimmer', description: 'Jeder bringt ein Getränk mit 🍕\nFilm-Vorschläge hier sammeln: https://www.example.com/filme', allDay: false, start: at(0, 20), end: at(0, 23), link: '' },
-        { id: 'k2', title: 'Jana in Hamburg', location: '', allDay: true, start: day(1), end: day(4), link: '' },
-        { id: 'k3', title: 'Vermieter kommt (Heizung)', location: '', description: 'Herr Schmitz schaut sich die Heizung im Bad an. Bitte jemand zu Hause sein.', allDay: false, start: at(2, 9, 30), end: at(2, 10, 30), link: '' },
-        { id: 'k4', title: 'Sperrmüll', location: 'vor dem Haus', allDay: true, start: day(6), end: day(7), link: '' },
-        { id: 'k5', title: 'Geburtstag Jul 🎂', location: '', allDay: true, start: day(12), end: day(13), link: '' },
-        { id: 'k6', title: 'Weiberfastnacht 🎭', location: 'Heumarkt', allDay: true, start: day(102), end: day(103), link: '' },
-        { id: 'k7', title: 'Rosenmontagszug', location: 'Innenstadt', allDay: false, start: at(106, 10), end: at(106, 18), link: '' },
-      ];
+      demoCalendar ??= (() => {
+        const at = (days, h, m = 0) => { const d = new Date(); d.setDate(d.getDate() + days); d.setHours(h, m, 0, 0); return d; };
+        const day = (days) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + days); return d; };
+        return [
+          { id: 'k1', title: 'WG-Abend: Pizza & Film', location: 'Wohnzimmer', description: 'Jeder bringt ein Getränk mit 🍕\nFilm-Vorschläge hier sammeln: https://www.example.com/filme', allDay: false, start: at(0, 20), end: at(0, 23), link: '' },
+          { id: 'k2', title: 'Jana in Hamburg', location: '', allDay: true, start: day(1), end: day(4), link: '' },
+          { id: 'k3', title: 'Vermieter kommt (Heizung)', location: '', description: 'Herr Schmitz schaut sich die Heizung im Bad an. Bitte jemand zu Hause sein.', allDay: false, start: at(2, 9, 30), end: at(2, 10, 30), link: '' },
+          { id: 'k4', title: 'Sperrmüll', location: 'vor dem Haus', allDay: true, start: day(6), end: day(7), link: '' },
+          { id: 'k5', title: 'Geburtstag Jul 🎂', location: '', allDay: true, start: day(12), end: day(13), link: '' },
+          { id: 'k6', title: 'Weiberfastnacht 🎭', location: 'Heumarkt', allDay: true, start: day(102), end: day(103), link: '' },
+          { id: 'k7', title: 'Rosenmontagszug', location: 'Innenstadt', allDay: false, start: at(106, 10), end: at(106, 18), link: '' },
+        ];
+      })();
+      return [...demoCalendar];
+    },
+
+    // Wie Google: Termin anlegen, ändern oder löschen – hier nur im Browser.
+    async calendarWrite(method, calendarId, eventId, body) {
+      await new Promise((r) => setTimeout(r, 300));
+      this.demoEvents();
+      if (method === 'DELETE') {
+        demoCalendar = demoCalendar.filter((e) => e.id !== eventId);
+        return null;
+      }
+      const id = eventId || `demoK${nextId++}`;
+      const event = normalizeEvent({ id, ...body });
+      demoCalendar = [...demoCalendar.filter((e) => e.id !== id), event];
+      return { id };
     },
   };
 }

@@ -2,28 +2,28 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=49';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=49';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=50';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=50';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=49';
-import { fetchEvents, groupByDay, newEventLink } from './calendar.js?v=49';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=49';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=49';
-import { compressImage } from './images.js?v=49';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=49';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=49';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=49';
-import { toPlain, expensesCsv } from './export.js?v=49';
-import { firebaseConfig } from './firebase-config.js?v=49';
-import { weisheitDesTages } from './koelsch.js?v=49';
-import { noteTextHtml, continueList } from './notetext.js?v=49';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=49';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=49';
+} from './chores.js?v=50';
+import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=50';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=50';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=50';
+import { compressImage } from './images.js?v=50';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji } from './invites.js?v=50';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=50';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=50';
+import { toPlain, expensesCsv } from './export.js?v=50';
+import { firebaseConfig } from './firebase-config.js?v=50';
+import { weisheitDesTages } from './koelsch.js?v=50';
+import { noteTextHtml, continueList } from './notetext.js?v=50';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=50';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=50';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=49) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=50) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -181,9 +181,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=49')).createDemoBackend();
+      backend = (await import('./demo.js?v=50')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=49')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=50')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -1407,8 +1407,120 @@ function openEvent(id) {
     <p class="event-detail-row"><span aria-hidden="true">🕒</span><span>${esc(eventWhen(e))}</span></p>
     ${e.location ? `<p class="event-detail-row"><span aria-hidden="true">📍</span><a href="${esc(maps)}" target="_blank" rel="noopener">${esc(e.location)}</a></p>` : ''}
     ${e.description ? `<div class="event-detail-desc">${linkify(esc(e.description))}</div>` : ''}
+    ${e.hiddenTitle ? '' : `<div class="form-actions">
+      <button type="button" class="btn outline" data-action="event-delete" data-id="${esc(e.id)}">Löschen</button>
+      <button type="button" class="btn primary" data-action="event-edit" data-id="${esc(e.id)}">Bearbeiten</button>
+    </div>`}
     ${e.link ? `<a class="btn outline full" href="${esc(e.link)}" target="_blank" rel="noopener">In Google Kalender öffnen</a>` : ''}`;
   $('#event-dialog').showModal();
+}
+
+// ---------- Termin eintragen / bearbeiten / löschen ----------
+
+function updateEventFormMode() {
+  const allDay = $('#e-allday').checked;
+  $('#e-time-row').hidden = allDay;
+  $('#e-date-to-row').hidden = !allDay;
+  $('#e-date-label').textContent = allDay ? 'Von (Datum)' : 'Datum';
+}
+
+function openEventForm(e = null) {
+  if (!state.calendar.config) return;
+  state.editingEvent = e?.id ?? null;
+  const v = e ? eventFormValues(e) : { title: '', allDay: false, date: todayISO(), dateTo: todayISO(), from: '19:00', to: '20:00', location: '', description: '' };
+  $('#e-head').textContent = e ? 'Termin bearbeiten' : 'Neuer Termin';
+  $('#e-title').value = v.title;
+  $('#e-allday').checked = v.allDay;
+  $('#e-date').value = v.date;
+  $('#e-date-to').value = v.dateTo;
+  $('#e-from').value = v.from;
+  $('#e-to').value = v.to;
+  $('#e-location').value = v.location;
+  $('#e-desc').value = v.description;
+  $('#e-error').textContent = '';
+  $('#e-delete').hidden = !e;
+  $('#e-delete').dataset.id = e?.id ?? '';
+  $('#e-save').textContent = e ? 'Speichern' : 'Eintragen';
+  $('#e-save').disabled = false;
+  updateEventFormMode();
+  $('#event-dialog').close();
+  $('#newevent-dialog').showModal();
+}
+
+// Fehler von Google verständlich erklären
+function calendarWriteErrorText(err) {
+  const code = err?.code ?? '';
+  if (['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/user-cancelled'].includes(code)) {
+    return 'Abgebrochen. Google muss einmal erlauben, dass Projekt Kölle in euren Kalender schreiben darf – bitte nochmal tippen und im Google-Fenster bestätigen.';
+  }
+  if (code === 'auth/popup-blocked') return 'Das Google-Fenster wurde blockiert. Bitte nochmal tippen (ggf. Pop-ups für diese Seite erlauben).';
+  if (code === 'auth/user-mismatch') return 'Bitte im Google-Fenster dasselbe Konto wählen, mit dem du in der App angemeldet bist.';
+  if (code === 'auth/network-request-failed') return 'Keine Verbindung. Bist du online?';
+  if (code) return `Google-Anmeldung hat nicht geklappt (${code}). Bitte nochmal versuchen.`;
+  if (err?.status === 401) return 'Die Erlaubnis ist abgelaufen. Bitte einfach nochmal tippen.';
+  if (err?.status === 403) {
+    return 'Google erlaubt dir noch nicht, in diesem Kalender etwas zu ändern. Entweder fehlt im Google-Fenster das Häkchen für den Kalender (nochmal tippen), oder Lukas muss dich in den Kalender-Einstellungen auf „Änderungen an Terminen vornehmen“ stellen.';
+  }
+  if (err?.status === 404 || err?.status === 410) return 'Diesen Termin oder Kalender gibt es nicht mehr. Bitte den Kalender aktualisieren.';
+  return 'Das hat nicht geklappt. Bist du online? Bitte nochmal versuchen.';
+}
+
+function onSubmitEvent(event) {
+  event.preventDefault();
+  const v = {
+    title: $('#e-title').value,
+    allDay: $('#e-allday').checked,
+    date: $('#e-date').value,
+    dateTo: $('#e-date-to').value,
+    from: $('#e-from').value,
+    to: $('#e-to').value,
+    location: $('#e-location').value,
+    description: $('#e-desc').value,
+  };
+  const error = !v.title.trim() ? 'Bitte eintragen, was ansteht.'
+    : !v.date ? 'Bitte ein Datum wählen.'
+      : v.allDay && v.dateTo && v.dateTo < v.date ? 'Das Bis-Datum liegt vor dem Von-Datum.'
+        : !v.allDay && (!v.from || !v.to) ? 'Bitte Von- und Bis-Uhrzeit wählen.'
+          : !v.allDay && v.from === v.to ? 'Von und Bis sind gleich – bitte eine Bis-Uhrzeit wählen.' : '';
+  $('#e-error').textContent = error;
+  if (error) return;
+  const id = state.editingEvent;
+  const save = $('#e-save');
+  save.disabled = true;
+  save.textContent = 'Speichert …';
+  // Kein await davor: Das Google-Fenster muss direkt nach dem Antippen aufgehen.
+  backend.calendarWrite(id ? 'PATCH' : 'POST', state.calendar.config.calendarId, id, eventResource(v))
+    .then(() => {
+      $('#newevent-dialog').close();
+      toast(id ? 'Termin geändert ✓' : 'Termin eingetragen ✓');
+      loadEvents();
+    })
+    .catch((err) => {
+      console.error(err);
+      $('#e-error').textContent = calendarWriteErrorText(err);
+      save.disabled = false;
+      save.textContent = id ? 'Speichern' : 'Eintragen';
+    });
+}
+
+function deleteEvent(id) {
+  const e = state.calendar.events?.find((x) => x.id === id);
+  if (!e || !confirm(`Termin „${e.title}“ wirklich löschen? Er verschwindet für alle aus dem WG-Kalender.`)) return;
+  backend.calendarWrite('DELETE', state.calendar.config.calendarId, id)
+    .then(() => {
+      $('#event-dialog').close();
+      $('#newevent-dialog').close();
+      state.calendar.events = state.calendar.events.filter((x) => x.id !== id);
+      renderAll();
+      toast('Termin gelöscht');
+      loadEvents();
+    })
+    .catch((err) => {
+      console.error(err);
+      const text = calendarWriteErrorText(err);
+      if ($('#newevent-dialog').open) $('#e-error').textContent = text;
+      else toast(text, true);
+    });
 }
 
 function renderKalender() {
@@ -1478,8 +1590,8 @@ function renderKalender() {
       </div>
       ${body}
     </section>
-    <a class="btn primary full" href="${esc(newEventLink(cal.config.calendarId))}" target="_blank" rel="noopener">＋ Termin eintragen</a>
-    <p class="hint">Öffnet Google Kalender. Achte darauf, dass euer WG-Kalender ausgewählt ist.</p>
+    <button class="btn primary full" data-action="event-new">＋ Termin eintragen</button>
+    <p class="hint">Landet direkt in eurem WG-Kalender. Lieber in Google selbst? <a href="${esc(newEventLink(cal.config.calendarId))}" target="_blank" rel="noopener">Google Kalender öffnen</a></p>
     <button class="btn outline full" data-action="calendar-settings">⚙️ Kalender-Einstellungen</button>`;
 }
 
@@ -2167,11 +2279,12 @@ function startCalendarCard() {
           ${g.events.slice(0, 3).map((e) => `<button type="button" class="start-event" data-action="event-open" data-id="${esc(e.id)}"><span>${e.allDay ? 'ganztägig' : sameDay(e.start, g.day) ? timeOf(e.start) : 'läuft'}</span>${esc(e.title)}</button>`).join('')}
         </div>`).join('')
         : '<p class="empty">Keine Termine in den nächsten Wochen.</p>';
+  const bodyWithAdd = `${body}<button class="link-btn start-event-add" data-action="event-new">＋ Termin eintragen</button>`;
   const first = groups[0]?.events[0];
   return foldCard('events', {
     title: '📅 Nächste Termine',
     action: '<button class="link-btn" data-action="tab" data-tab="kalender">Ganzer Kalender ›</button>',
-    body,
+    body: bodyWithAdd,
     summary: first ? `${dayTitle(groups[0].day)}: ${esc(first.title)}` : '',
   });
 }
@@ -2901,6 +3014,9 @@ function onClick(event) {
     case 'calendar-settings': openCalendarForm(); break;
     case 'calendar-reload': loadEvents(); break;
     case 'event-open': openEvent(el.dataset.id); break;
+    case 'event-new': openEventForm(); break;
+    case 'event-edit': openEventForm(state.calendar.events?.find((x) => x.id === el.dataset.id)); break;
+    case 'event-delete': deleteEvent(el.dataset.id); break;
     case 'koelsch': openKoelsch(); break;
     case 'calendar-remove': removeCalendar(); break;
     case 'quick-edit': state.quickEdit = !state.quickEdit; renderEinkauf(); break;
@@ -2977,6 +3093,16 @@ $('#n-file').addEventListener('change', (event) => {
   addNoteImages(files);
 });
 $('#absence-form').addEventListener('submit', onSubmitAbsence);
+$('#newevent-form').addEventListener('submit', onSubmitEvent);
+$('#e-allday').addEventListener('change', updateEventFormMode);
+// Datum geändert -> Bis-Datum mitziehen, Von-Uhrzeit geändert -> Bis eine Stunde später
+$('#e-date').addEventListener('change', () => {
+  if (!$('#e-date-to').value || $('#e-date-to').value < $('#e-date').value) $('#e-date-to').value = $('#e-date').value;
+});
+$('#e-from').addEventListener('change', () => {
+  const [h, m] = $('#e-from').value.split(':').map(Number);
+  if (Number.isFinite(h)) $('#e-to').value = `${String((h + 1) % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+});
 $('#poll-form').addEventListener('submit', onSubmitPoll);
 $('#invite-form').addEventListener('submit', onSubmitInvite);
 $('#invite-form').addEventListener('change', (event) => {

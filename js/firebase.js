@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  reauthenticateWithPopup,
   getRedirectResult,
   onAuthStateChanged,
   signOut,
@@ -32,6 +33,7 @@ import {
   isSupported as isMessagingSupported,
   onMessage,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js';
+import { CALENDAR_SCOPE, eventWriteUrl } from './calendar.js?v=50';
 
 export function createFirebaseBackend(config) {
   const app = initializeApp(config);
@@ -50,6 +52,29 @@ export function createFirebaseBackend(config) {
   }
 
   getRedirectResult(auth).catch((err) => console.error(err));
+
+  // Erlaubnis, in den Google-Kalender zu schreiben: Google fragt beim ersten Mal nach
+  // („Darf Projekt Kölle deinen Kalender bearbeiten?“). Der Zugang gilt etwa 1 Stunde,
+  // danach öffnet sich kurz das Google-Fenster und schließt sich meist von selbst.
+  const CAL_TOKEN_KEY = 'koelle.calToken';
+  let calToken = null;
+  try { calToken = JSON.parse(sessionStorage.getItem(CAL_TOKEN_KEY) ?? 'null'); } catch { /* privater Modus */ }
+  const forgetCalendarToken = () => {
+    calToken = null;
+    try { sessionStorage.removeItem(CAL_TOKEN_KEY); } catch { /* egal */ }
+  };
+  async function calendarAccessToken() {
+    if (calToken && calToken.until > Date.now() && calToken.uid === auth.currentUser?.uid) return calToken.token;
+    const calProvider = new GoogleAuthProvider();
+    calProvider.addScope(CALENDAR_SCOPE);
+    calProvider.setCustomParameters({ login_hint: auth.currentUser?.email ?? '' });
+    const result = await reauthenticateWithPopup(auth.currentUser, calProvider);
+    const token = GoogleAuthProvider.credentialFromResult(result)?.accessToken;
+    if (!token) throw Object.assign(new Error('Kein Kalender-Zugang erhalten'), { status: 401 });
+    calToken = { token, until: Date.now() + 50 * 60000, uid: auth.currentUser.uid };
+    try { sessionStorage.setItem(CAL_TOKEN_KEY, JSON.stringify(calToken)); } catch { /* egal */ }
+    return token;
+  }
 
   return {
     isDemo: false,
@@ -106,6 +131,25 @@ export function createFirebaseBackend(config) {
     },
 
     now: () => serverTimestamp(),
+
+    // Termin im Google-Kalender anlegen (POST), ändern (PATCH) oder löschen (DELETE).
+    // Wichtig: Das Google-Fenster muss direkt nach dem Antippen aufgehen – deshalb
+    // vorher nichts abwarten.
+    async calendarWrite(method, calendarId, eventId, body) {
+      const token = await calendarAccessToken();
+      const response = await fetch(eventWriteUrl(calendarId, eventId), {
+        method,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) forgetCalendarToken();
+        let detail = '';
+        try { detail = (await response.json()).error?.message ?? ''; } catch { /* kein JSON */ }
+        throw Object.assign(new Error(`Kalender ${response.status}: ${detail}`), { status: response.status, detail });
+      }
+      return method === 'DELETE' ? null : response.json();
+    },
 
     // ---------- Push-Nachrichten ----------
     pushReady: Boolean(config.vapidKey),

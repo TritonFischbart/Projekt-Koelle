@@ -172,6 +172,48 @@ Mit **„Test-Nachricht senden“** prüfen, ob es klappt.
 
 ---
 
+## Teil F – Termine direkt in der App eintragen (einmalig, ca. 15 Minuten)
+
+Damit „＋ Termin eintragen“ direkt in euren WG-Kalender schreibt, braucht Google zwei Einstellungen.
+Am besten am **Computer** machen. Die Google-Seiten sind mal Deutsch, mal Englisch – beide Begriffe stehen dabei.
+
+### F1. Google sagen, dass die App in den Kalender schreiben möchte
+1. **console.cloud.google.com** öffnen und oben das Projekt **„projekt-koelle“** auswählen.
+2. Links im Menü (☰) **„Google Auth Platform“** öffnen.
+   (Heißt bei manchen noch **„APIs & Dienste“ → „OAuth-Zustimmungsbildschirm“** / *OAuth consent screen*.)
+3. Links auf **„Zielgruppe“** (*Audience*) gehen und schauen, was bei **Veröffentlichungsstatus** (*Publishing status*) steht:
+   - **„In Produktion“** (*In production*): so lassen, weiter mit Schritt 4.
+   - **„Testen“** (*Testing*): Unten bei **„Testnutzer“** (*Test users*) auf **„+ Nutzer hinzufügen“** (*Add users*)
+     tippen und die Google-Adressen von **dir, Jana und Jul** eintragen → **Speichern**.
+4. Links auf **„Datenzugriff“** (*Data access*) → **„Bereiche hinzufügen oder entfernen“** (*Add or remove scopes*).
+5. Im Suchfeld/Filter **`calendar.events`** eingeben. Häkchen bei der Zeile mit
+   **`…/auth/calendar.events`** setzen → unten **„Aktualisieren“** (*Update*) → dann **„Speichern“** (*Save*).
+6. Falls Google nach einer „Überprüfung“ (*Verification*) fragt: **nicht nötig**, einfach ignorieren.
+   Die Überprüfung braucht nur eine App für viele fremde Leute – ihr seid nur zu dritt.
+
+### F2. Kurz prüfen: Jana und Jul dürfen Termine ändern
+Wurde beim Einrichten (Teil D) wahrscheinlich schon so gemacht – nur kurz nachsehen.
+1. **calendar.google.com** öffnen.
+2. Links bei **„WG Kölle“** auf die drei Punkte **⋮** → **„Einstellungen und Freigabe“** (*Settings and sharing*).
+3. Runter zu **„Für bestimmte Personen oder Gruppen freigeben“** (*Share with specific people or groups*).
+4. Bei **Jana** und **Jul** die Berechtigung auf **„Änderungen an Terminen vornehmen“** (*Make changes to events*) stellen.
+   (Steht dort „Alle Termindetails anzeigen“, dürfen sie nur lesen.)
+
+### F3. Ausprobieren
+1. App neu öffnen (unter ⚙️ muss **Version 50** oder höher stehen).
+2. Auf der Startseite unter „Nächste Termine“ auf **„＋ Termin eintragen“** tippen, z. B. „Test“ eintragen → **Eintragen**.
+3. Es öffnet sich ein Google-Fenster: dein Konto wählen.
+4. Wahrscheinlich kommt **„Google hat diese App nicht überprüft“** (*Google hasn't verified this app*). Das ist normal
+   (siehe F1, Schritt 6): auf **„Erweitert“** (*Advanced*) → **„Weiter zu projekt-koelle.firebaseapp.com (unsicher)“**
+   (*Go to … (unsafe)*) tippen.
+5. Bei der Frage nach dem Kalender **das Häkchen setzen** (wichtig!) → **„Weiter“** (*Continue*).
+6. Der Termin steht jetzt im WG-Kalender. Antippen → „Löschen“, um den Test wieder zu entfernen.
+
+Jana und Jul machen Schritt 2–5 einmal auf ihrem Handy. Danach fragt Google nicht mehr nach – höchstens öffnet sich
+nach einer Stunde kurz das Google-Fenster und schließt sich von selbst.
+
+**Klappt etwas nicht?** Die App zeigt im Formular eine Meldung in Rot. Mach einen Screenshot davon und schick ihn Claude.
+
 ## Wenn etwas nicht klappt
 
 | Meldung | Lösung |
