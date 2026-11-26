@@ -508,12 +508,12 @@ Claude-Sitzung (Operator), die so arbeitet:
 > Bitte bei jeder Sitzung dort nachführen.
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
-> #11 Termine direkt eintragen (bei Lukas getestet, Jana/Jul ausstehend) · #14 Müllabfuhr-Termine.
+> #14 Müllabfuhr-Termine (AWB-Seite aus der Cloud gesperrt → Lukas importiert die .ics selbst).
+> #11 Termine eintragen: am 26.11.2026 von Jana und Jul erfolgreich getestet, Issue geschlossen.
 > Gebaut am 25. Nov. 2026 (Test durch Lukas ausstehend): #13 Kassenbon-Fotos · #15 Ideen-Sammlung · #24 WG-Radio.
 > Wenn etwas davon erledigt ist, das Issue schließen und hier austragen.
 
-- **Termine direkt in der App eintragen** (#11): gebaut am 25. Nov. 2026 (siehe Kalender). Issue erst schließen,
-  wenn Lukas, Jana und Jul es auf dem Handy erfolgreich ausprobiert haben.
+- ~~**Termine direkt in der App eintragen** (#11)~~: gebaut 25. Nov. 2026, von allen dreien getestet (26. Nov.).
 
 - ~~**Push-Nachrichten** (#12)~~ – erledigt am 1. Nov. 2026: bereitgestellt, Test-Nachricht auf
   Lukas' Handy kam an. Rückmeldungen zum Verhalten (Uhrzeiten, Menge) noch einplanen. Das Dienstkonto `github-deploy` braucht die Rollen
