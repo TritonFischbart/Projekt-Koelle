@@ -2,30 +2,30 @@
 
 // Die Nummer hinter ?v= bei jeder Änderung erhöhen (auch in index.html),
 // damit Handys sofort die neuen Dateien laden statt alter gespeicherter.
-import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=52';
-import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=52';
+import { PEOPLE, CATEGORIES, CHORES, PUSH_TYPES } from './config.js?v=53';
+import { parseEuro, formatEuro, splitAmount, itemShares, expenseShares, computeBalances, suggestTransfers } from './money.js?v=53';
 import {
   mondayOf, addDays, isoWeek, weekKey, weekIndex, planWeek, weeksUntilDue,
   guessAreaIcon, DEFAULT_AREA_ICON, AREA_ICON_CHOICES,
-} from './chores.js?v=52';
-import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=52';
-import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=52';
-import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=52';
-import { compressImage, RECEIPT_OPTIONS } from './images.js?v=52';
-import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji, inviteParticipants, isRatingOpen, ratingSummary, bestEvenings } from './invites.js?v=52';
-import { allStations, isStreamUrl, isWebUrl, playlistService } from './radio.js?v=52';
-import { visibleQuickNotes, agoText, QUICK_NOTE_MAX } from './quicknotes.js?v=52';
-import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=52';
-import { monthStats, monthTrend, currentMonth } from './stats.js?v=52';
-import { toPlain, expensesCsv } from './export.js?v=52';
-import { firebaseConfig } from './firebase-config.js?v=52';
-import { weisheitDesTages } from './koelsch.js?v=52';
-import { noteTextHtml, continueList } from './notetext.js?v=52';
-import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=52';
-import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=52';
+} from './chores.js?v=53';
+import { fetchEvents, groupByDay, newEventLink, eventResource, eventFormValues } from './calendar.js?v=53';
+import { SHOP_CATEGORIES, guessCategory, parseShoppingInput } from './shopcats.js?v=53';
+import { isAwayForWeek, isAwayOn, upcomingAbsences } from './absences.js?v=53';
+import { compressImage, RECEIPT_OPTIONS } from './images.js?v=53';
+import { INVITE_TEMPLATES, isInviteActive, inviteWhen, guessInviteEmoji, inviteParticipants, isRatingOpen, ratingSummary, bestEvenings } from './invites.js?v=53';
+import { allStations, isStreamUrl, isWebUrl, playlistService } from './radio.js?v=53';
+import { visibleQuickNotes, agoText, QUICK_NOTE_MAX } from './quicknotes.js?v=53';
+import { monthKey, addMonths, initialLastBooked, dueMonths, recurringExpenseId } from './recurring.js?v=53';
+import { monthStats, monthTrend, currentMonth } from './stats.js?v=53';
+import { toPlain, expensesCsv } from './export.js?v=53';
+import { firebaseConfig } from './firebase-config.js?v=53';
+import { weisheitDesTages } from './koelsch.js?v=53';
+import { noteTextHtml, continueList } from './notetext.js?v=53';
+import { loadTips, upcomingTips, tipDay, searchTips, TIP_FILTERS } from './tipps.js?v=53';
+import { guessDateFromText, pollExpired, pollDay } from './polls.js?v=53';
 
 const PERSON_IDS = PEOPLE.map((p) => p.id);
-// Versionsnummer aus der Adresse dieser Datei (app.js?v=52) – zeigt, ob das Handy die neueste Version hat
+// Versionsnummer aus der Adresse dieser Datei (app.js?v=53) – zeigt, ob das Handy die neueste Version hat
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? '?';
 const $ = (selector) => document.querySelector(selector);
 
@@ -192,9 +192,9 @@ async function start() {
   const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('HIER');
   try {
     if (params.has('demo')) {
-      backend = (await import('./demo.js?v=52')).createDemoBackend();
+      backend = (await import('./demo.js?v=53')).createDemoBackend();
     } else if (configured) {
-      backend = (await import('./firebase.js?v=52')).createFirebaseBackend(firebaseConfig);
+      backend = (await import('./firebase.js?v=53')).createFirebaseBackend(firebaseConfig);
     } else {
       showScreen('setup');
       return;
@@ -2510,9 +2510,15 @@ function bestEveningsBody() {
 
 // ---------- 📻 WG-Radio ----------
 
-const radio = { id: null, status: 'off' }; // status: off | loading | playing | paused | error
+const radio = { id: null, status: 'off', retries: 0, sleepAt: 0 }; // status: off | loading | playing | paused | error
 const radioStations = () => allStations(state.radioSettings?.stations ?? []);
 const currentStation = () => radioStations().find((s) => s.id === radio.id) ?? null;
+const RADIO_RETRIES = 3; // so oft neu verbinden, wenn der Stream abreißt (z. B. WLAN → Mobilfunk)
+const SLEEP_OPTIONS = [15, 30, 60];
+
+function lastStationId() {
+  try { return localStorage.getItem('koelle.radioLast'); } catch { return null; }
+}
 
 function openRadio() {
   if (!$('#radio-dialog').open) $('#radio-dialog').showModal();
@@ -2527,6 +2533,8 @@ function playStation(id) {
     return;
   }
   radio.id = id;
+  radio.retries = 0;
+  try { localStorage.setItem('koelle.radioLast', id); } catch { /* egal */ }
   startStream(station);
 }
 
@@ -2535,8 +2543,9 @@ function startStream(station) {
   const audio = $('#radio-audio');
   radio.status = 'loading';
   clearTimeout(radio.timer);
+  clearTimeout(radio.retryTimer);
   const id = station.id;
-  radio.timer = setTimeout(() => { if (radio.id === id && radio.status === 'loading') radioFailed(); }, 15000);
+  radio.timer = setTimeout(() => { if (radio.id === id && radio.status === 'loading') radioLost(); }, 15000);
   audio.src = station.url;
   audio.play().catch((err) => {
     if (err?.name === 'AbortError') return; // anderer Sender gewählt
@@ -2545,7 +2554,7 @@ function startStream(station) {
       renderRadio();
       return;
     }
-    radioFailed();
+    radioLost();
   });
   if ('mediaSession' in navigator && window.MediaMetadata) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -2558,8 +2567,10 @@ function startStream(station) {
 }
 
 function pauseRadio() {
+  clearTimeout(radio.timer);
+  clearTimeout(radio.retryTimer);
+  radio.status = 'paused'; // vor pause(), damit das „pause“-Ereignis nichts durcheinanderbringt
   $('#radio-audio').pause();
-  radio.status = 'paused';
   renderRadio();
 }
 
@@ -2567,28 +2578,72 @@ function toggleRadio() {
   const station = currentStation();
   if (!station) return;
   if (radio.status === 'playing' || radio.status === 'loading') pauseRadio();
-  else startStream(station);
+  else {
+    radio.retries = 0;
+    startStream(station);
+  }
 }
 
 function stopRadio() {
   clearTimeout(radio.timer);
+  clearTimeout(radio.retryTimer);
+  setRadioSleep(0, false);
   const audio = $('#radio-audio');
+  radio.id = null;
+  radio.status = 'off';
   audio.pause();
   audio.removeAttribute('src');
   audio.load();
-  radio.id = null;
-  radio.status = 'off';
   renderRadio();
+}
+
+// Stream abgerissen oder lädt nicht: erst ein paar Mal still neu verbinden, dann Fehlermeldung
+function radioLost() {
+  const station = currentStation();
+  if (!station || radio.status === 'paused' || radio.status === 'off') return;
+  if (!navigator.onLine) { // ohne Netz warten – das „online“-Ereignis startet neu
+    radio.status = 'loading';
+    radio.waitingForNet = true;
+    clearTimeout(radio.timer);
+    renderRadio();
+    return;
+  }
+  if (radio.retries < RADIO_RETRIES) {
+    radio.retries += 1;
+    radio.status = 'loading';
+    clearTimeout(radio.timer);
+    clearTimeout(radio.retryTimer);
+    renderRadio();
+    radio.retryTimer = setTimeout(() => { if (radio.id === station.id && radio.status === 'loading') startStream(station); }, 1000 * radio.retries);
+    return;
+  }
+  radioFailed();
 }
 
 function radioFailed() {
   if (!radio.id) return;
+  clearTimeout(radio.timer);
   radio.status = 'error';
   renderRadio();
 }
 
 function radioStateText(status) {
+  if (status === 'loading' && radio.waitingForNet) return 'Wartet auf Netz …';
+  if (status === 'loading' && radio.retries) return 'Verbindet neu …';
   return { loading: 'Lädt …', playing: 'Läuft', paused: 'Pause', error: 'Geht gerade nicht' }[status] ?? '';
+}
+
+// Schlaf-Timer: Radio geht nach X Minuten von selbst aus
+function setRadioSleep(minutes, render = true) {
+  clearTimeout(radio.sleepTimer);
+  radio.sleepAt = minutes ? Date.now() + minutes * 60000 : 0;
+  radio.sleepMin = minutes;
+  if (minutes) radio.sleepTimer = setTimeout(() => { stopRadio(); toast('Gute Nacht 🌙 Das Radio ist aus.'); }, minutes * 60000);
+  if (render) renderRadio();
+}
+
+function sleepLeftText() {
+  return `in ${Math.max(1, Math.ceil((radio.sleepAt - Date.now()) / 60000))} Min.`;
 }
 
 function renderRadio() {
@@ -2601,29 +2656,42 @@ function renderRadio() {
   $('#radio-btn').setAttribute('aria-pressed', String(on));
   if (on) {
     $('#radio-bar-name').textContent = station.name;
-    $('#radio-bar-state').textContent = `WG-Radio · ${radioStateText(radio.status)}`;
+    $('#radio-bar-state').textContent = `WG-Radio · ${radioStateText(radio.status)}${radio.sleepAt ? ` · 🌙 aus ${sleepLeftText()}` : ''}`;
     const playing = radio.status === 'playing' || radio.status === 'loading';
     $('#radio-bar-toggle').textContent = playing ? '⏸' : '▶︎';
     $('#radio-bar-toggle').setAttribute('aria-label', playing ? 'Pause' : 'Weiterhören');
+  }
+  if ('mediaSession' in navigator) {
+    try { navigator.mediaSession.playbackState = radio.status === 'playing' || radio.status === 'loading' ? 'playing' : on ? 'paused' : 'none'; } catch { /* egal */ }
   }
   if (!$('#radio-dialog').open) return;
   const playlist = isWebUrl(state.radioSettings?.playlistUrl ?? '') ? state.radioSettings.playlistUrl : '';
   const stationRow = (s) => {
     const active = s.id === radio.id;
+    const last = !radio.id && s.id === lastStationId();
     return `
       <li class="station">
         <button type="button" class="station-play${active ? ' active' : ''}" data-action="radio-play" data-id="${esc(s.id)}">
           <span class="station-icon" aria-hidden="true">${esc(s.icon)}</span>
           <span class="station-text"><strong>${esc(s.name)}</strong>${s.hint ? `<small>${esc(s.hint)}</small>` : '<small>Eigener Sender</small>'}</span>
-          <span class="station-state">${active ? radioStateText(radio.status) : '▶︎'}</span>
+          <span class="station-state">${active ? radioStateText(radio.status) : last ? 'Zuletzt ▶︎' : '▶︎'}</span>
         </button>
         ${s.custom ? `<button type="button" class="icon-btn small" data-action="radio-edit" data-id="${esc(s.id)}" aria-label="${esc(s.name)} bearbeiten">✎</button>` : ''}
       </li>`;
   };
   $('#radio-body').innerHTML = `
-    ${radio.status === 'error' && station ? `<p class="radio-error">„${esc(station.name)}“ ist gerade nicht erreichbar. Versuch es gleich nochmal oder nimm einen anderen Sender.</p>` : ''}
+    ${radio.status === 'error' && station ? `<div class="radio-error"><p>„${esc(station.name)}“ ist gerade nicht erreichbar. Versuch es gleich nochmal oder nimm einen anderen Sender.</p>
+      <button type="button" class="btn outline" data-action="radio-retry">🔄 Nochmal versuchen</button></div>` : ''}
     <ul class="station-list">${radioStations().map(stationRow).join('')}</ul>
     <button type="button" class="link-btn" data-action="radio-edit" style="margin-top: 1px">＋ Eigenen Sender hinzufügen</button>
+    ${station && radio.status !== 'error' ? `<div class="radio-sleep">
+      <span class="label">🌙 Ausschalten nach</span>
+      <div class="chips">
+        ${SLEEP_OPTIONS.map((m) => `<button type="button" class="chip-btn${radio.sleepAt && radio.sleepMin === m ? ' active' : ''}" data-action="radio-sleep" data-min="${m}">${m} Min.</button>`).join('')}
+        ${radio.sleepAt ? '<button type="button" class="chip-btn" data-action="radio-sleep" data-min="0">Timer aus</button>' : ''}
+      </div>
+      ${radio.sleepAt ? `<span class="hint">Das Radio geht ${sleepLeftText()} aus.</span>` : ''}
+    </div>` : ''}
     <h3 class="radio-section-title">🎵 Unsere Playlist</h3>
     <div class="radio-playlist">
       ${playlist
@@ -2833,7 +2901,9 @@ function pollsCard() {
     const voted = PERSON_IDS.filter((id) => votes[id] != null).length;
     return `
       <div class="poll${p.closed ? ' closed' : ''}">
-        <p class="poll-question">${esc(p.question)}${p.until ? ` <span class="poll-date">📅 ${pollDay(p.until)}</span>` : ''}</p>
+        <p class="poll-question">${esc(p.question)}${p.closed
+          ? (p.until ? ` <span class="poll-date">📅 ${pollDay(p.until)}</span>` : '')
+          : ` <button type="button" class="poll-date${p.until ? '' : ' empty'}" data-action="poll-date" data-id="${esc(p.id)}" aria-label="${p.until ? `Datum ${pollDay(p.until)} ändern` : 'Datum festlegen'}">📅 ${p.until ? pollDay(p.until) : 'Wann?'}</button>`}</p>
         <div class="poll-options">${p.options.map((opt, i) => `
           <button class="poll-option${votes[state.me] === i ? ' mine' : ''}${p.closed && max > 0 && counts[i].length === max ? ' winner' : ''}"
             ${p.closed ? 'disabled' : `data-action="poll-vote" data-id="${esc(p.id)}" data-index="${i}"`}>
@@ -2887,6 +2957,27 @@ function onSubmitPoll(event) {
   backend.add('polls', { question, options, until, votes: {}, closed: false, createdBy: state.me, createdAt: backend.now() }).catch(showError);
   $('#poll-dialog').close();
   toast('Abstimmung gestartet ✓');
+}
+
+// Datum nachträglich setzen/ändern – auch für alte Abstimmungen ohne Datum,
+// damit sie nach dem Tag verschwinden.
+function openPollDate(id) {
+  const poll = state.polls.find((p) => p.id === id);
+  if (!poll) return;
+  state.pollDateId = id;
+  $('#pd-question').textContent = poll.question;
+  $('#pd-date').value = poll.until ?? guessDateFromText(poll.question) ?? '';
+  $('#pd-clear').hidden = !poll.until;
+  $('#poll-date-dialog').showModal();
+}
+
+function savePollDate(value) {
+  const id = state.pollDateId;
+  if (!id) return;
+  backend.update('polls', id, { until: value || null }).catch(showError);
+  $('#poll-date-dialog').close();
+  const today = isoDay(new Date());
+  toast(!value ? 'Datum entfernt' : value < today ? 'Datum gespeichert – der Tag ist vorbei, die Abstimmung verschwindet.' : `Gespeichert ✓ Verschwindet nach ${pollDay(value)}`);
 }
 
 function votePoll(id, index) {
@@ -3405,6 +3496,8 @@ function onClick(event) {
     case 'radio-play': playStation(el.dataset.id); break;
     case 'radio-toggle': toggleRadio(); break;
     case 'radio-stop': stopRadio(); break;
+    case 'radio-retry': if (currentStation()) { radio.retries = 0; startStream(currentStation()); } break;
+    case 'radio-sleep': setRadioSleep(Number(el.dataset.min)); break;
     case 'radio-edit': openRadioEdit(el.dataset.id || null); break;
     case 'radio-playlist': openRadioEdit(null, 'playlist'); break;
     case 'radio-delete': deleteRadioStation(); break;
@@ -3464,6 +3557,8 @@ function onClick(event) {
     case 'poll-yesno': $('#p-options').innerHTML = pollOptionInput('Ja') + pollOptionInput('Nein'); break;
     case 'poll-vote': votePoll(el.dataset.id, Number(el.dataset.index)); break;
     case 'poll-close': closePoll(el.dataset.id); break;
+    case 'poll-date': openPollDate(el.dataset.id); break;
+    case 'poll-date-clear': savePollDate(''); break;
     case 'poll-delete': deletePoll(el.dataset.id); break;
     case 'search-open': openSearch(); break;
     case 'restore-open': $('#restore-file').click(); break;
@@ -3593,16 +3688,48 @@ $('#absence-form').addEventListener('submit', onSubmitAbsence);
 $('#newevent-form').addEventListener('submit', onSubmitEvent);
 $('#quick-form').addEventListener('submit', onSubmitQuick);
 $('#radio-edit-form').addEventListener('submit', onSubmitRadioEdit);
+$('#poll-date-form').addEventListener('submit', (e) => { e.preventDefault(); savePollDate($('#pd-date').value); });
 $('#f-receipt-file').addEventListener('change', (e) => {
   addReceipts([...e.target.files]);
   e.target.value = '';
 });
 {
   const audio = $('#radio-audio');
-  audio.addEventListener('playing', () => { if (radio.id) { radio.status = 'playing'; renderRadio(); } });
-  audio.addEventListener('waiting', () => { if (radio.id && radio.status === 'playing') { radio.status = 'loading'; renderRadio(); } });
-  audio.addEventListener('pause', () => { if (radio.id && radio.status !== 'error') { radio.status = 'paused'; renderRadio(); } });
-  audio.addEventListener('error', () => { if (audio.getAttribute('src')) radioFailed(); });
+  audio.addEventListener('playing', () => {
+    if (!radio.id) return;
+    clearTimeout(radio.timer);
+    radio.status = 'playing';
+    radio.retries = 0;
+    radio.waitingForNet = false;
+    renderRadio();
+  });
+  // Stockt der Stream länger als 15 s, wird neu verbunden
+  audio.addEventListener('waiting', () => {
+    if (!radio.id || radio.status !== 'playing') return;
+    radio.status = 'loading';
+    clearTimeout(radio.timer);
+    const id = radio.id;
+    radio.timer = setTimeout(() => { if (radio.id === id && radio.status === 'loading') radioLost(); }, 15000);
+    renderRadio();
+  });
+  // Pause von außen (Sperrbildschirm, Kopfhörer raus, Anruf) – aber nicht beim Senderwechsel
+  audio.addEventListener('pause', () => {
+    if (radio.id && radio.status === 'playing') { radio.status = 'paused'; renderRadio(); }
+  });
+  audio.addEventListener('ended', () => radioLost()); // Live-Stream zu Ende = Verbindung weg
+  audio.addEventListener('error', () => { if (audio.getAttribute('src')) radioLost(); });
+  window.addEventListener('online', () => {
+    if (radio.id && radio.waitingForNet) {
+      radio.waitingForNet = false;
+      radio.retries = 0;
+      startStream(currentStation());
+    }
+  });
+  // Restzeit des Schlaf-Timers; schaltet auch aus, falls das Handy den Timer verschlafen hat
+  setInterval(() => {
+    if (!radio.sleepAt) return;
+    if (Date.now() >= radio.sleepAt) { stopRadio(); toast('Gute Nacht 🌙 Das Radio ist aus.'); } else renderRadio();
+  }, 30000);
   if ('mediaSession' in navigator) {
     try {
       navigator.mediaSession.setActionHandler('play', () => toggleRadio());
