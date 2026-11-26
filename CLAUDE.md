@@ -508,7 +508,10 @@ Claude-Sitzung (Operator), die so arbeitet:
 > Bitte bei jeder Sitzung dort nachführen.
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
-> #14 Müllabfuhr-Termine (AWB-Seite aus der Cloud gesperrt → Lukas importiert die .ics selbst).
+> #14 Müllabfuhr: 2027 erledigt (26.11.2026) – Papier + Gelbe Tonne als ganztägige Termine „🔵 Papiertonne“/„🟡 Gelbe Tonne“
+> im Google-Kalender, per Google-Kalender-Anbindung von Claude eingetragen. Daten aus der AWB-API (`awbkoeln.de/api/streets` →
+> `street_code`, dann `/api/calendar?...&start_year=…`); awbkoeln.de ist aus der Cloud-Umgebung evtl. gesperrt. Adresse steht
+> **nicht** im Repo (öffentlich) – nur im Projekt-Gedächtnis. Restmüll/Bio liefert die API für die Adresse nicht.
 > #11 Termine eintragen: am 26.11.2026 von Jana und Jul erfolgreich getestet, Issue geschlossen.
 > Gebaut am 25. Nov. 2026 (Test durch Lukas ausstehend): #13 Kassenbon-Fotos · #15 Ideen-Sammlung · #24 WG-Radio.
 > Wenn etwas davon erledigt ist, das Issue schließen und hier austragen.
@@ -525,7 +528,7 @@ Claude-Sitzung (Operator), die so arbeitet:
   Beim allerersten Bereitstellen kam „Eventarc Service Agent“ – das löst sich nach ein paar Minuten von selbst.
 - ~~**Kassenbon-Fotos** (#13)~~ – gebaut 25. Nov. 2026 (in Firestore statt Storage, siehe Ausgaben).
 - ~~**WG-Radio** (#24)~~ – gebaut 25. Nov. 2026 (Kölner/NRW-Sender + eigene Sender + Playlist-Link).
-- **Müllabfuhr-Termine** der AWB Köln in den Google-Kalender übernehmen (ohne Code).
+- ~~**Müllabfuhr-Termine** (#14)~~ – 2027 eingetragen (Papier, Gelbe Tonne). Ende 2027 für 2028 wiederholen.
 - ~~Test mit Jana und Jul (#10)~~ – erledigt am 1. Nov. 2026: Anmeldung bei allen dreien klappt.
 - ~~**Ideen-Sammlung** (#15)~~: „Ich geh jetzt einkaufen“, „Kurz notiert“ (Schnell-Notizen) und „Wie war's?“
   (Bewertung für den WG-Abend) – alle gebaut am 25. Nov. 2026.

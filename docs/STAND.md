@@ -8,6 +8,7 @@ Ausführliche Details zu jeder Funktion stehen in `CLAUDE.md`.
 
 | Wann | Was |
 |---|---|
+| 26.11. | 🗑️ **Müllabfuhr 2027 (#14)**: 26 × 🔵 Papiertonne und 26 × 🟡 Gelbe Tonne als ganztägige Termine im Google-Kalender „Projekt Kölle“ (aus dem AWB-Abfuhrkalender). Erscheinen in der App und morgens als Push. |
 | 26.11. | 📅 **Termine eintragen (#11)**: Jana und Jul haben es erfolgreich getestet → Issue geschlossen. |
 | 26.11. | 🤖 **ChatGPT-Gegenprüfung** (PR #65) übernommen (braucht OpenAI-Schlüssel als Network Secret in der Claude-Code-Umgebung). |
 | 26.11. | 🗳️ **Abstimmungen aufräumen:** Datum lässt sich jetzt auch nachträglich setzen (📅 neben der Frage). Alte Abstimmungen ohne Datum bekommen so ein Datum und verschwinden danach von selbst. |
@@ -24,11 +25,8 @@ Ausführliche Details zu jeder Funktion stehen in `CLAUDE.md`.
 2. **Alte Abstimmung(en)** auf der Startseite: einmal auf „📅 Wann?“ tippen und ein vergangenes Datum
    wählen (oder „Löschen“) – dann ist der Bereich leer.
 3. **Jul**: Push-Nachrichten einschalten (⚙️ → „Auf diesem Handy einschalten“) – laut Protokoll noch kein Gerät.
-4. **Müllabfuhr-Termine (#14)**: Die AWB-Seite ist aus Claudes
-   Cloud-Umgebung nicht erreichbar, deshalb bitte selbst (ca. 2 Min.): awbkoeln.de → Abfuhrkalender → Adresse
-   eingeben → Termine als Kalenderdatei (iCal/.ics) herunterladen → am Computer calendar.google.com →
-   ⚙️ Einstellungen → „Importieren und exportieren“ (Import & export) → Datei wählen → Kalender „WG Kölle“ → Importieren.
-   Danach erscheinen die Termine in der App und um 8 Uhr als Push („Termine heute“).
+4. **Restmüll und Biotonne**: Die AWB liefert für eure Adresse nur Papier und Gelbe Tonne. Kurz klären, wer die
+   graue/braune Tonne abholt (evtl. über die Hausverwaltung) – dann trägt Claude die Termine nach.
 5. **Montag, 30.11.**: Kommt die neue Wochentipps-Runde an? Die aktuelle Datei reicht bis 6.12.
    Falls nicht: auf claude.ai/code/routines prüfen, ob die Routine noch das Repo `TritonFischbart/Projekt-Koelle` eingetragen hat.
 6. Das alte Repository `Projekt-K-lle` gibt es nicht mehr separat – GitHub leitet nur weiter. Nichts zu tun.
@@ -37,13 +35,14 @@ Ausführliche Details zu jeder Funktion stehen in `CLAUDE.md`.
 
 - Issues #13, #15, #24 schließen, sobald Lukas' Test-Rückmeldung da ist.
 - Rückmeldungen zu Push-Nachrichten (Uhrzeiten, Menge) umsetzen, sobald welche kommen.
+- Ende 2027: Müllabfuhr-Termine für 2028 eintragen (AWB-Kalender kommt meist im Dezember).
 - „Termine heute (8 Uhr)“ meldet laut Protokoll oft „0 Termine“ – prüfen, falls im Kalender doch welche standen.
 
 ## 🚀 Vorschläge für die nächsten Schritte (nach Wichtigkeit)
 
 1. **Echttest-Woche**: Erst mal alles Neue eine Woche im Alltag nutzen und Rückmeldungen sammeln,
    statt sofort Neues zu bauen. Die App hat gerade viele frische Funktionen.
-2. **Müllabfuhr am Vorabend melden** (nach dem Import, #14): Push „Morgen kommt die Biotonne“ um 19 Uhr –
+2. **Müllabfuhr am Vorabend melden** (#14): Push „Morgen kommt die Biotonne“ um 19 Uhr –
    wäre eine neue Push-Art, braucht Lukas' Okay.
 3. **Startseite entschlacken**: Sie ist inzwischen lang (Termine, Konto, Einkauf, Aufgabe, Kurz notiert,
    Bock, Abstimmungen, Wer ist weg, Wochentipps). Idee: selbst wählen, welche Karten man sieht.
