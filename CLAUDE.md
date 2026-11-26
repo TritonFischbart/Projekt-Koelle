@@ -304,6 +304,9 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Wird aus der Frage erkannt (heute/morgen/übermorgen/Wochentag/Wochenende/„20.11.“, `js/polls.js`), lässt sich
   ändern oder leeren. **Nach diesem Tag verschwindet die Abstimmung** (auch aus rotem Punkt), damit Platz für
   Neues ist. Ohne Datum bleibt alles wie bisher. In der Liste steht ein kleines „📅 Fr, 20.11.“.
+  **Nachträglich setzen/ändern (26. Nov. 2026):** Bei offenen Abstimmungen ist „📅 Fr, 20.11.“ bzw. „📅 Wann?“ ein Knopf
+  → `#poll-date-dialog` (`openPollDate`/`savePollDate`). Grund: Lukas' alte Abstimmungen hatten kein Datum und
+  verschwanden deshalb nie („hat noch nicht geklappt“).
 
 ### 🙋 Wer hat Bock? (Idee von Lukas/Jana)
 - Auf der Startseite über den Abstimmungen: spontane Aktionen („Ich koche – wer isst mit?“,
@@ -408,7 +411,11 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   eigener Sender eintragen.
 - Läuft weiter beim Wechseln der Bereiche; Leiste über der unteren Leiste (`#radio-bar`: Pause/Weiter/✕), Media Session
   für Sperrbildschirm. Nach Pause startet der Stream frisch (live). `<audio id="radio-audio">` liegt statisch in index.html.
-- Lädt ein Sender 15 s lang nicht, kommt die Fehlermeldung. Radio-Einstellungen sind in der Datensicherung (`radio`).
+- Lädt ein Sender 15 s lang nicht oder reißt ab (`error`/`ended`/langes `waiting`), verbindet `radioLost` bis zu 3× still neu
+  („Verbindet neu …“), ohne Netz wartet es aufs `online`-Ereignis; erst danach Fehlermeldung mit „🔄 Nochmal versuchen“.
+  Das `pause`-Ereignis zählt nur bei Status `playing` (sonst blieb beim Senderwechsel „Pause“ stehen und der 15-s-Timer griff nicht).
+  🌙 Schlaf-Timer 15/30/60 Min. (`setRadioSleep`, nur auf diesem Gerät), zuletzt gehörter Sender in `localStorage`
+  `koelle.radioLast` („Zuletzt ▶︎“). Stand 26. Nov. 2026. Radio-Einstellungen sind in der Datensicherung (`radio`).
 - Varianten laut.fm/eigener Sender wurden nicht gebaut (eigener Sender lässt sich aber als Stream eintragen).
 
 ## 🎪 Wochentipps „Diese Woche in Ehrenfeld“ (seit 7. Nov. 2026, Wunsch von Lukas)
@@ -473,6 +480,9 @@ Claude-Sitzung (Operator), die so arbeitet:
   aufgehoben). Danach musste Claude neu mit GitHub verbunden werden.
 
 ## Merkliste / To-do für später (noch nicht gebaut)
+
+> **Aktuelle Aufgabenliste mit Prioritäten: `docs/STAND.md`** (erledigt / braucht Lukas / kann Claude / Vorschläge).
+> Bitte bei jeder Sitzung dort nachführen.
 
 > Die Aufgaben stehen auch als **GitHub-Issues** im Projekt (Reiter „Issues“):
 > #11 Termine direkt eintragen (bei Lukas getestet, Jana/Jul ausstehend) · #14 Müllabfuhr-Termine.

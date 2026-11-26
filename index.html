@@ -8,11 +8,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Kölle">
   <title>Projekt Kölle</title>
-  <link rel="icon" href="icons/icon.svg?v=52" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=52">
-  <link rel="manifest" href="manifest.webmanifest?v=52">
-  <link rel="stylesheet" href="css/style.css?v=52">
-  <script type="module" src="js/app.js?v=52"></script>
+  <link rel="icon" href="icons/icon.svg?v=53" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=53">
+  <link rel="manifest" href="manifest.webmanifest?v=53">
+  <link rel="stylesheet" href="css/style.css?v=53">
+  <script type="module" src="js/app.js?v=53"></script>
 </head>
 <body>
   <!-- Ladebildschirm -->
@@ -23,7 +23,7 @@
   <!-- Firebase ist noch nicht eingerichtet -->
   <div id="screen-setup" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=52" alt="" class="logo">
+      <img src="icons/icon.svg?v=53" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p id="setup-text">Fast geschafft! Die Verbindung zur gemeinsamen Datenbank (Firebase) ist noch nicht eingerichtet. Wie das geht, steht in der Datei <strong>ANLEITUNG.md</strong>.</p>
       <a class="btn primary" href="?demo">Demo ansehen</a>
@@ -33,7 +33,7 @@
   <!-- Anmelden -->
   <div id="screen-login" class="screen center" hidden>
     <div class="welcome">
-      <img src="icons/icon.svg?v=52" alt="" class="logo">
+      <img src="icons/icon.svg?v=53" alt="" class="logo">
       <h1>Projekt Kölle</h1>
       <p>Die WG-Seite von Jana, Jul und Lukas.</p>
       <button class="btn primary" data-action="login">Mit Google anmelden</button>
@@ -66,7 +66,7 @@
       <span class="pull-text visually-hidden">Zum Aktualisieren ziehen</span>
     </div>
     <header class="topbar">
-      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=52" alt=""> Projekt Kölle</button>
+      <button type="button" class="brand" data-action="koelsch" aria-label="Projekt Kölle – Kölsche Weisheit des Tages"><img src="icons/icon.svg?v=53" alt=""> Projekt Kölle</button>
       <span class="topbar-actions">
         <button class="icon-btn settings-btn" id="radio-btn" data-action="radio-open" aria-label="WG-Radio">📻</button>
         <button class="icon-btn settings-btn" data-action="tab" data-tab="settings" aria-label="Einstellungen">⚙️</button>
@@ -455,6 +455,26 @@
       <p class="error" id="a-error"></p>
       <div class="form-actions">
         <button type="button" class="btn danger" id="a-delete" data-action="absence-delete-form" hidden>Löschen</button>
+        <button type="submit" class="btn primary">Speichern</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Formular: Datum einer Abstimmung ändern -->
+  <dialog id="poll-date-dialog" class="sheet">
+    <form id="poll-date-form" class="sheet-form" novalidate>
+      <div class="sheet-head">
+        <h2>Wann ist das?</h2>
+        <button type="button" class="icon-btn" data-action="close-form" aria-label="Schließen">✕</button>
+      </div>
+      <p id="pd-question" class="poll-question"></p>
+      <label class="field">
+        <span class="label">Datum</span>
+        <input type="date" id="pd-date">
+        <span class="hint">Nach diesem Tag verschwindet die Abstimmung von selbst – dann ist Platz für Neues.</span>
+      </label>
+      <div class="form-actions">
+        <button type="button" class="btn outline" id="pd-clear" data-action="poll-date-clear" hidden>Kein Datum</button>
         <button type="submit" class="btn primary">Speichern</button>
       </div>
     </form>

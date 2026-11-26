@@ -793,6 +793,9 @@ main { overflow-x: clip; }
 .tips-filters .chip-btn { padding: 6px 11px; font-size: 0.85rem; }
 .tips-count { margin: 0 0 6px; font-size: 0.85rem; }
 
+button.poll-date { position: relative; border: 0; font-family: inherit; line-height: inherit; cursor: pointer; }
+button.poll-date::after { content: ''; position: absolute; inset: -11px -6px; } /* größere Tippfläche */
+.poll-date.empty { background: transparent; color: var(--muted); border: 1px dashed var(--muted); font-weight: 600; }
 .poll-date { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 0.8rem; font-weight: 700; white-space: nowrap; vertical-align: middle; }
 
 /* ---------- Einklappbare Karten (Tipp auf die Überschrift) ---------- */
@@ -885,7 +888,11 @@ body.radio-on .fab { bottom: calc(var(--tabbar-h) + 72px + env(safe-area-inset-b
 .station-text small { color: var(--muted); font-size: 0.82rem; }
 .station-state { margin-left: auto; flex: none; color: var(--brand); font-weight: 700; font-size: 0.85rem; }
 .radio-section-title { margin: 18px 0 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-.radio-error { margin: 10px 0 0; color: var(--brand); font-weight: 600; }
+.radio-error { margin: 0 0 14px; color: var(--brand); font-weight: 600; display: grid; gap: 8px; justify-items: start; }
+.radio-error p { margin: 0; }
+.radio-sleep { display: grid; gap: 6px; margin: 14px 0 0; }
+.radio-sleep .chips { margin: 0; }
+.radio-sleep .chip-btn { padding: 6px 12px; font-size: 0.88rem; }
 .radio-playlist { display: grid; gap: 8px; }
 
 /* ---------- 🧾 Kassenbon ---------- */
