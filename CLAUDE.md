@@ -423,9 +423,8 @@ Einkäufe, die schon als Ausgabe eingetragen wurden, haben `expensed: true`.
   Familie, Kostenlos). Durchsucht Titel, Text, Ort, Uhrzeit und `tags`; verwandte Wörter zählen mit
   („Band“ findet Konzerte, „Trödel“ Flohmärkte – Liste `SYNONYMS` in `js/tipps.js`). Beim Tippen wird nur
   die Liste neu gezeichnet; beim Neuzeichnen der Startseite bleiben Fokus und Text im Suchfeld erhalten.
-- ⚠️ Am 14.11.2026 konnte die automatische Runde **nicht hochladen** (Fehler 403, kein Schreibzugriff –
-  per `create_trigger` angelegte Aufgaben haben das Repo nicht als Quelle). Lösung: Aufgabe auf claude.ai
-  unter „Routinen“ mit ausgewähltem Repository anlegen. Prüfen, ob die Montags-Runde wirklich mergt.
+- Die automatische Runde lädt seit dem Umbau am 16.11.2026 zuverlässig hoch (holt sich das Repo per `add_repo`;
+  geprüft am 26.11.2026: PR #64 vom 23.11. gemergt).
 - Daten in **`data/wochentipps.json`** (`updated, from, to, tips[{emoji, title, date, dateTo?, time,
   place, text, url, tags[]}]`), geladen von `js/tipps.js` (ohne Cache). Leer/fehlend = Karte unsichtbar.
   `tags` (klein geschrieben) z. B. flohmarkt, konzert, band, party, karneval, theater, markt, kinder,
@@ -462,20 +461,14 @@ Claude-Sitzung (Operator), die so arbeitet:
    was geprüft wurde, was geändert wurde (mit PR-Links), was gefunden aber nicht geändert wurde
    (Vorschläge für Lukas). Auch wenn nichts zu tun war („Alles in Ordnung“).
 
-## 🔁 Übergabe an die nächste Sitzung (Stand 16. Nov. 2026)
+## 🔁 Übergabe an die nächste Sitzung (Stand 26. Nov. 2026)
 
-- **Offen: Automatische Runden dürfen nicht hochladen.** „Projekt Kölle – Wochentipps Ehrenfeld“
-  (Mo 7:41) und „Projekt Kölle – wöchentlicher Wartungs-Operator“ (Sa 10:23) recherchieren/prüfen, aber
-  `git push` scheitert mit 403 „TritonFischbart/Projekt-Koelle is not in this session's authorized repository
-  set … add the repository to the session's sources“; `add_repo` ist in diesen Sitzungen nicht verfügbar.
-  Ursache: per `create_trigger` angelegte Routinen haben keine Repo-Quelle. Lukas hat GitHub-App-Zugriff
-  auf alle Repos erteilt (nötig, reicht aber nicht). **Lösung:** Lukas trägt auf claude.ai/code/routines bei
-  beiden Routinen unter „Repository“ (evtl. „Advanced settings“) `TritonFischbart/Projekt-Koelle` ein –
-  mit Screenshot begleiten – danach Wochentipps-Runde per „Run now“/fire_trigger testen und prüfen, ob sie
-  selbst mergt. Notfalls Routinen auf claude.ai neu anlegen (Prompts: siehe list_triggers) und alte löschen.
-  Gleiches Problem vermutlich bei seinen **Kreidezeit-Routinen** (Boulder-App).
-- Wochentipps in `data/wochentipps.json` reichen bis **28.11.2026**. Zwei gescheiterte Runden hatten neue
-  Tipps (16.–29.11.); bei Bedarf neu recherchieren und selbst einstellen.
+- **Erledigt: Automatische Runden laden wieder hoch.** Seit 16. Nov. 2026 holen sich „Wochentipps Ehrenfeld“
+  (Mo 7:41) und „Wartungs-Operator“ (Sa 10:23) das Repo zu Beginn selbst per `add_repo` (steht im Prompt der
+  geplanten Aufgabe). Geprüft am 26. Nov. 2026: Wochentipps-PR #64 (23.11.) gemergt, Wartungsberichte vom 16. und
+  21.11. in Issue #55. Gleiches gilt für die Kreidezeit-Aufgaben (Boulder-App, PR #83 vom 22.11.).
+  Falls es wieder scheitert (403 „not in this session's authorized repository set“): zuerst prüfen, ob der
+  `add_repo`-Schritt im Prompt noch steht.
 - GitHub-Konto war 7.–12. Nov. von GitHubs Missbrauchs-Erkennung gesperrt (Support-Ticket 4968104,
   aufgehoben). Danach musste Claude neu mit GitHub verbunden werden.
 
