@@ -465,6 +465,32 @@ Claude hat das Tool **`ask_chatgpt`** (MCP-Server `chatgpt` aus `.mcp.json`, Cod
   `gpt-6.2-sol`, änderbar über die Umgebungsvariable `OPENAI_MODEL`. Guthaben: platform.openai.com
   → Billing.
 
+## 🧰 Modellwahl und Werkzeuge (seit 27. Nov. 2026, Wunsch von Lukas)
+
+**Modellwahl – Limit sparen, ohne Qualität zu verlieren.** Lukas weiß vorher oft nicht, welches Modell passt;
+Claude entscheidet das und sagt es ihm zu Beginn in einem Satz.
+- **Starkes Modell (Opus) nur für Denkarbeit:** Planung, Logik-Umbauten, alles mit gespeicherten Daten,
+  Sicherheitsregeln, Fehlersuche bei unklaren Bugs, und die Abschlussprüfung vor dem Merge.
+- **Routine an Helfer mit kleinerem Modell abgeben** (Unter-Agent mit `model: "sonnet"`, für reines Suchen/Lesen
+  `"haiku"`): Texte, Farben/CSS, kleine klare Fehler, Doku/STAND nachführen, Recherche, Tests laufen lassen,
+  Screenshots prüfen. Das Ergebnis prüft das Hauptmodell kurz, bevor es übernommen wird.
+- Arbeitet Lukas selbst mit Sonnet an etwas, das Denkarbeit braucht: kurz darauf hinweisen („Dafür lieber Opus“).
+- Bei langen Sitzungen mit Themenwechsel: vorschlagen, eine neue Sitzung zu starten (spart Limit).
+
+**Werkzeuge** (offizielle Plugins von Anthropic, einmal pro Konto installieren – Lukas tippt den Befehl in
+Claude Code, Claude erklärt Schritt für Schritt):
+- `/plugin install claude-code-setup@claude-plugins-official` – analysiert das Projekt und empfiehlt passende
+  Hooks, Skills, MCP-Server und Unter-Agenten. Einmal laufen lassen, Vorschläge mit Lukas durchgehen,
+  nur Sinnvolles übernehmen und hier festhalten.
+- **Claude Security** (offizielles Plugin `claude-security`): Sicherheits-Scan des Repos oder eines PR-Diffs.
+  Vor größeren Veröffentlichungen und nach Änderungen an Login, Regeln oder Datenfeldern nutzen.
+
+**Bewusst NICHT nutzen** (geprüft 27. Nov. 2026): automatische Umleitung auf „Gratis-KI-Anbieter“ bei vollem Limit
+(Code und Daten gingen an unbekannte Anbieter, schlechtere Qualität); Werkzeuge, die gesperrte Plattformen
+(Instagram, X, LinkedIn) ohne offizielle Schnittstelle auslesen (verstößt gegen deren Regeln, Konto-Sperre droht);
+Zusatz-Gedächtnis-Plugins (CLAUDE.md/STAND.md reichen); „Caveman“-Kurzsprache (Lukas braucht einfache, vollständige
+Erklärungen; gemessene Ersparnis deutlich kleiner als beworben).
+
 ## 🤖 Wartungs-Operator (seit 7. Nov. 2026, Wunsch von Lukas)
 
 Lukas möchte, dass die App regelmäßig von selbst geprüft und verbessert wird. Er hat erlaubt,
